@@ -1,0 +1,22 @@
+version: '3.1'
+
+services:
+  node:
+    build:
+      context: .
+    command: ../node_modules/.bin/nodemon --inspect=0.0.0.0:9229 ./bin/www
+    ports:
+      - "80:3000"
+      - "9229:9229"
+      - "9230:9230"
+    volumes:
+      - .:/app:delegated
+      - expo:/app/.expo
+      - node_modules:/app/node_modules
+    environment:
+      # https://github.com/kerbe/docker-expo#usage-of-this-docker-container
+      - REACT_NATIVE_PACKAGER_HOSTNAME=${HOST_IP_ADDRESS}
+
+volumes:
+  expo:
+  node_modules:
