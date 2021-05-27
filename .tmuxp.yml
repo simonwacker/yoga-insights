@@ -1,0 +1,20 @@
+# https://tmuxp.git-pull.com/en/latest/examples.html
+session_name: Yoga Insights
+start_directory: ./
+suppress_history: false
+windows:
+- window_name: Shell
+  focus: true # https://github.com/tmux-python/tmuxp/issues/326
+  panes:
+  -
+- window_name: Editor
+  layout: even-horizontal
+  panes:
+  - shell_command:
+    - nvim
+  - shell_command:
+    - make up
+    - make shell
+- window_name: Debug
+  panes:
+  -
