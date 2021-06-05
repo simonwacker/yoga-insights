@@ -13,8 +13,7 @@ windows:
   - shell_command:
     - nvim
   - shell_command:
-    - make up
-    - make shell
+    - make up shell
 - window_name: Debug
   panes:
   -
