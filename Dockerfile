@@ -7,12 +7,14 @@
 # https://hub.docker.com/_/node/
 FROM node:14.17.0-buster-slim
 
+# Pass in the host's user and group IDs
 ARG USER_ID
 ARG GROUP_ID
 
 ENV NODE_ENV=development
 ENV PORT=3000
 
+# Install global npm dependencies in user home
 # https://github.com/nodejs/docker-node/blob/main/docs/BestPractices.md#global-npm-dependencies
 ENV NPM_CONFIG_PREFIX=/home/node/.npm-global
 ENV PATH=/home/node/.npm-global/bin:${PATH}
@@ -20,6 +22,7 @@ ENV PATH=/home/node/.npm-global/bin:${PATH}
 # https://github.com/kerbe/docker-expo#usage-of-this-docker-container
 ENV EXPO_DEVTOOLS_LISTEN_ADDRESS=0.0.0.0
 
+# Modify `node` group and user to have the IDs `${USER_ID}` and `${GROUP_ID}`
 # https://github.com/nodejs/docker-node/blob/main/docs/BestPractices.md#non-root-user
 RUN \
   groupmod \
@@ -54,6 +57,7 @@ RUN \
     expo-cli@latest \
     ignite-cli@latest
 
+# Symlink `/app` to `/home/node/app` and make both owned by `node`
 RUN \
   mkdir --parents \
     /home/node/app && \
@@ -64,9 +68,12 @@ RUN \
     /home/node/app \
     /app
 
+# Switch to directory `/app`
 WORKDIR /app
+# Switch to user `node`
 USER node
 
+# Install node packages
 COPY \
   --chown=node:node \
   ./package.json \
@@ -87,12 +94,15 @@ RUN \
   npm cache clean \
     --force
 
+# Make node executables known to shell
 ENV PATH=/app/node_modules/.bin:${PATH}
 
+# Create directory `/app/.expo` such that the corresponding volume is owned by
+# the user `node`
 RUN \
   mkdir ./.expo
 
-# port 3000 for node, and 9229 and 9230 (tests) for debug
-EXPOSE 3000 9229 9230
+# Port 19000 for node, 19002 for debugging, and 19006 for project
+EXPOSE 19000 19002 19006
 ENTRYPOINT ["/usr/bin/tini", "--"]
 CMD ["npm", "run", "web"]

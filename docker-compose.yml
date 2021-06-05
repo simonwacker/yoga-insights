@@ -4,11 +4,11 @@ services:
   node:
     build:
       context: .
-    command: ../node_modules/.bin/nodemon --inspect=0.0.0.0:9229 ./bin/www
+    command: ["npm", "run", "web"]
     ports:
-      - "80:3000"
-      - "9229:9229"
-      - "9230:9230"
+      - "19000:19000"
+      - "19002:19002"
+      - "19006:19006"
     volumes:
       - .:/app:delegated
       - expo:/app/.expo
