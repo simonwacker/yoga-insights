@@ -12,6 +12,10 @@ help: ## Print documentation
 .DEFAULT_GOAL: help
 .PHONY: help
 
+tmux: ## Load tmux(p) workspace
+	tmuxp load .
+.PHONY: tmux
+
 build: ## Build services
 	docker-compose build \
 		--build-arg USER_ID=$(shell id --user) \
