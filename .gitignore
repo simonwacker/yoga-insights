@@ -1,3 +1,7 @@
+# General
+#
+*.bak
+
 # OSX
 #
 .DS_Store
