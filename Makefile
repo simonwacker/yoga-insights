@@ -2,7 +2,7 @@
 
 # https://unix.stackexchange.com/questions/8518/how-to-get-my-own-ip-address-and-save-it-to-a-variable-in-a-shell-script/8521#8521
 # https://unix.stackexchange.com/questions/8518/how-to-get-my-own-ip-address-and-save-it-to-a-variable-in-a-shell-script/8521#comment1135415_84263
-HOST_IP_ADDRESS = $(shell ip -4 --oneline address list $$(ip route list | grep default | awk '{print $$5}') | awk '{print $$4}' | cut --delimiter / --fields 1)
+HOST_IP_ADDRESS = $(shell ip -4 --oneline address list $$(ip route list | grep default | awk '{print $$5}') | awk '{print $$4}' | cut --delimiter / --fields 1 | head --lines 1)
 
 # https://www.client9.com/self-documenting-makefiles/
 help: ## Print documentation
