@@ -17,9 +17,10 @@ tmux: ## Load tmux(p) workspace
 .PHONY: tmux
 
 build: ## Build services
-	docker-compose build \
-		--build-arg USER_ID=$(shell id --user) \
-		--build-arg GROUP_ID=$(shell id --group)
+	HOST_IP_ADDRESS=${HOST_IP_ADDRESS} \
+		docker-compose build \
+			--build-arg USER_ID=$(shell id --user) \
+			--build-arg GROUP_ID=$(shell id --group)
 .PHONY: build
 
 up: ## Start services
@@ -29,24 +30,28 @@ up: ## Start services
 .PHONY: up
 
 logs: ## Follow logs
-	docker-compose logs \
-		--follow
+	HOST_IP_ADDRESS=${HOST_IP_ADDRESS} \
+		docker-compose logs \
+			--follow
 .PHONY: logs
 
 restart: ## Restart services
-	docker-compose restart
+	HOST_IP_ADDRESS=${HOST_IP_ADDRESS} \
+		docker-compose restart
 .PHONY: restart
 
 down: ## Stop services
-	docker-compose down \
-		--remove-orphans
+	HOST_IP_ADDRESS=${HOST_IP_ADDRESS} \
+		docker-compose down \
+			--remove-orphans
 .PHONY: down
 
 exec: ## Execute command `${COMMAND}` within running service `node`
-	docker-compose exec \
-		--user $(shell id --user):$(shell id --group) \
-		node \
-		${COMMAND}
+	HOST_IP_ADDRESS=${HOST_IP_ADDRESS} \
+		docker-compose exec \
+			--user $(shell id --user):$(shell id --group) \
+			node \
+			${COMMAND}
 .PHONY: exec
 
 shell: COMMAND=bash
@@ -54,8 +59,9 @@ shell: exec ## Enter shell in running service `node`
 .PHONY: shell
 
 run: ## Run command `${COMMAND}` within fresh service `node`
-	docker-compose run \
-		--user $(shell id --user):$(shell id --group) \
-		node \
-		${COMMAND}
+	HOST_IP_ADDRESS=${HOST_IP_ADDRESS} \
+		docker-compose run \
+			--user $(shell id --user):$(shell id --group) \
+			node \
+			${COMMAND}
 .PHONY: run
