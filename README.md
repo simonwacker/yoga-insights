@@ -1,3 +1,8 @@
+Run `make up` to start services and `make shell` to enter shell within running
+container. There, run `adb -a -d devices` to list devices connected via USB and
+start server in background if necessary. Then, run `npm run android` to open
+app on Android device.
+
 # Welcome to your new ignited app!
 
 [![CircleCI](https://circleci.com/gh/infinitered/ignite.svg?style=svg)](https://circleci.com/gh/infinitered/ignite)
