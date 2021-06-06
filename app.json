@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "YogaInsights",
-    "slug": "YogaInsights",
+    "name": "Yoga Insights",
+    "slug": "yoga-insights",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -20,7 +20,15 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
+      "bundleIdentifier": "de.citysoundstudio.yogainsights",
+      "buildNumber": "1.0.0",
       "supportsTablet": true
+    },
+        "ios": {
+    },
+    "android": {
+      "package": "de.citysoundstudio.yogainsights",
+      "versionCode": 1
     },
     "web": {
       "favicon": "./assets/favicon.png"
