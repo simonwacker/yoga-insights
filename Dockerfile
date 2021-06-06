@@ -38,12 +38,15 @@ RUN \
     node
 
 # Install
-# * `tini`, a tiny but valid `init` for containers, see
-#   https://github.com/krallin/tini#debian
+# * `adb`, android debug bridge to communicate with an emulator instance or
+#   connected Android-powered device, see
+#   https://developer.android.com/studio/command-line/adb
 # * `procps`, utilities to browse information in the proc filesystem, in
 #   particular, `pkill` that is somewhere used deep within `./bin/postInstall`,
 #   see
 #   https://gitlab.com/procps-ng/procps
+# * `tini`, a tiny but valid `init` for containers, see
+#   https://github.com/krallin/tini#debian
 #
 # For best practices on using `apt-get` see
 # https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#run
@@ -52,8 +55,9 @@ RUN \
   apt-get install \
     --yes \
     --no-install-recommends \
-    tini \
-    procps && \
+    android-tools-adb \
+    procps \
+    tini && \
   rm \
     --recursive \
     --force \
