@@ -7,22 +7,24 @@
 # https://hub.docker.com/_/node/
 FROM node:14.17.0-buster-slim
 
-# Pass in the host's user and group IDs
+# Pass in the host's user and group IDs. They are used as user and group for
+# directories and files being created. They should also be used through the
+# `--user` option when starting containers based on this image. Then,
+# directories and files created within image and container have the proper user
+# and group on the host and vice versa.
 ARG USER_ID
 ARG GROUP_ID
 
+# Set node environment to `development`.
 ENV NODE_ENV=development
-ENV PORT=3000
 
-# Install global npm dependencies in user home
-# https://github.com/nodejs/docker-node/blob/main/docs/BestPractices.md#global-npm-dependencies
-ENV NPM_CONFIG_PREFIX=/home/node/.npm-global
-ENV PATH=/home/node/.npm-global/bin:${PATH}
-
+# Make expo listen to all addresses inside the container. For details see
 # https://github.com/kerbe/docker-expo#usage-of-this-docker-container
 ENV EXPO_DEVTOOLS_LISTEN_ADDRESS=0.0.0.0
 
-# Modify `node` group and user to have the IDs `${USER_ID}` and `${GROUP_ID}`
+# Modify `node` user and group to have the IDs `${USER_ID}` and `${GROUP_ID}`
+# and make `node` the primary group of user `node`. For details on this best
+# practice see
 # https://github.com/nodejs/docker-node/blob/main/docs/BestPractices.md#non-root-user
 RUN \
   groupmod \
@@ -35,8 +37,16 @@ RUN \
     --gid ${GROUP_ID} \
     node
 
+# Install
+# * `tini`, a tiny but valid `init` for containers, see
+#   https://github.com/krallin/tini#debian
+# * `procps`, utilities to browse information in the proc filesystem, in
+#   particular, `pkill` that is somewhere used deep within `./bin/postInstall`,
+#   see
+#   https://gitlab.com/procps-ng/procps
+#
+# For best practices on using `apt-get` see
 # https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#run
-# https://github.com/krallin/tini#debian
 RUN \
   apt-get update && \
   apt-get install \
@@ -49,15 +59,7 @@ RUN \
     --force \
     /var/lib/apt/lists/*
 
-# Install latest npm and expo, regardless of node version, for speed and fixes
-RUN \
-  npm install \
-    --global \
-    npm@latest \
-    expo-cli@latest \
-    ignite-cli@latest
-
-# Symlink `/app` to `/home/node/app` and make both owned by `node`
+# Symlink `/app` to `/home/node/app` and make both owned by `node`.
 RUN \
   mkdir --parents \
     /home/node/app && \
@@ -68,12 +70,30 @@ RUN \
     /home/node/app \
     /app
 
-# Switch to directory `/app`
+# Set working directory to `/app`.
 WORKDIR /app
-# Switch to user `node`
-USER node
+# Set user and group to `node`.
+USER node:node
 
-# Install node packages
+# Place global node dependencies in home of `node` user. For details on this
+# best practice see
+# https://github.com/nodejs/docker-node/blob/main/docs/BestPractices.md#global-npm-dependencies
+ENV NPM_CONFIG_PREFIX=/home/node/.npm-global
+ENV PATH=/home/node/.npm-global/bin:${PATH}
+
+# Install latest npm, expo, and ignite command-line interfaces, regardless of
+# node version, for speed and fixes.
+RUN \
+  npm install \
+    --global \
+    npm@latest \
+    expo-cli@latest \
+    ignite-cli@latest
+
+# Make local node executables known to shell.
+ENV PATH=/app/node_modules/.bin:${PATH}
+
+# Install local node dependencies.
 COPY \
   --chown=node:node \
   ./package.json \
@@ -94,15 +114,12 @@ RUN \
   npm cache clean \
     --force
 
-# Make node executables known to shell
-ENV PATH=/app/node_modules/.bin:${PATH}
-
 # Create directory `/app/.expo` such that the corresponding volume is owned by
-# the user `node`
+# the user `node`.
 RUN \
   mkdir ./.expo
 
-# Port 19000 for node, 19002 for debugging, and 19006 for project
+# Expose port 19000 for node, 19002 for debugging, and 19006 for project.
 EXPOSE 19000 19002 19006
+# Use entrypoint `tini`.
 ENTRYPOINT ["/usr/bin/tini", "--"]
-CMD ["npm", "run", "web"]
