@@ -1,7 +1,8 @@
-Run `make up` to start services and `make shell` to enter shell within running
-container. There, run `adb -a -d devices` to list devices connected via USB and
-start server in background if necessary. Then, run `npm run android` to open
-app on Android device.
+Install [Expo Go](https://expo.io/client) on your smart phone and connect it
+via USB to your machine.  Run `make up` to start services and `make shell` to
+enter shell within running container. There, run `adb -a -d devices` to list
+devices connected via USB and start server in background if necessary. Then,
+run `npm run android` to open app on Android device.
 
 # Welcome to your new ignited app!
 
