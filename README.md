@@ -1,10 +1,13 @@
 Install [Expo Go](https://expo.io/client) on your smart-phone, [configure
 developer options](https://developer.android.com/studio/debug/dev-options) on
-Android devices, and connect your device via USB to your machine.  Run `make
+Android devices, in particular, enable USB debugging, and connect your device via USB to your machine.  Run `make
 up` to start services and `make shell` to enter shell within running container.
 There, run `adb -a -d devices` to list devices connected via USB and start
 server in background if necessary. Then, run `npm run android` to open app on
 Android device.
+
+In case `adb` does not list the device, debug the issue as detailed in
+[How do I get my device detected by ADB on Linux?](https://android.stackexchange.com/questions/144966/how-do-i-get-my-device-detected-by-adb-on-linux/144967#144967)
 
 # Welcome to your new ignited app!
 
