@@ -123,6 +123,8 @@ RUN \
 RUN \
   mkdir ./.expo
 
+# Expose port ... for ...
+EXPOSE 9090 3000 9001 8081
 # Expose port 19000 for node, 19002 for debugging, and 19006 for project.
 EXPOSE 19000 19002 19006
 # Use entrypoint `tini`.
