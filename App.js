@@ -9,6 +9,21 @@
 // It's easier just to leave it here.
 import App from "./app/app.tsx"
 import { AppRegistry } from "react-native"
+import { registerRootComponent } from "expo"
 
-AppRegistry.registerComponent("YogaInsights", () => App)
+let isExpo = false;
+try {
+  const Constants = require("expo-constants");
+  // True if the app is running in an `expo build` app or if it's running in Expo Go.
+  isExpo =
+    Constants.executionEnvironment === "standalone" ||
+    Constants.executionEnvironment === "storeClient";
+} catch {}
+
+if (isExpo) {
+  registerRootComponent(App)
+} else {
+  AppRegistry.registerComponent("YogaInsights", () => App)
+}
+
 export default App
