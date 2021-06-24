@@ -5,14 +5,21 @@
  * You'll likely spend most of your time in this file.
  */
 import React from "react"
+import { createStackNavigator } from "@react-navigation/stack"
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
 import {
   ClassesScreen,
-  PosesScreen,
   MusicScreen,
+  PlayerScreen,
   PlaylistsScreen,
+  PosesScreen,
   SettingsScreen,
 } from "../screens"
+
+export type MainParamList = {
+  tabs: undefined
+  player: undefined
+}
 
 /**
  * This type allows TypeScript to know what routes are defined in this navigator
@@ -26,7 +33,7 @@ import {
  *   https://reactnavigation.org/docs/params/
  *   https://reactnavigation.org/docs/typescript#type-checking-the-navigator
  */
-export type PrimaryParamList = {
+export type TabParamList = {
   classes: undefined
   poses: undefined
   music: undefined
@@ -34,20 +41,22 @@ export type PrimaryParamList = {
   settings: undefined
 }
 
-// Documentation: https://reactnavigation.org/docs/tab-based-navigation
-const Tab = createBottomTabNavigator<PrimaryParamList>()
+const Stack = createStackNavigator<MainParamList>()
 
-export function MainNavigator() {
+// Documentation: https://reactnavigation.org/docs/tab-based-navigation
+const Tab = createBottomTabNavigator<TabParamList>()
+
+export function TabNavigator() {
   return (
     <Tab.Navigator
       initialRouteName="classes"
       tabBarOptions={
         {
-          // activeTintColor: "#fc9d61",
-          // inactiveTintColor: "#fc9d61",
-          // activeBackgroundColor: "#e6a1ff",
-          // inactiveBackgroundColor: "#f2ccff",
-        }
+        // activeTintColor: "#fc9d61",
+        // inactiveTintColor: "#fc9d61",
+        // activeBackgroundColor: "#e6a1ff",
+        // inactiveBackgroundColor: "#f2ccff",
+      }
       }
     >
       <Tab.Screen name="classes" component={ClassesScreen} options={{ title: "Stunden" }} />
@@ -56,6 +65,17 @@ export function MainNavigator() {
       <Tab.Screen name="playlists" component={PlaylistsScreen} options={{ title: "Favoriten" }} />
       <Tab.Screen name="settings" component={SettingsScreen} options={{ title: "Einstellungen" }} />
     </Tab.Navigator>
+  )
+}
+
+export function MainNavigator() {
+  return (
+    <Stack.Navigator
+      initialRouteName="tabs"
+    >
+      <Stack.Screen name="tabs" component={TabNavigator} options={{ headerShown: false }} />
+      <Stack.Screen name="player" component={PlayerScreen} options={{ title: "Player" }} />
+    </Stack.Navigator>
   )
 }
 
