@@ -1,10 +1,11 @@
 import React from "react"
 import { observer } from "mobx-react-lite"
-import { TouchableOpacity, FlatList, View, Image, ViewStyle } from "react-native"
+import { TouchableOpacity, FlatList, View, Image, ViewStyle, TextStyle } from "react-native"
 import { Screen, Text } from "../../components"
 import { useNavigation } from "@react-navigation/native"
 // import { useStores } from "../../models"
 import { color, spacing } from "../../theme"
+import { PlayerScreenNavigationProp } from "../../navigators"
 
 const ROOT: ViewStyle = {
   backgroundColor: color.palette.black,
@@ -27,13 +28,13 @@ export const ClassesScreen = observer(function ClassesScreen() {
   // const { someStore, anotherStore } = useStores()
 
   // Pull in navigation via hook
-  const navigation = useNavigation()
+  const navigation = useNavigation<PlayerScreenNavigationProp>()
 
   const classes = [
-    {id: 1, name: "Spannungsausgleich", status: "gekauft/heruntergeladen"},
-    {id: 2, name: "Migraeneprophylaxe", status: "gekauft"},
-    {id: 3, name: "Gesunder Ruecken", status: "kaufbar"},
-    {id: 4, name: "Flexible Beine", status: "kaufbar"}
+    { id: 1, name: "Spannungsausgleich", trackId: "a", status: "gekauft/heruntergeladen" },
+    { id: 2, name: "Migraeneprophylaxe", trackId: "b", status: "gekauft" },
+    { id: 3, name: "Gesunder Ruecken", trackId: "c", status: "kaufbar" },
+    { id: 4, name: "Flexible Beine", trackId: "d", status: "kaufbar" },
   ]
 
   return (
@@ -43,7 +44,9 @@ export const ClassesScreen = observer(function ClassesScreen() {
         data={[...classes]}
         keyExtractor={(item) => String(item.id)}
         renderItem={({ item }) => (
-          <TouchableOpacity onPress={() => navigation.navigate("player")}>
+          <TouchableOpacity
+            onPress={() => navigation.navigate("player", { trackId: item.trackId })}
+          >
             <View style={LIST_CONTAINER}>
               <Text style={LIST_TEXT}>
                 {item.name} ({item.status})
