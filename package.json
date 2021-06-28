@@ -57,7 +57,8 @@
     "reactotron-react-js": "^3.3.7",
     "reactotron-react-native": "5.0.0",
     "validate.js": "0.13.1",
-    "expo-av": "~9.1.2"
+    "expo-av": "~9.1.2",
+    "@react-native-community/slider": "3.0.3"
   },
   "devDependencies": {
     "@babel/core": "~7.9.0",
