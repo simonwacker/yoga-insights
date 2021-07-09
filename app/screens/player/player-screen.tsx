@@ -65,49 +65,69 @@ export const PlayerScreen = observer(() => {
     setEditingSlider(false)
   }
   const onEditingSlider = async (seconds) => {
-    const milliseconds = seconds * 1000
-    if (playbackStatus.isLoaded) {
-      if (milliseconds <= playbackStatus.playableDurationMillis) {
-        await sound?.setPositionAsync(milliseconds)
+    try {
+      const milliseconds = seconds * 1000
+      if (playbackStatus.isLoaded) {
+        if (milliseconds <= playbackStatus.playableDurationMillis) {
+          await sound?.setPositionAsync(milliseconds)
+        }
       }
+    } catch (error) {
+      console.error(`Failed to slide to ${seconds} seconds.`, errors)
     }
   }
 
   const createAndLoadAndPlay = async () => {
-    const { sound: newSound, status: newPlaybackStatus } = await Audio.Sound.createAsync(
-      { uri: uris[trackId] },
-      { shouldPlay: true }, // initialStatus
-      onPlaybackStatusUpdate, // onPlaybackStatusUpdate
-      true, // downloadFirst
-    )
-    setSound(newSound)
-    onPlaybackStatusUpdate(newPlaybackStatus)
+    try {
+      const { sound: newSound, status: newPlaybackStatus } = await Audio.Sound.createAsync(
+        { uri: uris[trackId] },
+        { shouldPlay: true }, // initialStatus
+        onPlaybackStatusUpdate, // onPlaybackStatusUpdate
+        true, // downloadFirst
+      )
+      setSound(newSound)
+      onPlaybackStatusUpdate(newPlaybackStatus)
+    } catch (error) {
+      console.error("Failed to create, load, and play audio.", error)
+    }
   }
 
   const play = async () => {
-    if (playbackStatus?.isLoaded) {
-      await sound?.playAsync()
+    try {
+      if (playbackStatus?.isLoaded) {
+        await sound?.playAsync()
+      }
+    } catch (error) {
+      console.error("Failed to play audio.", error)
     }
   }
 
   const pause = async () => {
-    if (playbackStatus?.isLoaded && playbackStatus.isPlaying) {
-      await sound?.pauseAsync()
+    try {
+      if (playbackStatus?.isLoaded && playbackStatus.isPlaying) {
+        await sound?.pauseAsync()
+      }
+    } catch (error) {
+      console.error("Failed to pause audio.", error)
     }
   }
 
   const jumpPrev30Seconds = () => jumpSeconds(-30)
   const jumpNext30Seconds = () => jumpSeconds(30)
   const jumpSeconds = async (seconds: number) => {
-    if (playbackStatus?.isLoaded) {
-      const milliseconds = seconds * 1000
-      let nextMilliseconds = playbackStatus.positionMillis + milliseconds
-      if (nextMilliseconds < 0) {
-        nextMilliseconds = 0
-      } else if (nextMilliseconds > playbackStatus.durationMillis) {
-        nextMilliseconds = playbackStatus.durationMillis
+    try {
+      if (playbackStatus?.isLoaded) {
+        const milliseconds = seconds * 1000
+        let nextMilliseconds = playbackStatus.positionMillis + milliseconds
+        if (nextMilliseconds < 0) {
+          nextMilliseconds = 0
+        } else if (nextMilliseconds > playbackStatus.durationMillis) {
+          nextMilliseconds = playbackStatus.durationMillis
+        }
+        await sound?.setPositionAsync(nextMilliseconds)
       }
-      await sound?.setPositionAsync(nextMilliseconds)
+    } catch (error) {
+      console.error(`Failed to jump ${seconds} seconds.`, error)
     }
   }
 
