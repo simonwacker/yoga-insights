@@ -41,6 +41,8 @@ RUN \
 # * `adb`, android debug bridge to communicate with an emulator instance or
 #   connected Android-powered device, see
 #   https://developer.android.com/studio/command-line/adb
+# * `make`, GNU Make to run often needed commands, see
+#   https://www.gnu.org/software/make/
 # * `procps`, utilities to browse information in the proc filesystem, in
 #   particular, `pkill` that is somewhere used deep within `./bin/postInstall`,
 #   see
@@ -56,6 +58,7 @@ RUN \
     --yes \
     --no-install-recommends \
     android-tools-adb \
+    make \
     procps \
     tini && \
   rm \
