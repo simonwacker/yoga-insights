@@ -67,7 +67,7 @@ export const PlayerScreen = observer(() => {
       await sound.unloadAsync()
     }
     const status = await sound.loadAsync(
-      uris[trackId],
+      { uri: uris[trackId] },
       { shouldPlay: true }, // initialStatus
       true, // downloadFirst
     )
@@ -139,6 +139,11 @@ export const PlayerScreen = observer(() => {
               30 L
             </Text>
           </TouchableOpacity>
+          {!playbackStatus?.isLoaded && playbackStatus?.error (
+            <>
+              <Text>Error: {playbackStatus.error}</Text>
+            </>
+          )}
           {!playbackStatus?.isLoaded && (
             <>
               <Text>Loading ...</Text>
