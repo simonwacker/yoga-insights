@@ -37,8 +37,7 @@ export const PlayerScreen = observer(() => {
   const route = useRoute<PlayerScreenRouteProp>()
   const { trackId } = route.params
 
-  const sound = new Audio.Sound()
-
+  const [sound, setSound] = useState<Audio.Sound | undefined>()
   const [playbackStatus, setPlaybackStatus] = useState<AVPlaybackStatus | undefined>()
   const [editingSlider, setEditingSlider] = useState(false)
 
@@ -47,9 +46,17 @@ export const PlayerScreen = observer(() => {
   }
 
   useEffect(() => {
-    loadAndPlay()
-    return () => sound.unloadAsync()
+    init()
   }, [trackId])
+
+  useEffect(() => {
+    return sound
+      ? () => {
+          sound.setOnPlaybackStatusUpdate(() => {})
+          sound.unloadAsync()
+        }
+      : undefined
+  }, [sound])
 
   const onStartEditSlider = () => {
     setEditingSlider(true)
@@ -57,33 +64,49 @@ export const PlayerScreen = observer(() => {
   const onEndEditSlider = () => {
     setEditingSlider(false)
   }
-  const onEditingSlider = (seconds) => {
+  const onEditingSlider = async (seconds) => {
     const milliseconds = seconds * 1000
-    sound.setPositionAsync(milliseconds)
+    if (playbackStatus.isLoaded) {
+      if (milliseconds <= playbackStatus.playableDurationMillis) {
+        await sound?.setPositionAsync(milliseconds)
+      }
+    }
   }
 
-  const loadAndPlay = async () => {
-    if (playbackStatus?.isLoaded) {
-      await sound.unloadAsync()
+  const init = async () => {
+    await unload()
+    await createAndLoadAndPlay()
+  }
+
+  const unload = async () => {
+    if (sound) {
+      sound.setOnPlaybackStatusUpdate(() => {})
+      if (playbackStatus?.isLoaded) {
+        await sound.unloadAsync()
+      }
     }
-    const status = await sound.loadAsync(
+  }
+
+  const createAndLoadAndPlay = async () => {
+    const { sound: newSound, status: newPlaybackStatus } = await Audio.Sound.createAsync(
       { uri: uris[trackId] },
       { shouldPlay: true }, // initialStatus
+      onPlaybackStatusUpdate, // onPlaybackStatusUpdate
       true, // downloadFirst
     )
-    sound.setOnPlaybackStatusUpdate(onPlaybackStatusUpdate)
-    onPlaybackStatusUpdate(status) // TODO Is this necessary?
+    setSound(newSound)
+    onPlaybackStatusUpdate(newPlaybackStatus)
   }
 
-  const play = () => {
+  const play = async () => {
     if (playbackStatus?.isLoaded) {
-      sound.playAsync()
+      await sound?.playAsync()
     }
   }
 
-  const pause = () => {
+  const pause = async () => {
     if (playbackStatus?.isLoaded && playbackStatus.isPlaying) {
-      sound.pauseAsync()
+      await sound?.pauseAsync()
     }
   }
 
@@ -98,25 +121,18 @@ export const PlayerScreen = observer(() => {
       } else if (nextMilliseconds > playbackStatus.durationMillis) {
         nextMilliseconds = playbackStatus.durationMillis
       }
-      sound.setPositionAsync(nextMilliseconds)
+      await sound?.setPositionAsync(nextMilliseconds)
     }
   }
 
-  const getAudioTimeString = (milliseconds: number) => {
-    const seconds = Math.round(milliseconds / 1000)
-    const h = Math.round(seconds / (60 * 60))
-    const m = Math.round((seconds % (60 * 60)) / 60)
-    const s = Math.round(seconds % 60)
+  const padZero = (x: number) => (x < 10 ? "0" + x.toString() : x.toString())
 
-    return (h < 10 ? "0" + h : h) + ":" + (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s)
+  const conertToAudioTimeString = (milliseconds: number) => {
+    const hours = Math.round(milliseconds / (1000 * 60 * 60))
+    const minutes = Math.round((milliseconds / (1000 * 60)) % 60)
+    const seconds = Math.round((milliseconds / 1000) % 60)
+    return `${padZero(hours)}:${padZero(minutes)}:${padZero(seconds)}`
   }
-
-  const currentTimeString = playbackStatus?.isLoaded
-    ? getAudioTimeString(playbackStatus.positionMillis)
-    : ""
-  const durationString = playbackStatus?.isLoaded
-    ? getAudioTimeString(playbackStatus.playableDurationMillis)
-    : ""
 
   return (
     <Screen style={ROOT} preset="scroll">
@@ -125,36 +141,19 @@ export const PlayerScreen = observer(() => {
           source={img_speaker}
           style={{ width: 150, height: 150, marginBottom: 15, alignSelf: "center" }}
         /> */}
-        <AntDesign name="antdesign" size={150} color="white" />
+        {!playbackStatus?.isLoaded && playbackStatus?.error && (
+          <>
+            <Text>Error: {playbackStatus.error}</Text>
+          </>
+        )}
         <View style={{ flexDirection: "row", justifyContent: "center", marginVertical: 15 }}>
           <TouchableOpacity onPress={jumpPrev30Seconds} style={{ justifyContent: "center" }}>
             <AntDesign name="left" size={30} color="white" />
             {/* <AutoImage source={img_playjumpleft} style={{ width: 30, height: 30 }} /> */}
-            <Text
-              style={{
-                color: "white",
-                fontSize: 12,
-              }}
-            >
-              30 L
-            </Text>
+            <Text style={{ color: "white", fontSize: 12 }}>30</Text>
           </TouchableOpacity>
-          {!playbackStatus?.isLoaded && playbackStatus?.error (
-            <>
-              <Text>Error: {playbackStatus.error}</Text>
-            </>
-          )}
           {!playbackStatus?.isLoaded && (
-            <>
-              <Text>Loading ...</Text>
-              <AntDesign name="loading1" size={30} color="white" />
-            </>
-          )}
-          {playbackStatus?.isLoaded && playbackStatus.isPlaying && (
-            <TouchableOpacity onPress={pause} style={{ marginHorizontal: 20 }}>
-              <AntDesign name="pausecircleo" size={30} color="white" />
-              {/* <AutoImage source={img_pause} style={{ width: 30, height: 30 }} /> */}
-            </TouchableOpacity>
+            <AntDesign name="loading1" size={30} color="white" style={{ marginHorizontal: 20 }} />
           )}
           {playbackStatus?.isLoaded && !playbackStatus.isPlaying && (
             <TouchableOpacity onPress={play} style={{ marginHorizontal: 20 }}>
@@ -162,21 +161,22 @@ export const PlayerScreen = observer(() => {
               {/* <AutoImage source={img_play} style={{ width: 30, height: 30 }} /> */}
             </TouchableOpacity>
           )}
+          {playbackStatus?.isLoaded && playbackStatus.isPlaying && (
+            <TouchableOpacity onPress={pause} style={{ marginHorizontal: 20 }}>
+              <AntDesign name="pausecircleo" size={30} color="white" />
+              {/* <AutoImage source={img_pause} style={{ width: 30, height: 30 }} /> */}
+            </TouchableOpacity>
+          )}
           <TouchableOpacity onPress={jumpNext30Seconds} style={{ justifyContent: "center" }}>
             {/* <AutoImage source={img_playjumpright} style={{ width: 30, height: 30 }} /> */}
             <AntDesign name="right" size={30} color="white" />
-            <Text
-              style={{
-                color: "white",
-                fontSize: 12,
-              }}
-            >
-              30 R
-            </Text>
+            <Text style={{ color: "white", fontSize: 12 }}>30</Text>
           </TouchableOpacity>
         </View>
         <View style={{ marginVertical: 15, marginHorizontal: 15, flexDirection: "row" }}>
-          <Text style={{ color: "white", alignSelf: "center" }}>{currentTimeString}</Text>
+          <Text style={{ color: "white", alignSelf: "center" }}>
+            {playbackStatus?.isLoaded ? conertToAudioTimeString(playbackStatus.positionMillis) : ""}
+          </Text>
           <Slider
             onTouchStart={onStartEditSlider}
             // onTouchMove={() => console.log('onTouchMove')}
@@ -186,16 +186,16 @@ export const PlayerScreen = observer(() => {
             onValueChange={onEditingSlider}
             value={playbackStatus?.isLoaded ? Math.round(playbackStatus.positionMillis / 1000) : 0}
             maximumValue={
-              playbackStatus?.isLoaded
-                ? Math.round(playbackStatus.playableDurationMillis / 1000)
-                : 0
+              playbackStatus?.isLoaded ? Math.round(playbackStatus.durationMillis / 1000) : 0
             }
             maximumTrackTintColor="gray"
             minimumTrackTintColor="white"
             thumbTintColor="white"
             style={{ flex: 1, alignSelf: "center", marginHorizontal: 10 }}
           />
-          <Text style={{ color: "white", alignSelf: "center" }}>{durationString}</Text>
+          <Text style={{ color: "white", alignSelf: "center" }}>
+            {playbackStatus?.isLoaded ? conertToAudioTimeString(playbackStatus.durationMillis) : ""}
+          </Text>
         </View>
       </View>
     </Screen>
