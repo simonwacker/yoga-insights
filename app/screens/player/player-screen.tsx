@@ -46,7 +46,7 @@ export const PlayerScreen = observer(() => {
   }
 
   useEffect(() => {
-    init()
+    createAndLoadAndPlay()
   }, [trackId])
 
   useEffect(() => {
@@ -69,20 +69,6 @@ export const PlayerScreen = observer(() => {
     if (playbackStatus.isLoaded) {
       if (milliseconds <= playbackStatus.playableDurationMillis) {
         await sound?.setPositionAsync(milliseconds)
-      }
-    }
-  }
-
-  const init = async () => {
-    await unload()
-    await createAndLoadAndPlay()
-  }
-
-  const unload = async () => {
-    if (sound) {
-      sound.setOnPlaybackStatusUpdate(() => {})
-      if (playbackStatus?.isLoaded) {
-        await sound.unloadAsync()
       }
     }
   }
