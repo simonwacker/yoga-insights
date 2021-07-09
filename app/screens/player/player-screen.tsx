@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react"
 import { observer } from "mobx-react-lite"
-import { Pressable, View, ViewStyle } from "react-native"
+import { Switch, Pressable, View, ViewStyle } from "react-native"
 import { Screen, Text } from "../../components"
 import { useRoute } from "@react-navigation/native"
 // import { useStores } from "../../models"
@@ -12,6 +12,8 @@ import Slider from "@react-native-community/slider"
 import { PlayerScreenRouteProp } from "../../navigators"
 // import { AutoImage } from "../../components"
 import { AntDesign } from "@expo/vector-icons"
+import { FileSystem } from "react-native-unimodules"
+import { DownloadResumable } from "expo-file-system"
 
 const ROOT: ViewStyle = {
   backgroundColor: color.palette.black,
@@ -19,12 +21,26 @@ const ROOT: ViewStyle = {
 }
 
 const uris = {
-  a:
-    "https://citysoundstudio.de/n/index.php/s/WggwKH5eGSxzZbk/download?path=%2FYoga%20Insights%20Vol.1&files=Yoga%20Insights%20Volume%201-Teil%201-Grundlegende%20Einf%C3%BChrung.mp3",
-  b: "fail",
-  c: "",
-  d:
-    "https://citysoundstudio.de/n/index.php/s/WggwKH5eGSxzZbk/download?path=%2FYoga%20Insights%20Vol.1&files=Yoga%20Insights%20Volume%201-Teil%202-Regeneratives%20entlastendes%20Abendprogramm.mp3",
+  a: {
+    web:
+      "https://citysoundstudio.de/n/index.php/s/WggwKH5eGSxzZbk/download?path=%2FYoga%20Insights%20Vol.1&files=Yoga%20Insights%20Volume%201-Teil%201-Grundlegende%20Einf%C3%BChrung.mp3",
+    file: FileSystem.documentDirectory + "a.mp3",
+  },
+  b: { web: "fail", file: FileSystem.documentDirectory + "b.mp3" },
+  c: { web: "", file: FileSystem.documentDirectory + "c.mp3" },
+  d: {
+    web:
+      "https://citysoundstudio.de/n/index.php/s/WggwKH5eGSxzZbk/download?path=%2FYoga%20Insights%20Vol.1&files=Yoga%20Insights%20Volume%201-Teil%202-Regeneratives%20entlastendes%20Abendprogramm.mp3",
+    file: "d.mp3",
+  },
+}
+
+enum DownloadStatus {
+  Unknown = "UNKNOWN",
+  NotDownloaded = "NOT_DOWNLOADED",
+  Downloading = "DOWNLOADING",
+  Paused = "PAUSED",
+  Downloaded = "DOWNLOADED",
 }
 
 export const PlayerScreen = observer(() => {
@@ -40,10 +56,21 @@ export const PlayerScreen = observer(() => {
   const [sound, setSound] = useState<Audio.Sound | undefined>()
   const [playbackStatus, setPlaybackStatus] = useState<AVPlaybackStatus | undefined>()
   const [editingSlider, setEditingSlider] = useState(false)
+  const [downloadStatus, setDownloadStatus] = useState(DownloadStatus.Unknown)
+  const [resumableDownload, setResumableDownload] = useState<DownloadResumable | undefined>()
+  const [downloadProgress, setDownloadProgress] = useState(0)
 
   const onPlaybackStatusUpdate = (newPlaybackStatus: AVPlaybackStatus) => {
     setPlaybackStatus(newPlaybackStatus)
   }
+
+  const onResumableDownloadProgressUpdate = ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
+    setDownloadProgress(totalBytesWritten / totalBytesExpectedToWrite)
+  }
+
+  useEffect(() => {
+    determineDownloadStatus()
+  }, [trackId])
 
   useEffect(() => {
     createAndLoadAndPlay()
@@ -57,6 +84,19 @@ export const PlayerScreen = observer(() => {
         }
       : undefined
   }, [sound])
+
+  useEffect(() => {
+    return resumableDownload
+      ? () => {
+          resumableDownload._removeSubscription()
+          // TODO If the resumable download did not finish, the file should be
+          // deleted. To do so, download the file into `FileSystem.cacheDirectory`
+          // first and only `moveFileAsync` to `documentDirectory` once it is
+          // downloaded. Always delete the cache file here!
+          // FileSystem.deleteAsync(uris[trackId].file, { idempotent: true })
+        }
+      : undefined
+  }, [resumableDownload])
 
   const onStartEditSlider = () => {
     setEditingSlider(true)
@@ -73,14 +113,26 @@ export const PlayerScreen = observer(() => {
         }
       }
     } catch (error) {
-      console.error(`Failed to slide to ${seconds} seconds.`, errors)
+      console.error(`Failed to slide to ${seconds} seconds.`, error)
+    }
+  }
+
+  const determineDownloadStatus = async () => {
+    try {
+      // TODO `exists` is also true when the download was paused and not resumed.
+      const { exists } = await FileSystem.getInfoAsync(uris[trackId].file)
+      setDownloadStatus(exists ? DownloadStatus.Downloaded : DownloadStatus.NotDownloaded)
+    } catch (error) {
+      console.log("Failed to determine download status.", error)
     }
   }
 
   const createAndLoadAndPlay = async () => {
     try {
+      const { exists } = await FileSystem.getInfoAsync(uris[trackId].file)
+      const uri = exists ? uris[trackId].file : uris[trackId].web
       const { sound: newSound, status: newPlaybackStatus } = await Audio.Sound.createAsync(
-        { uri: uris[trackId] },
+        { uri: uri },
         { shouldPlay: true }, // initialStatus
         onPlaybackStatusUpdate, // onPlaybackStatusUpdate
         true, // downloadFirst
@@ -140,6 +192,52 @@ export const PlayerScreen = observer(() => {
     return `${padZero(hours)}:${padZero(minutes)}:${padZero(seconds)}`
   }
 
+  const switchDownloadStatus = async () => {
+    try {
+      switch (downloadStatus) {
+        case DownloadStatus.Unknown: {
+          break
+        }
+        case DownloadStatus.Downloaded: {
+          await FileSystem.deleteAsync(uris[trackId].file)
+          setDownloadProgress(0)
+          setDownloadStatus(DownloadStatus.NotDownloaded)
+          break
+        }
+        case DownloadStatus.Downloading: {
+          await resumableDownload.pauseAsync()
+          setDownloadStatus(DownloadStatus.Paused)
+          break
+        }
+        case DownloadStatus.Paused: {
+          setDownloadStatus(DownloadStatus.Downloading)
+          const { md5, status } = await resumableDownload.resumeAsync()
+          // TODO Check `md5` checksum and HTTP status code
+          setDownloadStatus(DownloadStatus.Downloaded)
+          setResumableDownload(undefined)
+          break
+        }
+        case DownloadStatus.NotDownloaded: {
+          const newResumableDownload = FileSystem.createDownloadResumable(
+            uris[trackId].web,
+            uris[trackId].file,
+            { md5: true },
+            onResumableDownloadProgressUpdate,
+          )
+          setDownloadStatus(DownloadStatus.Downloading)
+          setResumableDownload(newResumableDownload)
+          const { md5, status } = await newResumableDownload.downloadAsync()
+          // TODO Check `md5` checksum and HTTP status code
+          setDownloadStatus(DownloadStatus.Downloaded)
+          setResumableDownload(undefined)
+          break
+        }
+      }
+    } catch (error) {
+      console.error("Switching download status of audio failed.", error)
+    }
+  }
+
   return (
     <Screen style={ROOT} preset="scroll">
       <View style={{ flex: 1, justifyContent: "center", backgroundColor: "black" }}>
@@ -178,6 +276,29 @@ export const PlayerScreen = observer(() => {
             <AntDesign name="right" size={30} color="white" />
             <Text style={{ color: "white", fontSize: 12 }}>30</Text>
           </Pressable>
+        </View>
+        <View style={{ marginVertical: 15, marginHorizontal: 15, flexDirection: "row" }}>
+          <Switch
+            trackColor={{ false: "#767577", true: "#81b0ff" }}
+            thumbColor={
+              downloadStatus === DownloadStatus.Downloading ||
+              downloadStatus === DownloadStatus.Downloaded
+                ? "#f5dd4b"
+                : "#f4f3f4"
+            }
+            ios_backgroundColor="#3e3e3e"
+            disabled={downloadStatus === DownloadStatus.Unknown}
+            value={
+              downloadStatus === DownloadStatus.Downloading ||
+              downloadStatus === DownloadStatus.Downloaded
+            }
+            onValueChange={switchDownloadStatus}
+          />
+          {downloadStatus === DownloadStatus.Downloading && (
+            <Text style={{ color: "white", fontSize: 12 }}>
+              {Math.round(downloadProgress * 100)} %
+            </Text>
+          )}
         </View>
         <View style={{ marginVertical: 15, marginHorizontal: 15, flexDirection: "row" }}>
           <Text style={{ color: "white", alignSelf: "center" }}>
