@@ -5,7 +5,7 @@
  * You'll likely spend most of your time in this file.
  */
 import React from "react"
-import { createStackNavigator } from "@react-navigation/stack"
+import { createStackNavigator, StackNavigationProp } from "@react-navigation/stack"
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
 import {
   ClassesScreen,
@@ -15,10 +15,20 @@ import {
   PosesScreen,
   SettingsScreen,
 } from "../screens"
+import { RouteProp } from "@react-navigation/native"
 
 export type MainParamList = {
   tabs: undefined
-  player: undefined
+  player: { trackId: string }
+}
+
+export type PlayerScreenRouteProp = RouteProp<MainParamList, "player">
+
+export type PlayerScreenNavigationProp = StackNavigationProp<MainParamList, "player">
+
+export type PlayerProps = {
+  route: PlayerScreenRouteProp
+  navigation: PlayerScreenNavigationProp
 }
 
 /**
@@ -52,11 +62,11 @@ export function TabNavigator() {
       initialRouteName="classes"
       tabBarOptions={
         {
-        // activeTintColor: "#fc9d61",
-        // inactiveTintColor: "#fc9d61",
-        // activeBackgroundColor: "#e6a1ff",
-        // inactiveBackgroundColor: "#f2ccff",
-      }
+          // activeTintColor: "#fc9d61",
+          // inactiveTintColor: "#fc9d61",
+          // activeBackgroundColor: "#e6a1ff",
+          // inactiveBackgroundColor: "#f2ccff",
+        }
       }
     >
       <Tab.Screen name="classes" component={ClassesScreen} options={{ title: "Stunden" }} />
@@ -70,9 +80,7 @@ export function TabNavigator() {
 
 export function MainNavigator() {
   return (
-    <Stack.Navigator
-      initialRouteName="tabs"
-    >
+    <Stack.Navigator initialRouteName="tabs">
       <Stack.Screen name="tabs" component={TabNavigator} options={{ headerShown: false }} />
       <Stack.Screen name="player" component={PlayerScreen} options={{ title: "Player" }} />
     </Stack.Navigator>

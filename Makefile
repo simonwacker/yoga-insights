@@ -12,9 +12,21 @@ help: ## Print documentation
 .DEFAULT_GOAL: help
 .PHONY: help
 
+# ----------------------------- #
+#                               #
+# ----------------------------- #
+
 tmux: ## Load tmux(p) workspace
 	tmuxp load .
 .PHONY: tmux
+
+ip: ## Print host IP address
+	@echo ${HOST_IP_ADDRESS}
+.PHONY: ip
+
+# ----------------------------- #
+# Interface with Docker Compose #
+# ----------------------------- #
 
 build: ## Build services
 	HOST_IP_ADDRESS=${HOST_IP_ADDRESS} \
@@ -65,3 +77,11 @@ run: ## Run command `${COMMAND}` within fresh service `node`
 			node \
 			${COMMAND}
 .PHONY: run
+
+# ------------------------------- #
+# In shell running service `node` #
+# ------------------------------- #
+
+usb: ## Connect to and list USB devices
+	adb -a -d devices
+.PHONY: usb
