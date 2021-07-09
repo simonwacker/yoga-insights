@@ -7,9 +7,6 @@ import { useNavigation } from "@react-navigation/native"
 import { color, spacing } from "../../theme"
 import { PlayerScreenNavigationProp } from "../../navigators"
 
-const FULL: ViewStyle = {
-  flex: 1,
-}
 const ROOT: ViewStyle = {
   backgroundColor: color.palette.black,
   flex: 1,
