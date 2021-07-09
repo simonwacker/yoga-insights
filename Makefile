@@ -20,6 +20,10 @@ tmux: ## Load tmux(p) workspace
 	tmuxp load .
 .PHONY: tmux
 
+ip: ## Print host IP address
+	@echo ${HOST_IP_ADDRESS}
+.PHONY: ip
+
 # ----------------------------- #
 # Interface with Docker Compose #
 # ----------------------------- #
@@ -78,6 +82,6 @@ run: ## Run command `${COMMAND}` within fresh service `node`
 # In shell running service `node` #
 # ------------------------------- #
 
-usb : ## Connect to and list USB devices
+usb: ## Connect to and list USB devices
 	adb -a -d devices
-.PHONY : usb
+.PHONY: usb
