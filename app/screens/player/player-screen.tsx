@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react"
 import { observer } from "mobx-react-lite"
-import { TouchableOpacity, View, ViewStyle } from "react-native"
+import { Pressable, View, ViewStyle } from "react-native"
 import { Screen, Text } from "../../components"
 import { useRoute } from "@react-navigation/native"
 // import { useStores } from "../../models"
@@ -133,31 +133,31 @@ export const PlayerScreen = observer(() => {
           </>
         )}
         <View style={{ flexDirection: "row", justifyContent: "center", marginVertical: 15 }}>
-          <TouchableOpacity onPress={jumpPrev30Seconds} style={{ justifyContent: "center" }}>
+          <Pressable onPress={jumpPrev30Seconds} style={{ justifyContent: "center" }}>
             <AntDesign name="left" size={30} color="white" />
             {/* <AutoImage source={img_playjumpleft} style={{ width: 30, height: 30 }} /> */}
             <Text style={{ color: "white", fontSize: 12 }}>30</Text>
-          </TouchableOpacity>
+          </Pressable>
           {!playbackStatus?.isLoaded && (
             <AntDesign name="loading1" size={30} color="white" style={{ marginHorizontal: 20 }} />
           )}
           {playbackStatus?.isLoaded && !playbackStatus.isPlaying && (
-            <TouchableOpacity onPress={play} style={{ marginHorizontal: 20 }}>
+            <Pressable onPress={play} style={{ marginHorizontal: 20 }}>
               <AntDesign name="playcircleo" size={30} color="white" />
               {/* <AutoImage source={img_play} style={{ width: 30, height: 30 }} /> */}
-            </TouchableOpacity>
+            </Pressable>
           )}
           {playbackStatus?.isLoaded && playbackStatus.isPlaying && (
-            <TouchableOpacity onPress={pause} style={{ marginHorizontal: 20 }}>
+            <Pressable onPress={pause} style={{ marginHorizontal: 20 }}>
               <AntDesign name="pausecircleo" size={30} color="white" />
               {/* <AutoImage source={img_pause} style={{ width: 30, height: 30 }} /> */}
-            </TouchableOpacity>
+            </Pressable>
           )}
-          <TouchableOpacity onPress={jumpNext30Seconds} style={{ justifyContent: "center" }}>
+          <Pressable onPress={jumpNext30Seconds} style={{ justifyContent: "center" }}>
             {/* <AutoImage source={img_playjumpright} style={{ width: 30, height: 30 }} /> */}
             <AntDesign name="right" size={30} color="white" />
             <Text style={{ color: "white", fontSize: 12 }}>30</Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
         <View style={{ marginVertical: 15, marginHorizontal: 15, flexDirection: "row" }}>
           <Text style={{ color: "white", alignSelf: "center" }}>
