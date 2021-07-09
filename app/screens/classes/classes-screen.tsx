@@ -1,6 +1,6 @@
 import React from "react"
 import { observer } from "mobx-react-lite"
-import { TouchableOpacity, FlatList, View, Image, ViewStyle, TextStyle } from "react-native"
+import { TouchableOpacity, FlatList, View, ViewStyle, TextStyle } from "react-native"
 import { Screen, Text } from "../../components"
 import { useNavigation } from "@react-navigation/native"
 // import { useStores } from "../../models"
