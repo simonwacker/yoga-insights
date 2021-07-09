@@ -7,6 +7,9 @@ import { useNavigation } from "@react-navigation/native"
 import { color, spacing } from "../../theme"
 import { PlayerScreenNavigationProp } from "../../navigators"
 
+const FULL: ViewStyle = {
+  flex: 1,
+}
 const ROOT: ViewStyle = {
   backgroundColor: color.palette.black,
   flex: 1,
@@ -38,7 +41,7 @@ export const ClassesScreen = observer(function ClassesScreen() {
   ]
 
   return (
-    <Screen style={ROOT} preset="scroll">
+    <Screen style={ROOT} preset="fixed">
       <FlatList
         contentContainerStyle={FLAT_LIST}
         data={[...classes]}
