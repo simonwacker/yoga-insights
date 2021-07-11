@@ -1,5 +1,5 @@
 import * as React from "react"
-import { TextStyle, TouchableOpacity, View, ViewStyle } from "react-native"
+import { TextStyle, Pressable, View, ViewStyle } from "react-native"
 import { Text } from "../text/text"
 import { color, spacing } from "../../theme"
 import { CheckboxProps } from "./checkbox.props"
@@ -40,14 +40,9 @@ export function Checkbox(props: CheckboxProps) {
   const onPress = props.onToggle ? () => props.onToggle && props.onToggle(!props.value) : null
 
   return (
-    <TouchableOpacity
-      activeOpacity={1}
-      disabled={!props.onToggle}
-      onPress={onPress}
-      style={rootStyle}
-    >
+    <Pressable disabled={!props.onToggle} onPress={onPress} style={rootStyle}>
       <View style={outlineStyle}>{props.value && <View style={fillStyle} />}</View>
       <Text text={props.text} tx={props.tx} numberOfLines={numberOfLines} style={LABEL} />
-    </TouchableOpacity>
+    </Pressable>
   )
 }

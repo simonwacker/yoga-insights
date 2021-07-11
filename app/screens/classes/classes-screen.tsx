@@ -1,6 +1,6 @@
 import React from "react"
 import { observer } from "mobx-react-lite"
-import { TouchableOpacity, FlatList, View, ViewStyle, TextStyle } from "react-native"
+import { Pressable, FlatList, View, ViewStyle, TextStyle } from "react-native"
 import { Screen, Text } from "../../components"
 import { useNavigation } from "@react-navigation/native"
 // import { useStores } from "../../models"
@@ -44,15 +44,13 @@ export const ClassesScreen = observer(function ClassesScreen() {
         data={[...classes]}
         keyExtractor={(item) => String(item.id)}
         renderItem={({ item }) => (
-          <TouchableOpacity
-            onPress={() => navigation.navigate("player", { trackId: item.trackId })}
-          >
+          <Pressable onPress={() => navigation.navigate("player", { trackId: item.trackId })}>
             <View style={LIST_CONTAINER}>
               <Text style={LIST_TEXT}>
                 {item.name} ({item.status})
               </Text>
             </View>
-          </TouchableOpacity>
+          </Pressable>
         )}
       />
     </Screen>
