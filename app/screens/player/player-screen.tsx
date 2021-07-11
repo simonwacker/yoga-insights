@@ -13,25 +13,40 @@ import { PlayerScreenRouteProp } from "../../navigators"
 // import { AutoImage } from "../../components"
 import { AntDesign } from "@expo/vector-icons"
 import { FileSystem } from "react-native-unimodules"
-import { DownloadResumable } from "expo-file-system"
+import { DownloadResumable, FileSystemDownloadResult } from "expo-file-system"
 
 const ROOT: ViewStyle = {
   backgroundColor: color.palette.black,
   flex: 1,
 }
 
-const uris = {
+// TODO Name and model this in a better way. How?
+const uris: { [key: string]: { web: string; file: string; cache: string; md5: string } } = {
   a: {
     web:
       "https://citysoundstudio.de/n/index.php/s/WggwKH5eGSxzZbk/download?path=%2FYoga%20Insights%20Vol.1&files=Yoga%20Insights%20Volume%201-Teil%201-Grundlegende%20Einf%C3%BChrung.mp3",
     file: FileSystem.documentDirectory + "a.mp3",
+    cache: FileSystem.cacheDirectory + "a.mp3",
+    md5: "????",
   },
-  b: { web: "fail", file: FileSystem.documentDirectory + "b.mp3" },
-  c: { web: "", file: FileSystem.documentDirectory + "c.mp3" },
+  b: {
+    web: "fail",
+    file: FileSystem.documentDirectory + "b.mp3",
+    cache: FileSystem.cacheDirectory + "b.mp3",
+    md5: "????",
+  },
+  c: {
+    web: "",
+    file: FileSystem.documentDirectory + "c.mp3",
+    cache: FileSystem.cacheDirectory + "c.mp3",
+    md5: "????",
+  },
   d: {
     web:
       "https://citysoundstudio.de/n/index.php/s/WggwKH5eGSxzZbk/download?path=%2FYoga%20Insights%20Vol.1&files=Yoga%20Insights%20Volume%201-Teil%202-Regeneratives%20entlastendes%20Abendprogramm.mp3",
     file: "d.mp3",
+    cache: FileSystem.cacheDirectory + "d.mp3",
+    md5: "????",
   },
 }
 
@@ -70,11 +85,11 @@ export const PlayerScreen = observer(() => {
 
   useEffect(() => {
     determineDownloadStatus()
-  }, [trackId])
+  }, [])
 
   useEffect(() => {
     createAndLoadAndPlay()
-  }, [trackId])
+  }, [])
 
   useEffect(() => {
     return sound
@@ -89,14 +104,13 @@ export const PlayerScreen = observer(() => {
     return resumableDownload
       ? () => {
           resumableDownload._removeSubscription()
-          // TODO If the resumable download did not finish, the file should be
-          // deleted. To do so, download the file into `FileSystem.cacheDirectory`
-          // first and only `moveFileAsync` to `documentDirectory` once it is
-          // downloaded. Always delete the cache file here!
-          // FileSystem.deleteAsync(uris[trackId].file, { idempotent: true })
         }
       : undefined
   }, [resumableDownload])
+
+  useEffect(() => {
+    return () => FileSystem.deleteAsync(uris[trackId].cache, { idempotent: true })
+  }, [])
 
   const onStartEditSlider = () => {
     setEditingSlider(true)
@@ -104,22 +118,20 @@ export const PlayerScreen = observer(() => {
   const onEndEditSlider = () => {
     setEditingSlider(false)
   }
-  const onEditingSlider = async (seconds) => {
+  const onEditingSlider = async (milliseconds: number) => {
     try {
-      const milliseconds = seconds * 1000
-      if (playbackStatus.isLoaded) {
-        if (milliseconds <= playbackStatus.playableDurationMillis) {
+      if (playbackStatus?.isLoaded) {
+        if (milliseconds <= playbackStatus.durationMillis) {
           await sound?.setPositionAsync(milliseconds)
         }
       }
     } catch (error) {
-      console.error(`Failed to slide to ${seconds} seconds.`, error)
+      console.error(`Failed to slide to ${milliseconds} seconds.`, error)
     }
   }
 
   const determineDownloadStatus = async () => {
     try {
-      // TODO `exists` is also true when the download was paused and not resumed.
       const { exists } = await FileSystem.getInfoAsync(uris[trackId].file)
       setDownloadStatus(exists ? DownloadStatus.Downloaded : DownloadStatus.NotDownloaded)
     } catch (error) {
@@ -167,7 +179,9 @@ export const PlayerScreen = observer(() => {
   const jumpPrev30Seconds = () => jumpSeconds(-30)
   const jumpNext30Seconds = () => jumpSeconds(30)
   const jumpSeconds = async (seconds: number) => {
+    // TODO My playback more or less jumps forth 1 minute and on the second press back 30 seconds. Why?
     try {
+      const playbackStatus = await sound.getStatusAsync()
       if (playbackStatus?.isLoaded) {
         const milliseconds = seconds * 1000
         let nextMilliseconds = playbackStatus.positionMillis + milliseconds
@@ -176,6 +190,7 @@ export const PlayerScreen = observer(() => {
         } else if (nextMilliseconds > playbackStatus.durationMillis) {
           nextMilliseconds = playbackStatus.durationMillis
         }
+        console.log(nextMilliseconds)
         await sound?.setPositionAsync(nextMilliseconds)
       }
     } catch (error) {
@@ -196,9 +211,13 @@ export const PlayerScreen = observer(() => {
     try {
       switch (downloadStatus) {
         case DownloadStatus.Unknown: {
+          console.error(
+            `Switched download status of track ${trackId} in unknown state --- impossible!`,
+          )
           break
         }
         case DownloadStatus.Downloaded: {
+          await switchSource(uris[trackId].web)
           await FileSystem.deleteAsync(uris[trackId].file)
           setDownloadProgress(0)
           setDownloadStatus(DownloadStatus.NotDownloaded)
@@ -210,32 +229,61 @@ export const PlayerScreen = observer(() => {
           break
         }
         case DownloadStatus.Paused: {
-          setDownloadStatus(DownloadStatus.Downloading)
-          const { md5, status } = await resumableDownload.resumeAsync()
-          // TODO Check `md5` checksum and HTTP status code
-          setDownloadStatus(DownloadStatus.Downloaded)
-          setResumableDownload(undefined)
+          await handleDownload(() => resumableDownload.resumeAsync())
           break
         }
         case DownloadStatus.NotDownloaded: {
-          const newResumableDownload = FileSystem.createDownloadResumable(
-            uris[trackId].web,
-            uris[trackId].file,
-            { md5: true },
-            onResumableDownloadProgressUpdate,
-          )
-          setDownloadStatus(DownloadStatus.Downloading)
-          setResumableDownload(newResumableDownload)
-          const { md5, status } = await newResumableDownload.downloadAsync()
-          // TODO Check `md5` checksum and HTTP status code
-          setDownloadStatus(DownloadStatus.Downloaded)
-          setResumableDownload(undefined)
+          await handleDownload(() => {
+            const newResumableDownload = FileSystem.createDownloadResumable(
+              uris[trackId].web,
+              uris[trackId].cache,
+              { md5: true },
+              onResumableDownloadProgressUpdate,
+            )
+            setResumableDownload(newResumableDownload)
+            return newResumableDownload.downloadAsync()
+          })
           break
         }
       }
     } catch (error) {
       console.error("Switching download status of audio failed.", error)
     }
+  }
+
+  const handleDownload = async (download: () => Promise<FileSystemDownloadResult>) => {
+    setDownloadStatus(DownloadStatus.Downloading)
+    const { uri, md5, status } = await download()
+    if (status !== 200) {
+      console.warn(`Downloading track ${trackId} responded with HTTP status code ${status}.`)
+    }
+    if (md5 !== uris[trackId].md5) {
+      // TODO Delete downloaded file?
+      console.error(
+        `Downloaded track ${trackId} has wrong md5 hash value ${md5}, expected ${uris[trackId].md5}`,
+      )
+    }
+    await FileSystem.moveAsync({ from: uri, to: uris[trackId].file })
+    setDownloadStatus(DownloadStatus.Downloaded)
+    setResumableDownload(undefined)
+    switchSource(uris[trackId].file)
+  }
+
+  const switchSource = async (uri: string) => {
+    const currentPlaybackStatus = await sound.getStatusAsync()
+    const shouldPlay = currentPlaybackStatus?.isLoaded && currentPlaybackStatus.isPlaying
+    const positionMillis = currentPlaybackStatus?.isLoaded
+      ? currentPlaybackStatus.positionMillis
+      : 0
+    await sound.unloadAsync()
+    await sound.loadAsync(
+      { uri: uri },
+      {
+        shouldPlay: shouldPlay,
+        positionMillis: positionMillis,
+      },
+      true,
+    )
   }
 
   return (
@@ -311,10 +359,8 @@ export const PlayerScreen = observer(() => {
             // onTouchEndCapture={() => console.log('onTouchEndCapture')}
             // onTouchCancel={() => console.log('onTouchCancel')}
             onValueChange={onEditingSlider}
-            value={playbackStatus?.isLoaded ? Math.round(playbackStatus.positionMillis / 1000) : 0}
-            maximumValue={
-              playbackStatus?.isLoaded ? Math.round(playbackStatus.durationMillis / 1000) : 0
-            }
+            value={playbackStatus?.isLoaded ? playbackStatus.positionMillis : 0}
+            maximumValue={playbackStatus?.isLoaded ? playbackStatus.durationMillis : 0}
             maximumTrackTintColor="gray"
             minimumTrackTintColor="white"
             thumbTintColor="white"
