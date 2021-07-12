@@ -179,7 +179,6 @@ export const PlayerScreen = observer(() => {
   const jumpPrev30Seconds = () => jumpSeconds(-30)
   const jumpNext30Seconds = () => jumpSeconds(30)
   const jumpSeconds = async (seconds: number) => {
-    // TODO My playback more or less jumps forth 1 minute and on the second press back 30 seconds. Why?
     try {
       const playbackStatus = await sound.getStatusAsync()
       if (playbackStatus?.isLoaded) {
@@ -190,7 +189,6 @@ export const PlayerScreen = observer(() => {
         } else if (nextMilliseconds > playbackStatus.durationMillis) {
           nextMilliseconds = playbackStatus.durationMillis
         }
-        console.log(nextMilliseconds)
         await sound?.setPositionAsync(nextMilliseconds)
       }
     } catch (error) {
@@ -201,9 +199,9 @@ export const PlayerScreen = observer(() => {
   const padZero = (x: number) => (x < 10 ? "0" + x.toString() : x.toString())
 
   const conertToAudioTimeString = (milliseconds: number) => {
-    const hours = Math.round(milliseconds / (1000 * 60 * 60))
-    const minutes = Math.round((milliseconds / (1000 * 60)) % 60)
-    const seconds = Math.round((milliseconds / 1000) % 60)
+    const hours = Math.floor(milliseconds / (1000 * 60 * 60))
+    const minutes = Math.floor((milliseconds / (1000 * 60)) % 60)
+    const seconds = Math.floor((milliseconds / 1000) % 60)
     return `${padZero(hours)}:${padZero(minutes)}:${padZero(seconds)}`
   }
 
