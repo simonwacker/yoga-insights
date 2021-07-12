@@ -350,7 +350,7 @@ export const PlayerScreen = observer(() => {
         </View>
         <View style={{ marginVertical: 15, marginHorizontal: 15, flexDirection: "row" }}>
           <Text style={{ color: "white", alignSelf: "center" }}>
-            {playbackStatus?.isLoaded ? conertToAudioTimeString(playbackStatus.positionMillis) : ""}
+            {conertToAudioTimeString(playbackStatus?.isLoaded ? playbackStatus.positionMillis : 0)}
           </Text>
           <Slider
             onTouchStart={onStartEditSlider}
@@ -367,7 +367,7 @@ export const PlayerScreen = observer(() => {
             style={{ flex: 1, alignSelf: "center", marginHorizontal: 10 }}
           />
           <Text style={{ color: "white", alignSelf: "center" }}>
-            {playbackStatus?.isLoaded ? conertToAudioTimeString(playbackStatus.durationMillis) : ""}
+            {conertToAudioTimeString(playbackStatus?.isLoaded ? playbackStatus.durationMillis : 0)}
           </Text>
         </View>
       </View>
