@@ -180,7 +180,6 @@ export const PlayerScreen = observer(() => {
   const jumpNext30Seconds = () => jumpSeconds(30)
   const jumpSeconds = async (seconds: number) => {
     try {
-      const playbackStatus = await sound.getStatusAsync()
       if (playbackStatus?.isLoaded) {
         const milliseconds = seconds * 1000
         let nextMilliseconds = playbackStatus.positionMillis + milliseconds
