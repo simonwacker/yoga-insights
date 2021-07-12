@@ -2,8 +2,8 @@
 
 import React, { useEffect, useState } from "react"
 import { observer } from "mobx-react-lite"
-import { Switch, Pressable, View, ViewStyle } from "react-native"
-import { Screen, Text } from "../../components"
+import { Pressable, View, ViewStyle } from "react-native"
+import { Screen, Text, DownloadSwitch } from "../../components"
 import { useRoute } from "@react-navigation/native"
 // import { useStores } from "../../models"
 import { color } from "../../theme"
@@ -13,7 +13,6 @@ import { PlayerScreenRouteProp } from "../../navigators"
 // import { AutoImage } from "../../components"
 import { AntDesign } from "@expo/vector-icons"
 import { FileSystem } from "react-native-unimodules"
-import { DownloadResumable, FileSystemDownloadResult } from "expo-file-system"
 
 const ROOT: ViewStyle = {
   backgroundColor: color.palette.black,
@@ -50,14 +49,6 @@ const uris: { [key: string]: { web: string; file: string; cache: string; md5: st
   },
 }
 
-enum DownloadStatus {
-  Unknown = "UNKNOWN",
-  NotDownloaded = "NOT_DOWNLOADED",
-  Downloading = "DOWNLOADING",
-  Paused = "PAUSED",
-  Downloaded = "DOWNLOADED",
-}
-
 export const PlayerScreen = observer(() => {
   // Pull in one of our MST stores
   // const { someStore, anotherStore } = useStores()
@@ -70,21 +61,10 @@ export const PlayerScreen = observer(() => {
 
   const [sound, setSound] = useState<Audio.Sound | undefined>()
   const [playbackStatus, setPlaybackStatus] = useState<AVPlaybackStatus | undefined>()
-  const [downloadStatus, setDownloadStatus] = useState(DownloadStatus.Unknown)
-  const [resumableDownload, setResumableDownload] = useState<DownloadResumable | undefined>()
-  const [downloadProgress, setDownloadProgress] = useState(0)
 
   const onPlaybackStatusUpdate = (newPlaybackStatus: AVPlaybackStatus) => {
     setPlaybackStatus(newPlaybackStatus)
   }
-
-  const onResumableDownloadProgressUpdate = ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
-    setDownloadProgress(totalBytesWritten / totalBytesExpectedToWrite)
-  }
-
-  useEffect(() => {
-    determineDownloadStatus()
-  }, [])
 
   useEffect(() => {
     createAndLoadAndPlay()
@@ -98,27 +78,6 @@ export const PlayerScreen = observer(() => {
         }
       : undefined
   }, [sound])
-
-  useEffect(() => {
-    return resumableDownload
-      ? () => {
-          resumableDownload._removeSubscription()
-        }
-      : undefined
-  }, [resumableDownload])
-
-  useEffect(() => {
-    return () => FileSystem.deleteAsync(uris[trackId].cache, { idempotent: true })
-  }, [])
-
-  const determineDownloadStatus = async () => {
-    try {
-      const { exists } = await FileSystem.getInfoAsync(uris[trackId].file)
-      setDownloadStatus(exists ? DownloadStatus.Downloaded : DownloadStatus.NotDownloaded)
-    } catch (error) {
-      console.log("Failed to determine download status.", error)
-    }
-  }
 
   const createAndLoadAndPlay = async () => {
     try {
@@ -185,68 +144,6 @@ export const PlayerScreen = observer(() => {
     return `${padZero(hours)}:${padZero(minutes)}:${padZero(seconds)}`
   }
 
-  const switchDownloadStatus = async () => {
-    try {
-      switch (downloadStatus) {
-        case DownloadStatus.Unknown: {
-          console.error(
-            `Switched download status of track ${trackId} in unknown state --- impossible!`,
-          )
-          break
-        }
-        case DownloadStatus.Downloaded: {
-          await switchSource(uris[trackId].web)
-          await FileSystem.deleteAsync(uris[trackId].file)
-          setDownloadProgress(0)
-          setDownloadStatus(DownloadStatus.NotDownloaded)
-          break
-        }
-        case DownloadStatus.Downloading: {
-          await resumableDownload.pauseAsync()
-          setDownloadStatus(DownloadStatus.Paused)
-          break
-        }
-        case DownloadStatus.Paused: {
-          await handleDownload(() => resumableDownload.resumeAsync())
-          break
-        }
-        case DownloadStatus.NotDownloaded: {
-          await handleDownload(() => {
-            const newResumableDownload = FileSystem.createDownloadResumable(
-              uris[trackId].web,
-              uris[trackId].cache,
-              { md5: true },
-              onResumableDownloadProgressUpdate,
-            )
-            setResumableDownload(newResumableDownload)
-            return newResumableDownload.downloadAsync()
-          })
-          break
-        }
-      }
-    } catch (error) {
-      console.error("Switching download status of audio failed.", error)
-    }
-  }
-
-  const handleDownload = async (download: () => Promise<FileSystemDownloadResult>) => {
-    setDownloadStatus(DownloadStatus.Downloading)
-    const { uri, md5, status } = await download()
-    if (status !== 200) {
-      console.warn(`Downloading track ${trackId} responded with HTTP status code ${status}.`)
-    }
-    if (md5 !== uris[trackId].md5) {
-      // TODO Delete downloaded file?
-      console.error(
-        `Downloaded track ${trackId} has wrong md5 hash value ${md5}, expected ${uris[trackId].md5}`,
-      )
-    }
-    await FileSystem.moveAsync({ from: uri, to: uris[trackId].file })
-    setDownloadStatus(DownloadStatus.Downloaded)
-    setResumableDownload(undefined)
-    switchSource(uris[trackId].file)
-  }
-
   const switchSource = async (uri: string) => {
     const oldPlaybackStatus = playbackStatus
     await sound.unloadAsync()
@@ -300,27 +197,15 @@ export const PlayerScreen = observer(() => {
           </Pressable>
         </View>
         <View style={{ marginVertical: 15, marginHorizontal: 15, flexDirection: "row" }}>
-          <Switch
-            trackColor={{ false: "#767577", true: "#81b0ff" }}
-            thumbColor={
-              downloadStatus === DownloadStatus.Downloading ||
-              downloadStatus === DownloadStatus.Downloaded
-                ? "#f5dd4b"
-                : "#f4f3f4"
-            }
-            ios_backgroundColor="#3e3e3e"
-            disabled={downloadStatus === DownloadStatus.Unknown}
-            value={
-              downloadStatus === DownloadStatus.Downloading ||
-              downloadStatus === DownloadStatus.Downloaded
-            }
-            onValueChange={switchDownloadStatus}
+          <DownloadSwitch
+            trackId={trackId}
+            webUri={uris[trackId].web}
+            fileUri={uris[trackId].file}
+            cacheUri={uris[trackId].cache}
+            md5HashValue={uris[trackId].md5}
+            onDownloadComplete={switchSource}
+            onDownloadDeleted={switchSource}
           />
-          {downloadStatus === DownloadStatus.Downloading && (
-            <Text style={{ color: "white", fontSize: 12 }}>
-              {Math.round(downloadProgress * 100)} %
-            </Text>
-          )}
         </View>
         <View style={{ marginVertical: 15, marginHorizontal: 15, flexDirection: "row" }}>
           <Text style={{ color: "white", alignSelf: "center" }}>
