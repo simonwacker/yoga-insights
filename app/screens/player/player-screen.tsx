@@ -70,7 +70,6 @@ export const PlayerScreen = observer(() => {
 
   const [sound, setSound] = useState<Audio.Sound | undefined>()
   const [playbackStatus, setPlaybackStatus] = useState<AVPlaybackStatus | undefined>()
-  const [editingSlider, setEditingSlider] = useState(false)
   const [downloadStatus, setDownloadStatus] = useState(DownloadStatus.Unknown)
   const [resumableDownload, setResumableDownload] = useState<DownloadResumable | undefined>()
   const [downloadProgress, setDownloadProgress] = useState(0)
@@ -111,24 +110,6 @@ export const PlayerScreen = observer(() => {
   useEffect(() => {
     return () => FileSystem.deleteAsync(uris[trackId].cache, { idempotent: true })
   }, [])
-
-  const onStartEditSlider = () => {
-    setEditingSlider(true)
-  }
-  const onEndEditSlider = () => {
-    setEditingSlider(false)
-  }
-  const onEditingSlider = async (milliseconds: number) => {
-    try {
-      if (playbackStatus?.isLoaded) {
-        if (milliseconds <= playbackStatus.durationMillis) {
-          await sound?.setPositionAsync(milliseconds)
-        }
-      }
-    } catch (error) {
-      console.error(`Failed to slide to ${milliseconds} seconds.`, error)
-    }
-  }
 
   const determineDownloadStatus = async () => {
     try {
@@ -346,12 +327,7 @@ export const PlayerScreen = observer(() => {
             {conertToAudioTimeString(playbackStatus?.isLoaded ? playbackStatus.positionMillis : 0)}
           </Text>
           <Slider
-            onTouchStart={onStartEditSlider}
-            // onTouchMove={() => console.log('onTouchMove')}
-            onTouchEnd={onEndEditSlider}
-            // onTouchEndCapture={() => console.log('onTouchEndCapture')}
-            // onTouchCancel={() => console.log('onTouchCancel')}
-            onValueChange={onEditingSlider}
+            disabled
             value={playbackStatus?.isLoaded ? playbackStatus.positionMillis : 0}
             maximumValue={playbackStatus?.isLoaded ? playbackStatus.durationMillis : 0}
             maximumTrackTintColor="gray"
