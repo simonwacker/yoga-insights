@@ -168,7 +168,7 @@ export const PlayerScreen = observer(() => {
 
   const pause = async () => {
     try {
-      if (playbackStatus?.isLoaded && playbackStatus.isPlaying) {
+      if (playbackStatus?.isLoaded && playbackStatus.shouldPlay) {
         await sound?.pauseAsync()
       }
     } catch (error) {
@@ -267,17 +267,13 @@ export const PlayerScreen = observer(() => {
   }
 
   const switchSource = async (uri: string) => {
-    const currentPlaybackStatus = await sound.getStatusAsync()
-    const shouldPlay = currentPlaybackStatus?.isLoaded && currentPlaybackStatus.isPlaying
-    const positionMillis = currentPlaybackStatus?.isLoaded
-      ? currentPlaybackStatus.positionMillis
-      : 0
+    const oldPlaybackStatus = playbackStatus
     await sound.unloadAsync()
     await sound.loadAsync(
       { uri: uri },
       {
-        shouldPlay: shouldPlay,
-        positionMillis: positionMillis,
+        shouldPlay: !oldPlaybackStatus?.isLoaded || oldPlaybackStatus.shouldPlay,
+        positionMillis: oldPlaybackStatus?.isLoaded ? oldPlaybackStatus.positionMillis : 0,
       },
       true,
     )
@@ -304,13 +300,13 @@ export const PlayerScreen = observer(() => {
           {!playbackStatus?.isLoaded && (
             <AntDesign name="loading1" size={30} color="white" style={{ marginHorizontal: 20 }} />
           )}
-          {playbackStatus?.isLoaded && !playbackStatus.isPlaying && (
+          {playbackStatus?.isLoaded && !playbackStatus.shouldPlay && (
             <Pressable onPress={play} style={{ marginHorizontal: 20 }}>
               <AntDesign name="playcircleo" size={30} color="white" />
               {/* <AutoImage source={img_play} style={{ width: 30, height: 30 }} /> */}
             </Pressable>
           )}
-          {playbackStatus?.isLoaded && playbackStatus.isPlaying && (
+          {playbackStatus?.isLoaded && playbackStatus.shouldPlay && (
             <Pressable onPress={pause} style={{ marginHorizontal: 20 }}>
               <AntDesign name="pausecircleo" size={30} color="white" />
               {/* <AutoImage source={img_pause} style={{ width: 30, height: 30 }} /> */}
