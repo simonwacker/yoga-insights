@@ -95,7 +95,8 @@ RUN \
     --global \
     npm@latest \
     expo-cli@latest \
-    ignite-cli@latest
+    ignite-cli@latest \
+    sharp-cli@latest
 
 # Make local node executables known to shell.
 ENV PATH=/app/node_modules/.bin:${PATH}
