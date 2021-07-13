@@ -15,16 +15,16 @@ enum DownloadStatus {
 
 export function DownloadSwitch({
   trackId,
-  webUri,
-  fileUri,
-  cacheUri,
-  md5HashValue,
+  sourceWebUri,
+  targetFileUri,
+  md5FileHashValue,
   onDownloadComplete,
-  onDownloadDeleted,
+  onDownloadJustAboutToBeDeleted,
 }: DownloadSwitchProps) {
   const [downloadProgress, setDownloadProgress] = useState(0)
   const [downloadStatus, setDownloadStatus] = useState(DownloadStatus.Unknown)
   const [resumableDownload, setResumableDownload] = useState<DownloadResumable | undefined>()
+  const temporaryFileUri = FileSystem.cacheDirectory + trackId
 
   const onResumableDownloadProgressUpdate = ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
     setDownloadProgress(totalBytesWritten / totalBytesExpectedToWrite)
@@ -43,12 +43,12 @@ export function DownloadSwitch({
   }, [resumableDownload])
 
   useEffect(() => {
-    return () => FileSystem.deleteAsync(cacheUri, { idempotent: true })
+    return () => FileSystem.deleteAsync(temporaryFileUri, { idempotent: true })
   }, [])
 
   const determineDownloadStatus = async () => {
     try {
-      const { exists } = await FileSystem.getInfoAsync(fileUri)
+      const { exists } = await FileSystem.getInfoAsync(targetFileUri)
       setDownloadStatus(exists ? DownloadStatus.Downloaded : DownloadStatus.NotDownloaded)
     } catch (error) {
       console.log("Failed to determine download status.", error)
@@ -65,8 +65,8 @@ export function DownloadSwitch({
           break
         }
         case DownloadStatus.Downloaded: {
-          await onDownloadDeleted(webUri)
-          await FileSystem.deleteAsync(fileUri)
+          await onDownloadJustAboutToBeDeleted(sourceWebUri)
+          await FileSystem.deleteAsync(targetFileUri)
           setDownloadProgress(0)
           setDownloadStatus(DownloadStatus.NotDownloaded)
           break
@@ -83,8 +83,8 @@ export function DownloadSwitch({
         case DownloadStatus.NotDownloaded: {
           await handleDownload(() => {
             const newResumableDownload = FileSystem.createDownloadResumable(
-              webUri,
-              cacheUri,
+              sourceWebUri,
+              temporaryFileUri,
               { md5: true },
               onResumableDownloadProgressUpdate,
             )
@@ -105,16 +105,16 @@ export function DownloadSwitch({
     if (status !== 200) {
       console.warn(`Downloading track ${trackId} responded with HTTP status code ${status}.`)
     }
-    if (md5 !== md5HashValue) {
+    if (md5 !== md5FileHashValue) {
       // TODO Delete downloaded file?
       console.error(
-        `Downloaded track ${trackId} has wrong md5 hash value ${md5}, expected ${md5HashValue}`,
+        `Downloaded track ${trackId} has wrong md5 hash value ${md5}, expected ${md5FileHashValue}`,
       )
     }
-    await FileSystem.moveAsync({ from: uri, to: fileUri })
+    await FileSystem.moveAsync({ from: uri, to: targetFileUri })
     setDownloadStatus(DownloadStatus.Downloaded)
     setResumableDownload(undefined)
-    await onDownloadComplete(fileUri)
+    await onDownloadComplete(targetFileUri)
   }
 
   return (

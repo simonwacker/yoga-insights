@@ -20,31 +20,27 @@ const ROOT: ViewStyle = {
 }
 
 // TODO Name and model this in a better way. How?
-const uris: { [key: string]: { web: string; file: string; cache: string; md5: string } } = {
+const uris: { [key: string]: { web: string; file: string; md5: string } } = {
   a: {
     web:
       "https://citysoundstudio.de/n/index.php/s/WggwKH5eGSxzZbk/download?path=%2FYoga%20Insights%20Vol.1&files=Yoga%20Insights%20Volume%201-Teil%201-Grundlegende%20Einf%C3%BChrung.mp3",
     file: FileSystem.documentDirectory + "a.mp3",
-    cache: FileSystem.cacheDirectory + "a.mp3",
     md5: "????",
   },
   b: {
     web: "fail",
     file: FileSystem.documentDirectory + "b.mp3",
-    cache: FileSystem.cacheDirectory + "b.mp3",
     md5: "????",
   },
   c: {
     web: "",
     file: FileSystem.documentDirectory + "c.mp3",
-    cache: FileSystem.cacheDirectory + "c.mp3",
     md5: "????",
   },
   d: {
     web:
       "https://citysoundstudio.de/n/index.php/s/WggwKH5eGSxzZbk/download?path=%2FYoga%20Insights%20Vol.1&files=Yoga%20Insights%20Volume%201-Teil%202-Regeneratives%20entlastendes%20Abendprogramm.mp3",
     file: "d.mp3",
-    cache: FileSystem.cacheDirectory + "d.mp3",
     md5: "????",
   },
 }
@@ -199,12 +195,11 @@ export const PlayerScreen = observer(() => {
         <View style={{ marginVertical: 15, marginHorizontal: 15, flexDirection: "row" }}>
           <DownloadSwitch
             trackId={trackId}
-            webUri={uris[trackId].web}
-            fileUri={uris[trackId].file}
-            cacheUri={uris[trackId].cache}
-            md5HashValue={uris[trackId].md5}
+            sourceWebUri={uris[trackId].web}
+            targetFileUri={uris[trackId].file}
+            md5FileHashValue={uris[trackId].md5}
             onDownloadComplete={switchSource}
-            onDownloadDeleted={switchSource}
+            onDownloadJustAboutToBeDeleted={switchSource}
           />
         </View>
         <View style={{ marginVertical: 15, marginHorizontal: 15, flexDirection: "row" }}>
