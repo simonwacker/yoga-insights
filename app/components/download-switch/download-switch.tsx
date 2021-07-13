@@ -117,9 +117,41 @@ export function DownloadSwitch({
     await onDownloadComplete(targetFileUri)
   }
 
+  const getSwitchAccessibilityLabelState = () => {
+    switch (downloadStatus) {
+      case DownloadStatus.Unknown:
+        return "unbekannter Herunterladzustand"
+      case DownloadStatus.NotDownloaded:
+      case DownloadStatus.Paused:
+        return "nicht heruntergeladen"
+      case DownloadStatus.Downloading:
+        return "beim Herunterladen"
+      case DownloadStatus.Downloaded:
+        return "heruntergeladen"
+    }
+  }
+
+  const getSwitchAccessibilityHintAction = () => {
+    switch (downloadStatus) {
+      case DownloadStatus.Unknown:
+        return ""
+      case DownloadStatus.NotDownloaded:
+      case DownloadStatus.Paused:
+        return "herunterladen"
+      case DownloadStatus.Downloading:
+        return "abbrechen"
+      case DownloadStatus.Downloaded:
+        return "löschen"
+    }
+  }
+
   return (
     <View style={{ marginVertical: 15, marginHorizontal: 15, flexDirection: "row" }}>
       <Switch
+        accessible={true}
+        accessibilityLabel={`Zustand: ${getSwitchAccessibilityLabelState()}`}
+        accessibilityHint={`Aktion: ${getSwitchAccessibilityHintAction()}`}
+        accessibilityRole="switch"
         trackColor={{ false: "#767577", true: "#81b0ff" }}
         thumbColor={
           downloadStatus === DownloadStatus.Downloading ||

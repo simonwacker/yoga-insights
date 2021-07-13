@@ -140,6 +140,13 @@ export const PlayerScreen = observer(() => {
     return `${padZero(hours)}:${padZero(minutes)}:${padZero(seconds)}`
   }
 
+  const conertToAudioTimePhrase = (milliseconds: number) => {
+    const hours = Math.floor(milliseconds / (1000 * 60 * 60))
+    const minutes = Math.floor((milliseconds / (1000 * 60)) % 60)
+    const seconds = Math.floor((milliseconds / 1000) % 60)
+    return `${hours} Stunden, ${minutes} Minuten und ${seconds} Sekunden`
+  }
+
   const switchSource = async (uri: string) => {
     const oldPlaybackStatus = playbackStatus
     await sound.unloadAsync()
@@ -166,27 +173,59 @@ export const PlayerScreen = observer(() => {
           </>
         )}
         <View style={{ flexDirection: "row", justifyContent: "center", marginVertical: 15 }}>
-          <Pressable onPress={jumpPrev30Seconds} style={{ justifyContent: "center" }}>
+          <Pressable
+            accessible={true}
+            accessibilityLabel="30 Sekunden zurückspulen"
+            accessibilityRole="button"
+            onPress={jumpPrev30Seconds}
+            style={{ justifyContent: "center" }}
+          >
             <AntDesign name="left" size={30} color="white" />
             {/* <AutoImage source={img_playjumpleft} style={{ width: 30, height: 30 }} /> */}
             <Text style={{ color: "white", fontSize: 12 }}>30</Text>
           </Pressable>
           {!playbackStatus?.isLoaded && (
-            <AntDesign name="loading1" size={30} color="white" style={{ marginHorizontal: 20 }} />
+            <AntDesign
+              accessible={true}
+              accessibilityLabel="wird geladen"
+              accessibilityRole="text"
+              name="loading1"
+              size={30}
+              color="white"
+              style={{ marginHorizontal: 20 }}
+            />
           )}
           {playbackStatus?.isLoaded && !playbackStatus.shouldPlay && (
-            <Pressable onPress={play} style={{ marginHorizontal: 20 }}>
+            <Pressable
+              accessible={true}
+              accessibilityLabel="abspielen"
+              accessibilityRole="button"
+              onPress={play}
+              style={{ marginHorizontal: 20 }}
+            >
               <AntDesign name="playcircleo" size={30} color="white" />
               {/* <AutoImage source={img_play} style={{ width: 30, height: 30 }} /> */}
             </Pressable>
           )}
           {playbackStatus?.isLoaded && playbackStatus.shouldPlay && (
-            <Pressable onPress={pause} style={{ marginHorizontal: 20 }}>
+            <Pressable
+              accessible={true}
+              accessibilityLabel="pausieren"
+              accessibilityRole="button"
+              onPress={pause}
+              style={{ marginHorizontal: 20 }}
+            >
               <AntDesign name="pausecircleo" size={30} color="white" />
               {/* <AutoImage source={img_pause} style={{ width: 30, height: 30 }} /> */}
             </Pressable>
           )}
-          <Pressable onPress={jumpNext30Seconds} style={{ justifyContent: "center" }}>
+          <Pressable
+            accessible={true}
+            accessibilityLabel="30 Sekunden vorspulen"
+            accessibilityRole="button"
+            onPress={jumpNext30Seconds}
+            style={{ justifyContent: "center" }}
+          >
             {/* <AutoImage source={img_playjumpright} style={{ width: 30, height: 30 }} /> */}
             <AntDesign name="right" size={30} color="white" />
             <Text style={{ color: "white", fontSize: 12 }}>30</Text>
@@ -203,11 +242,31 @@ export const PlayerScreen = observer(() => {
           />
         </View>
         <View style={{ marginVertical: 15, marginHorizontal: 15, flexDirection: "row" }}>
-          <Text style={{ color: "white", alignSelf: "center" }}>
+          <Text
+            accessible={true}
+            accessibilityLabel={conertToAudioTimePhrase(
+              playbackStatus?.isLoaded ? playbackStatus.positionMillis : 0,
+            )}
+            accessibilityHint="Spielzeit"
+            accessibilityRole="text"
+            style={{ color: "white", alignSelf: "center" }}
+          >
             {conertToAudioTimeString(playbackStatus?.isLoaded ? playbackStatus.positionMillis : 0)}
           </Text>
           <Slider
             disabled
+            accessible={true}
+            accessibilityLabel={`
+              ${
+                playbackStatus?.isLoaded
+                  ? Math.round(
+                      (playbackStatus.positionMillis / playbackStatus.durationMillis) * 100,
+                    )
+                  : 0
+              }%
+            `}
+            accessibilityHint="prozentuale Spielzeit"
+            accessibilityRole="progressbar"
             value={playbackStatus?.isLoaded ? playbackStatus.positionMillis : 0}
             maximumValue={playbackStatus?.isLoaded ? playbackStatus.durationMillis : 0}
             maximumTrackTintColor="gray"
@@ -215,7 +274,15 @@ export const PlayerScreen = observer(() => {
             thumbTintColor="white"
             style={{ flex: 1, alignSelf: "center", marginHorizontal: 10 }}
           />
-          <Text style={{ color: "white", alignSelf: "center" }}>
+          <Text
+            accessible={true}
+            accessibilityLabel={conertToAudioTimePhrase(
+              playbackStatus?.isLoaded ? playbackStatus.durationMillis : 0,
+            )}
+            accessibilityHint="Spieldauer"
+            accessibilityRole="text"
+            style={{ color: "white", alignSelf: "center" }}
+          >
             {conertToAudioTimeString(playbackStatus?.isLoaded ? playbackStatus.durationMillis : 0)}
           </Text>
         </View>
