@@ -168,7 +168,15 @@ export function DownloadSwitch({
         onValueChange={switchDownloadStatus}
       />
       {downloadStatus === DownloadStatus.Downloading && (
-        <Text style={{ color: "white", fontSize: 12 }}>{Math.round(downloadProgress * 100)} %</Text>
+        <Text
+          accessible={true}
+          accessibilityLabel={`${Math.round(downloadProgress * 100)}%`}
+          accessibilityHint="prozentualer Herunterladefortschritt"
+          accessibilityRole="text"
+          style={{ color: "white", fontSize: 12 }}
+        >
+          {Math.round(downloadProgress * 100)}%
+        </Text>
       )}
     </View>
   )
