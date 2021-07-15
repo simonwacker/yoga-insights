@@ -53,6 +53,10 @@ export const PlayerScreen = observer(() => {
 
   const createAndLoadAndPlay = async () => {
     try {
+      // Make sure audio is played if iOS is in silent mode, defaults to `false`.
+      // NOTE: This sets the property globally which means _all_ future audio
+      // playbacks will be affected.
+      await Audio.setAudioModeAsync({ playsInSilentModeIOS: true })
       const { exists } = await FileSystem.getInfoAsync(fileUri)
       const uri = exists ? fileUri : webUri
       const { sound: newSound, status: newPlaybackStatus } = await Audio.Sound.createAsync(
