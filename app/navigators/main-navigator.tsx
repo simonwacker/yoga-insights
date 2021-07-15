@@ -19,7 +19,14 @@ import { RouteProp } from "@react-navigation/native"
 
 export type MainParamList = {
   tabs: undefined
-  player: { trackId: string }
+  // TODO Restrict extension and URL type!
+  player: {
+    trackId: string
+    name: string
+    fileExtension: string
+    md5FileHashValue: string
+    webUri: string
+  }
 }
 
 export type PlayerScreenRouteProp = RouteProp<MainParamList, "player">

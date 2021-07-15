@@ -19,32 +19,6 @@ const ROOT: ViewStyle = {
   flex: 1,
 }
 
-// TODO Name and model this in a better way. How?
-const uris: { [key: string]: { web: string; file: string; md5: string } } = {
-  a: {
-    web:
-      "https://citysoundstudio.de/n/index.php/s/WggwKH5eGSxzZbk/download?path=%2FYoga%20Insights%20Vol.1&files=Yoga%20Insights%20Volume%201-Teil%201-Grundlegende%20Einf%C3%BChrung.mp3",
-    file: FileSystem.documentDirectory + "a.mp3",
-    md5: "????",
-  },
-  b: {
-    web: "fail",
-    file: FileSystem.documentDirectory + "b.mp3",
-    md5: "????",
-  },
-  c: {
-    web: "",
-    file: FileSystem.documentDirectory + "c.mp3",
-    md5: "????",
-  },
-  d: {
-    web:
-      "https://citysoundstudio.de/n/index.php/s/WggwKH5eGSxzZbk/download?path=%2FYoga%20Insights%20Vol.1&files=Yoga%20Insights%20Volume%201-Teil%202-Regeneratives%20entlastendes%20Abendprogramm.mp3",
-    file: "d.mp3",
-    md5: "????",
-  },
-}
-
 export const PlayerScreen = observer(() => {
   // Pull in one of our MST stores
   // const { someStore, anotherStore } = useStores()
@@ -53,7 +27,9 @@ export const PlayerScreen = observer(() => {
   // const navigation = useNavigation()
 
   const route = useRoute<PlayerScreenRouteProp>()
-  const { trackId } = route.params
+  const { trackId, name, fileExtension, md5FileHashValue, webUri } = route.params
+  // TODO Find a better way to come up with a file URI.
+  const fileUri = `${FileSystem.documentDirectory}${trackId}.${fileExtension}`
 
   const [sound, setSound] = useState<Audio.Sound | undefined>()
   const [playbackStatus, setPlaybackStatus] = useState<AVPlaybackStatus | undefined>()
@@ -77,8 +53,8 @@ export const PlayerScreen = observer(() => {
 
   const createAndLoadAndPlay = async () => {
     try {
-      const { exists } = await FileSystem.getInfoAsync(uris[trackId].file)
-      const uri = exists ? uris[trackId].file : uris[trackId].web
+      const { exists } = await FileSystem.getInfoAsync(fileUri)
+      const uri = exists ? fileUri : webUri
       const { sound: newSound, status: newPlaybackStatus } = await Audio.Sound.createAsync(
         { uri: uri },
         { shouldPlay: true }, // initialStatus
@@ -172,6 +148,7 @@ export const PlayerScreen = observer(() => {
             <Text>Error: {playbackStatus.error}</Text>
           </>
         )}
+        <Text>{name}</Text>
         <View style={{ flexDirection: "row", justifyContent: "center", marginVertical: 15 }}>
           <Pressable
             accessible={true}
@@ -234,9 +211,9 @@ export const PlayerScreen = observer(() => {
         <View style={{ marginVertical: 15, marginHorizontal: 15, flexDirection: "row" }}>
           <DownloadSwitch
             trackId={trackId}
-            sourceWebUri={uris[trackId].web}
-            targetFileUri={uris[trackId].file}
-            md5FileHashValue={uris[trackId].md5}
+            sourceWebUri={webUri}
+            targetFileUri={fileUri}
+            md5FileHashValue={md5FileHashValue}
             onDownloadComplete={switchSource}
             onDownloadJustAboutToBeDeleted={switchSource}
           />

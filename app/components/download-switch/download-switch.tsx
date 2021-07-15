@@ -103,12 +103,14 @@ export function DownloadSwitch({
     setDownloadStatus(DownloadStatus.Downloading)
     const { uri, md5, status } = await download()
     if (status !== 200) {
-      console.warn(`Downloading track ${trackId} responded with HTTP status code ${status}.`)
+      console.warn(
+        `Downloading track ${trackId} responded with HTTP status code ${status}, expected 200.`,
+      )
     }
     if (md5 !== md5FileHashValue) {
       // TODO Delete downloaded file?
       console.error(
-        `Downloaded track ${trackId} has wrong md5 hash value ${md5}, expected ${md5FileHashValue}`,
+        `Downloaded track ${trackId} has wrong md5 hash value ${md5}, expected ${md5FileHashValue}.`,
       )
     }
     await FileSystem.moveAsync({ from: uri, to: targetFileUri })
