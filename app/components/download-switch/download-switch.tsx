@@ -32,7 +32,7 @@ export function DownloadSwitch({
 
   useEffect(() => {
     determineDownloadStatus()
-  }, [])
+  }, [targetFileUri])
 
   useEffect(() => {
     return resumableDownload
@@ -148,7 +148,14 @@ export function DownloadSwitch({
   }
 
   return (
-    <View style={{ marginVertical: 15, marginHorizontal: 15, flexDirection: "row" }}>
+    <View
+      style={{
+        marginVertical: 15,
+        marginHorizontal: 15,
+        flexDirection: "row",
+        justifyContent: "center",
+      }}
+    >
       <Switch
         accessible={true}
         accessibilityLabel={`Zustand: ${getSwitchAccessibilityLabelState()}`}

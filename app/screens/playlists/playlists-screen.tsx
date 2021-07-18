@@ -1,25 +1,80 @@
 import React from "react"
 import { observer } from "mobx-react-lite"
-import { ViewStyle } from "react-native"
+import { FlatList, Pressable, TextStyle, View, ViewStyle } from "react-native"
 import { Screen, Text } from "../../components"
 // import { useNavigation } from "@react-navigation/native"
 // import { useStores } from "../../models"
-import { color } from "../../theme"
+import { color, spacing } from "../../theme"
+import { useNavigation } from "@react-navigation/native"
+import { PlayerScreenNavigationProp } from "../../navigators"
 
 const ROOT: ViewStyle = {
   backgroundColor: color.palette.black,
   flex: 1,
 }
+const LIST_CONTAINER: ViewStyle = {
+  alignItems: "center",
+  flexDirection: "row",
+  padding: 10,
+}
+const LIST_TEXT: TextStyle = {
+  marginLeft: 10,
+}
+const FLAT_LIST: ViewStyle = {
+  paddingHorizontal: spacing[4],
+}
+
+const playlists = [
+  {
+    id: "playlist-1",
+    name: "Fixe Playlist",
+    tracks: [
+      {
+        trackId: "volume-1-part-1",
+        name: "Volume 1 - Teil 1 - Grundlegende Einführung",
+        fileExtension: "mp3",
+        md5FileHashValue: "4154d609e7307a3cc31c9ac1e20ea9d0",
+        webUri:
+          "https://citysoundstudio.de/n/index.php/s/WggwKH5eGSxzZbk/download?path=%2FYoga%20Insights%20Vol.1&files=Yoga%20Insights%20Volume%201-Teil%201-Grundlegende%20Einf%C3%BChrung.mp3",
+      },
+      {
+        trackId: "volume-1-part-2",
+        name: "Volume 1 - Teil 2 - Regeneratives entlastendes Abendprogramm",
+        fileExtension: "mp3",
+        md5FileHashValue: "?",
+        webUri:
+          "https://citysoundstudio.de/n/index.php/s/WggwKH5eGSxzZbk/download?path=%2FYoga%20Insights%20Vol.1&files=Yoga%20Insights%20Volume%201-Teil%202-Regeneratives%20entlastendes%20Abendprogramm.mp3",
+      },
+      {
+        trackId: "volume-1-part-3",
+        name: "Volume 1 - Teil 3 - Naturklänge zum freien Üben",
+        fileExtension: "mp3",
+        md5FileHashValue: "?",
+        webUri:
+          "https://citysoundstudio.de/n/index.php/s/WggwKH5eGSxzZbk/download?path=%2FYoga%20Insights%20Vol.1&files=Yoga%20Insights%20Volume%201-Teil%203-Naturkl%C3%A4nge%20zum%20freien%20%C3%9Cben.mp3",
+      },
+    ],
+  },
+]
 
 export const PlaylistsScreen = observer(function PlaylistsScreen() {
-  // Pull in one of our MST stores
   // const { someStore, anotherStore } = useStores()
+  const navigation = useNavigation<PlayerScreenNavigationProp>()
 
-  // Pull in navigation via hook
-  // const navigation = useNavigation()
   return (
-    <Screen style={ROOT} preset="scroll">
-      <Text preset="header" text="" />
+    <Screen style={ROOT} preset="fixed">
+      <FlatList
+        contentContainerStyle={FLAT_LIST}
+        data={[...playlists]}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <Pressable onPress={() => navigation.navigate("player", item.tracks)}>
+            <View style={LIST_CONTAINER}>
+              <Text style={LIST_TEXT}>{item.name}</Text>
+            </View>
+          </Pressable>
+        )}
+      />
     </Screen>
   )
 })

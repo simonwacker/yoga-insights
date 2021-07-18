@@ -26,7 +26,7 @@ export type MainParamList = {
     fileExtension: string
     md5FileHashValue: string
     webUri: string
-  }
+  }[]
 }
 
 export type PlayerScreenRouteProp = RouteProp<MainParamList, "player">
