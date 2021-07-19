@@ -5,4 +5,12 @@ export interface AudioPlayerProps {
   md5FileHashValue: string
   webUri: string
   onPlaybackDidJustFinish: () => void
+  previousTrack?: {
+    name: string
+  }
+  onPlayPreviousTrack: () => void
+  nextTrack?: {
+    name: string
+  }
+  onPlayNextTrack: () => void
 }

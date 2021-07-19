@@ -16,6 +16,10 @@ export function AudioPlayer({
   md5FileHashValue,
   webUri,
   onPlaybackDidJustFinish,
+  previousTrack,
+  onPlayPreviousTrack,
+  nextTrack,
+  onPlayNextTrack,
 }: AudioPlayerProps) {
   // TODO Find a better way to come up with a file URI.
   const fileUri = `${FileSystem.documentDirectory}${trackId}.${fileExtension}`
@@ -159,11 +163,21 @@ export function AudioPlayer({
         }}
       >
         <Pressable
+          disabled={!previousTrack}
+          accessible={true}
+          accessibilityLabel={`Vorheriges Stück abspielen ${previousTrack?.name}`}
+          accessibilityRole="button"
+          onPress={onPlayPreviousTrack}
+          style={{ marginHorizontal: 10 }}
+        >
+          <AntDesign name="stepbackward" size={30} color="white" />
+        </Pressable>
+        <Pressable
           accessible={true}
           accessibilityLabel="30 Sekunden zurückspulen"
           accessibilityRole="button"
           onPress={jumpPrev30Seconds}
-          style={{ justifyContent: "center" }}
+          style={{ marginHorizontal: 10 }}
         >
           <AntDesign name="left" size={30} color="white" />
           {/* <AutoImage source={img_playjumpleft} style={{ width: 30, height: 30 }} /> */}
@@ -177,7 +191,7 @@ export function AudioPlayer({
             name="loading1"
             size={30}
             color="white"
-            style={{ marginHorizontal: 20 }}
+            style={{ marginHorizontal: 10 }}
           />
         )}
         {playbackStatus?.isLoaded && !playbackStatus.shouldPlay && (
@@ -186,7 +200,7 @@ export function AudioPlayer({
             accessibilityLabel="abspielen"
             accessibilityRole="button"
             onPress={play}
-            style={{ marginHorizontal: 20 }}
+            style={{ marginHorizontal: 10 }}
           >
             <AntDesign name="playcircleo" size={30} color="white" />
             {/* <AutoImage source={img_play} style={{ width: 30, height: 30 }} /> */}
@@ -198,7 +212,7 @@ export function AudioPlayer({
             accessibilityLabel="pausieren"
             accessibilityRole="button"
             onPress={pause}
-            style={{ marginHorizontal: 20 }}
+            style={{ marginHorizontal: 10 }}
           >
             <AntDesign name="pausecircleo" size={30} color="white" />
             {/* <AutoImage source={img_pause} style={{ width: 30, height: 30 }} /> */}
@@ -209,11 +223,21 @@ export function AudioPlayer({
           accessibilityLabel="30 Sekunden vorspulen"
           accessibilityRole="button"
           onPress={jumpNext30Seconds}
-          style={{ justifyContent: "center" }}
+          style={{ marginHorizontal: 10 }}
         >
           {/* <AutoImage source={img_playjumpright} style={{ width: 30, height: 30 }} /> */}
           <AntDesign name="right" size={30} color="white" />
           <Text style={{ color: "white", fontSize: 12 }}>30</Text>
+        </Pressable>
+        <Pressable
+          disabled={!nextTrack}
+          accessible={true}
+          accessibilityLabel={`Nächstes Stück abspielen ${nextTrack?.name}`}
+          accessibilityRole="button"
+          onPress={onPlayNextTrack}
+          style={{ marginHorizontal: 10 }}
+        >
+          <AntDesign name="stepforward" size={30} color="white" />
         </Pressable>
       </View>
       <View
