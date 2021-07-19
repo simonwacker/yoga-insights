@@ -21,12 +21,15 @@ export type MainParamList = {
   tabs: undefined
   // TODO Restrict extension and URL type!
   player: {
-    trackId: string
-    name: string
-    fileExtension: string
-    md5FileHashValue: string
-    webUri: string
-  }[]
+    initialTrackIndex: number
+    tracks: {
+      trackId: string
+      name: string
+      fileExtension: string
+      md5FileHashValue: string
+      webUri: string
+    }[]
+  }
 }
 
 export type PlayerScreenRouteProp = RouteProp<MainParamList, "player">

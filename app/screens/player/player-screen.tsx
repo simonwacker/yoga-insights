@@ -13,9 +13,9 @@ const ROOT: ViewStyle = {
 
 export const PlayerScreen = observer(() => {
   const route = useRoute<PlayerScreenRouteProp>()
-  const tracks = route.params
+  const { initialTrackIndex, tracks } = route.params
 
-  const [trackIndex, setTrackIndex] = useState(0)
+  const [trackIndex, setTrackIndex] = useState(initialTrackIndex)
   const track = tracks[trackIndex]
 
   const playPreviousTrack = () => {

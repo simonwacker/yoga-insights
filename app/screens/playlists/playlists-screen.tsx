@@ -68,7 +68,11 @@ export const PlaylistsScreen = observer(function PlaylistsScreen() {
         data={[...playlists]}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <Pressable onPress={() => navigation.navigate("player", item.tracks)}>
+          <Pressable
+            onPress={() =>
+              navigation.navigate("player", { initialTrackIndex: 0, tracks: item.tracks })
+            }
+          >
             <View style={LIST_CONTAINER}>
               <Text style={LIST_TEXT}>{item.name}</Text>
             </View>

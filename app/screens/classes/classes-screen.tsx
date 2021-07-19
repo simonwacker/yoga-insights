@@ -119,18 +119,13 @@ export const ClassesScreen = observer(function ClassesScreen() {
         contentContainerStyle={FLAT_LIST}
         data={[...classes]}
         keyExtractor={(item) => item.trackId}
-        renderItem={({ item }) => (
+        renderItem={({ item, index }) => (
           <Pressable
             onPress={() =>
-              navigation.navigate("player", [
-                {
-                  trackId: item.trackId,
-                  name: item.name,
-                  fileExtension: item.fileExtension,
-                  md5FileHashValue: item.md5FileHashValue,
-                  webUri: item.webUri,
-                },
-              ])
+              navigation.navigate("player", {
+                initialTrackIndex: index,
+                tracks: classes,
+              })
             }
           >
             <View style={LIST_CONTAINER}>
