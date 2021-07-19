@@ -49,9 +49,12 @@ export function AudioPlayer({
 
   const createAndLoadAndPlay = async () => {
     try {
+      const currentSound = sound || new Audio.Sound()
       if (sound) {
-        sound.setOnPlaybackStatusUpdate(() => {})
         await sound.unloadAsync()
+      } else {
+        currentSound.setOnPlaybackStatusUpdate(onPlaybackStatusUpdate)
+        setSound(currentSound)
       }
       // Make sure audio is played if iOS is in silent mode, defaults to `false`.
       // NOTE: This sets the property globally which means _all_ future audio
@@ -59,14 +62,11 @@ export function AudioPlayer({
       await Audio.setAudioModeAsync({ playsInSilentModeIOS: true })
       const { exists } = await FileSystem.getInfoAsync(fileUri)
       const uri = exists ? fileUri : webUri
-      const { sound: newSound, status: newPlaybackStatus } = await Audio.Sound.createAsync(
+      await currentSound.loadAsync(
         { uri: uri },
         { shouldPlay: true }, // initialStatus
-        onPlaybackStatusUpdate, // onPlaybackStatusUpdate
         true, // downloadFirst
       )
-      setSound(newSound)
-      onPlaybackStatusUpdate(newPlaybackStatus)
     } catch (error) {
       console.error("Failed to create, load, and play audio.", error)
     }
