@@ -24,7 +24,8 @@ export function AudioPlayer({
   // TODO Find a better way to come up with a file URI.
   const fileUri = `${FileSystem.documentDirectory}${trackId}.${fileExtension}`
 
-  const [sound, setSound] = useState<Audio.Sound | undefined>()
+  // TODO Using `const sound = new Audio.Sound()` resulted in weird behavior. Why?
+  const [sound] = useState<Audio.Sound>(() => new Audio.Sound())
   const [playbackStatus, setPlaybackStatus] = useState<AVPlaybackStatus | undefined>()
 
   const onPlaybackStatusUpdate = (newPlaybackStatus: AVPlaybackStatus) => {
@@ -35,34 +36,29 @@ export function AudioPlayer({
   }
 
   useEffect(() => {
-    createAndLoadAndPlay()
+    loadAndPlay()
   }, [fileUri, webUri])
 
   useEffect(() => {
-    return sound
-      ? () => {
-          sound.setOnPlaybackStatusUpdate(() => {})
-          sound.unloadAsync()
-        }
-      : undefined
+    return () => {
+      sound.setOnPlaybackStatusUpdate(() => {})
+      sound.unloadAsync()
+    }
   }, [sound])
 
-  const createAndLoadAndPlay = async () => {
+  const loadAndPlay = async () => {
     try {
-      const currentSound = sound || new Audio.Sound()
-      if (sound) {
+      if (playbackStatus?.isLoaded) {
         await sound.unloadAsync()
-      } else {
-        currentSound.setOnPlaybackStatusUpdate(onPlaybackStatusUpdate)
-        setSound(currentSound)
       }
       // Make sure audio is played if iOS is in silent mode, defaults to `false`.
       // NOTE: This sets the property globally which means _all_ future audio
       // playbacks will be affected.
       await Audio.setAudioModeAsync({ playsInSilentModeIOS: true })
+      sound.setOnPlaybackStatusUpdate(onPlaybackStatusUpdate)
       const { exists } = await FileSystem.getInfoAsync(fileUri)
       const uri = exists ? fileUri : webUri
-      await currentSound.loadAsync(
+      await sound.loadAsync(
         { uri: uri },
         { shouldPlay: true }, // initialStatus
         true, // downloadFirst
@@ -75,7 +71,7 @@ export function AudioPlayer({
   const play = async () => {
     try {
       if (playbackStatus?.isLoaded) {
-        await sound?.playAsync()
+        await sound.playAsync()
       }
     } catch (error) {
       console.error("Failed to play audio.", error)
@@ -85,7 +81,7 @@ export function AudioPlayer({
   const pause = async () => {
     try {
       if (playbackStatus?.isLoaded && playbackStatus.shouldPlay) {
-        await sound?.pauseAsync()
+        await sound.pauseAsync()
       }
     } catch (error) {
       console.error("Failed to pause audio.", error)
@@ -104,7 +100,7 @@ export function AudioPlayer({
         } else if (nextMilliseconds > playbackStatus.durationMillis) {
           nextMilliseconds = playbackStatus.durationMillis
         }
-        await sound?.setPositionAsync(nextMilliseconds)
+        await sound.setPositionAsync(nextMilliseconds)
       }
     } catch (error) {
       console.error(`Failed to jump ${seconds} seconds.`, error)
