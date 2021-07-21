@@ -1,7 +1,7 @@
-import { CharacterModel } from "./character"
+import { PlaylistModel } from "./playlist"
 
 test("can be created", () => {
-  const instance = CharacterModel.create({
+  const instance = PlaylistModel.create({
     id: 1,
     name: "Rick Sanchez",
   })
