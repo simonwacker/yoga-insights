@@ -117,7 +117,7 @@ export const ClassesScreen = observer(function ClassesScreen() {
     <Screen style={ROOT} preset="fixed">
       <FlatList
         contentContainerStyle={FLAT_LIST}
-        data={[...classes]}
+        data={classes}
         keyExtractor={(item) => item.trackId}
         renderItem={({ item, index }) => (
           <Pressable
