@@ -5,7 +5,7 @@ import { withEnvironment } from "../extensions/with-environment"
 export const PlaylistStoreModel = types
   .model("PlaylistStore")
   .props({
-    playlists: types.optional(types.array(PlaylistModel), []),
+    playlists: types.array(PlaylistModel),
   })
   .extend(withEnvironment)
   .actions((self) => ({
@@ -14,10 +14,10 @@ export const PlaylistStoreModel = types
     },
   }))
   .actions((self) => ({
-    addPlaylist: (playlist: PlaylistModel) => {
+    addPlaylist: (playlist: { name: string; trackIds: string[] }) => {
       self.playlists?.push(playlist)
     },
-    getPlaylists: async () => {
+    fetchPlaylists: () => {
       self.savePlaylists([])
       // TODO Persist and load persisted playlists somehow. Maybe with https://github.com/quarrant/mobx-persist-store
       // The ignite boilerplate does it with an API as follows:

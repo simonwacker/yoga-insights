@@ -2,7 +2,7 @@ import { Instance, SnapshotOut, types } from "mobx-state-tree"
 
 export const PlaylistModel = types.model("Playlist").props({
   name: types.string,
-  poseTrackIds: types.array(types.string),
+  trackIds: types.array(types.string),
 })
 
 type PlaylistType = Instance<typeof PlaylistModel>

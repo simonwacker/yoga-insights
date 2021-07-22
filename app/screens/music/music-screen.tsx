@@ -1,9 +1,8 @@
-import React from "react"
+import React, { useEffect } from "react"
 import { observer } from "mobx-react-lite"
 import { ViewStyle } from "react-native"
-import { Screen, Text } from "../../components"
-// import { useNavigation } from "@react-navigation/native"
-// import { useStores } from "../../models"
+import { Screen, TrackList } from "../../components"
+import { useStores } from "../../models"
 import { color } from "../../theme"
 
 const ROOT: ViewStyle = {
@@ -12,14 +11,19 @@ const ROOT: ViewStyle = {
 }
 
 export const MusicScreen = observer(function MusicScreen() {
-  // Pull in one of our MST stores
-  // const { someStore, anotherStore } = useStores()
+  const { trackStore } = useStores()
 
-  // Pull in navigation via hook
-  // const navigation = useNavigation()
+  useEffect(() => {
+    async function fetchMusic() {
+      await trackStore.fetchMusic()
+    }
+
+    fetchMusic()
+  }, [])
+
   return (
-    <Screen style={ROOT} preset="scroll">
-      <Text preset="header" text="" />
+    <Screen style={ROOT} preset="fixed">
+      <TrackList tracks={[...trackStore.music]} />
     </Screen>
   )
 })

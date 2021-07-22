@@ -6,6 +6,8 @@ import { Text } from "../"
 import { flatten } from "ramda"
 import { useNavigation } from "@react-navigation/native"
 import { PlayerScreenNavigationProp } from "../../navigators"
+import { TrackSection } from "../../models"
+import { getSnapshot } from "mobx-state-tree"
 
 const CONTAINER: ViewStyle = {
   justifyContent: "center",
@@ -26,16 +28,7 @@ const LIST_TEXT: TextStyle = {
 }
 
 export interface TrackListProps {
-  tracks: {
-    title: string
-    data: {
-      trackId: string
-      name: string
-      fileExtension: string
-      md5FileHashValue: string
-      webUri: string
-    }[]
-  }[]
+  tracks: TrackSection[]
   /**
    * An optional style override useful for padding & margin.
    */
@@ -44,20 +37,21 @@ export interface TrackListProps {
 
 export const TrackList = observer(function TrackList({ tracks, style }: TrackListProps) {
   const navigation = useNavigation<PlayerScreenNavigationProp>()
+  const snapshotTracks = tracks.map((x) => getSnapshot(x)) // TODO Why is this necessary?
 
   return (
     <View style={flatten([CONTAINER, style])}>
       <SectionList
         contentContainerStyle={SECTION_LIST}
-        sections={tracks}
+        sections={snapshotTracks}
         keyExtractor={(item) => item.trackId}
         renderSectionHeader={({ section }) => <Text style={SECTION_TITLE}>{section.title}</Text>}
-        renderItem={({ item, index }) => (
+        renderItem={({ item, index, section }) => (
           <Pressable
             onPress={() =>
               navigation.navigate("player", {
                 initialTrackIndex: index,
-                tracks: flatten(tracks.map((x) => x.data)),
+                tracks: [...section.data],
               })
             }
           >

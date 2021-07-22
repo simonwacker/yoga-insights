@@ -1,5 +1,6 @@
 import { Instance, SnapshotOut, types } from "mobx-state-tree"
 import { PlaylistStoreModel } from "../playlist-store/playlist-store"
+import { TrackStoreModel } from "../track-store/track-store"
 
 /**
  * A RootStore model.
@@ -7,6 +8,7 @@ import { PlaylistStoreModel } from "../playlist-store/playlist-store"
 // prettier-ignore
 export const RootStoreModel = types.model("RootStore").props({
   playlistStore: types.optional(PlaylistStoreModel, {} as any),
+  trackStore: types.optional(TrackStoreModel, {} as any),
 })
 
 /**
