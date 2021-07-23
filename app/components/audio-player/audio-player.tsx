@@ -24,7 +24,6 @@ export function AudioPlayer({
   // TODO Find a better way to come up with a file URI.
   const fileUri = `${FileSystem.documentDirectory}${trackId}.${fileExtension}`
 
-  // TODO Using `const sound = new Audio.Sound()` resulted in weird behavior. Why?
   const [sound] = useState<Audio.Sound>(() => new Audio.Sound())
   const [playbackStatus, setPlaybackStatus] = useState<AVPlaybackStatus | undefined>()
 
