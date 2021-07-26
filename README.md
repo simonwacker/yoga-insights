@@ -12,6 +12,15 @@ developer tools in your browser by navigating to
 In case `adb` does not list the device, debug the issue as detailed in
 [How do I get my device detected by ADB on Linux?](https://android.stackexchange.com/questions/144966/how-do-i-get-my-device-detected-by-adb-on-linux/144967#144967)
 
+If we ever should need to make queries, using
+[React Query](https://react-query.tanstack.com/overview)
+may be a good idea.
+
+If we ever should need more state management than React contexts provide, using
+[Jotai](https://github.com/pmndrs/jotai)
+(or [Recoil](https://recoiljs.org/))
+may be a good idea.
+
 # Welcome to your new ignited app!
 
 [![CircleCI](https://circleci.com/gh/infinitered/ignite.svg?style=svg)](https://circleci.com/gh/infinitered/ignite)
