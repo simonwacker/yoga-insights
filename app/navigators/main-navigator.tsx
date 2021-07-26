@@ -45,9 +45,7 @@ export type PlayerProps = {
  * This type allows TypeScript to know what routes are defined in this navigator
  * as well as what properties (if any) they might take when navigating to them.
  *
- * If no params are allowed, pass through `undefined`. Generally speaking, we
- * recommend using your MobX-State-Tree store(s) to keep application state
- * rather than passing state through navigation params.
+ * If no params are allowed, pass through `undefined`.
  *
  * For more information, see this documentation:
  *   https://reactnavigation.org/docs/params/

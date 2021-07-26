@@ -1,5 +1,4 @@
 import React, { useState } from "react"
-import { observer } from "mobx-react-lite"
 import { ViewStyle } from "react-native"
 import { Screen, AudioPlayer } from "../../components"
 import { useRoute } from "@react-navigation/native"
@@ -11,7 +10,7 @@ const ROOT: ViewStyle = {
   flex: 1,
 }
 
-export const PlayerScreen = observer(() => {
+export const PlayerScreen = () => {
   const route = useRoute<PlayerScreenRouteProp>()
   const { initialTrackIndex, tracks } = route.params
 
@@ -48,4 +47,4 @@ export const PlayerScreen = observer(() => {
       />
     </Screen>
   )
-})
+}

@@ -1,8 +1,7 @@
-import React, { useEffect } from "react"
-import { observer } from "mobx-react-lite"
+import React from "react"
 import { ViewStyle } from "react-native"
 import { Screen, TrackList } from "../../components"
-import { useStores } from "../../models"
+import { useClasses } from "../../stores"
 import { color } from "../../theme"
 
 const ROOT: ViewStyle = {
@@ -10,20 +9,12 @@ const ROOT: ViewStyle = {
   flex: 1,
 }
 
-export const ClassesScreen = observer(function ClassesScreen() {
-  const { trackStore } = useStores()
-
-  useEffect(() => {
-    async function fetchClasses() {
-      await trackStore.fetchClasses()
-    }
-
-    fetchClasses()
-  }, [])
+export const ClassesScreen = () => {
+  const [classes] = useClasses()
 
   return (
     <Screen style={ROOT} preset="fixed">
-      <TrackList tracks={[...trackStore.classes]} />
+      <TrackList tracks={classes} />
     </Screen>
   )
-})
+}

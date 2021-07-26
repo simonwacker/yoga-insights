@@ -1,13 +1,11 @@
 import * as React from "react"
 import { SectionList, Pressable, StyleProp, TextStyle, View, ViewStyle } from "react-native"
-import { observer } from "mobx-react-lite"
 import { spacing } from "../../theme"
 import { Text } from "../"
 import { flatten } from "ramda"
 import { useNavigation } from "@react-navigation/native"
 import { PlayerScreenNavigationProp } from "../../navigators"
-import { TrackSection } from "../../models"
-import { getSnapshot } from "mobx-state-tree"
+import { Section, Track } from "../../models"
 
 const CONTAINER: ViewStyle = {
   justifyContent: "center",
@@ -28,22 +26,21 @@ const LIST_TEXT: TextStyle = {
 }
 
 export interface TrackListProps {
-  tracks: TrackSection[]
+  tracks: Section<Track>[]
   /**
    * An optional style override useful for padding & margin.
    */
   style?: StyleProp<ViewStyle>
 }
 
-export const TrackList = observer(function TrackList({ tracks, style }: TrackListProps) {
+export const TrackList = ({ tracks, style }: TrackListProps) => {
   const navigation = useNavigation<PlayerScreenNavigationProp>()
-  const snapshotTracks = tracks.map((x) => getSnapshot(x)) // TODO Why is this necessary?
 
   return (
     <View style={flatten([CONTAINER, style])}>
       <SectionList
         contentContainerStyle={SECTION_LIST}
-        sections={snapshotTracks}
+        sections={tracks}
         keyExtractor={(item) => item.trackId}
         renderSectionHeader={({ section }) => <Text style={SECTION_TITLE}>{section.title}</Text>}
         renderItem={({ item, index, section }) => (
@@ -63,4 +60,4 @@ export const TrackList = observer(function TrackList({ tracks, style }: TrackLis
       />
     </View>
   )
-})
+}

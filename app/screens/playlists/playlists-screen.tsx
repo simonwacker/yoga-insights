@@ -1,12 +1,10 @@
 import React from "react"
-import { observer } from "mobx-react-lite"
 import { FlatList, Pressable, TextStyle, View, ViewStyle } from "react-native"
 import { Screen, Text } from "../../components"
-// import { useNavigation } from "@react-navigation/native"
-// import { useStores } from "../../models"
 import { color, spacing } from "../../theme"
 import { useNavigation } from "@react-navigation/native"
 import { PlayerScreenNavigationProp } from "../../navigators"
+import { usePlaylistStore, usePoseStore } from "../../stores"
 
 const ROOT: ViewStyle = {
   backgroundColor: color.palette.black,
@@ -24,53 +22,25 @@ const FLAT_LIST: ViewStyle = {
   paddingHorizontal: spacing[4],
 }
 
-const playlists = [
-  {
-    id: "playlist-1",
-    name: "Fixe Playlist",
-    tracks: [
-      {
-        trackId: "volume-1-part-1",
-        name: "Volume 1 - Teil 1 - Grundlegende Einführung",
-        fileExtension: "mp3",
-        md5FileHashValue: "4154d609e7307a3cc31c9ac1e20ea9d0",
-        webUri:
-          "https://citysoundstudio.de/n/index.php/s/WggwKH5eGSxzZbk/download?path=%2FYoga%20Insights%20Vol.1&files=Yoga%20Insights%20Volume%201-Teil%201-Grundlegende%20Einf%C3%BChrung.mp3",
-      },
-      {
-        trackId: "volume-1-part-2",
-        name: "Volume 1 - Teil 2 - Regeneratives entlastendes Abendprogramm",
-        fileExtension: "mp3",
-        md5FileHashValue: "?",
-        webUri:
-          "https://citysoundstudio.de/n/index.php/s/WggwKH5eGSxzZbk/download?path=%2FYoga%20Insights%20Vol.1&files=Yoga%20Insights%20Volume%201-Teil%202-Regeneratives%20entlastendes%20Abendprogramm.mp3",
-      },
-      {
-        trackId: "volume-1-part-3",
-        name: "Volume 1 - Teil 3 - Naturklänge zum freien Üben",
-        fileExtension: "mp3",
-        md5FileHashValue: "?",
-        webUri:
-          "https://citysoundstudio.de/n/index.php/s/WggwKH5eGSxzZbk/download?path=%2FYoga%20Insights%20Vol.1&files=Yoga%20Insights%20Volume%201-Teil%203-Naturkl%C3%A4nge%20zum%20freien%20%C3%9Cben.mp3",
-      },
-    ],
-  },
-]
+export const PlaylistsScreen = () => {
+  const { playlists } = usePlaylistStore()
+  const { poses } = usePoseStore()
 
-export const PlaylistsScreen = observer(function PlaylistsScreen() {
-  // const { someStore, anotherStore } = useStores()
   const navigation = useNavigation<PlayerScreenNavigationProp>()
 
   return (
     <Screen style={ROOT} preset="fixed">
       <FlatList
         contentContainerStyle={FLAT_LIST}
-        data={[...playlists]}
-        keyExtractor={(item) => item.id}
+        data={playlists}
+        keyExtractor={(index) => index.toString()}
         renderItem={({ item }) => (
           <Pressable
             onPress={() =>
-              navigation.navigate("player", { initialTrackIndex: 0, tracks: item.tracks })
+              navigation.navigate("player", {
+                initialTrackIndex: 0,
+                tracks: item.trackIds.map((trackId) => poses.indexedById[trackId]),
+              })
             }
           >
             <View style={LIST_CONTAINER}>
@@ -81,4 +51,4 @@ export const PlaylistsScreen = observer(function PlaylistsScreen() {
       />
     </Screen>
   )
-})
+}

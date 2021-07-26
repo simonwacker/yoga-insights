@@ -63,7 +63,7 @@ export function AudioPlayer({
         true, // downloadFirst
       )
     } catch (error) {
-      console.error("Failed to create, load, and play audio.", error)
+      __DEV__ && console.error("Failed to create, load, and play audio.", error)
     }
   }
 
@@ -73,7 +73,7 @@ export function AudioPlayer({
         await sound.playAsync()
       }
     } catch (error) {
-      console.error("Failed to play audio.", error)
+      __DEV__ && console.error("Failed to play audio.", error)
     }
   }
 
@@ -83,7 +83,7 @@ export function AudioPlayer({
         await sound.pauseAsync()
       }
     } catch (error) {
-      console.error("Failed to pause audio.", error)
+      __DEV__ && console.error("Failed to pause audio.", error)
     }
   }
 
@@ -102,7 +102,7 @@ export function AudioPlayer({
         await sound.setPositionAsync(nextMilliseconds)
       }
     } catch (error) {
-      console.error(`Failed to jump ${seconds} seconds.`, error)
+      __DEV__ && console.error(`Failed to jump ${seconds} seconds.`, error)
     }
   }
 

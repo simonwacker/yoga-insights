@@ -1,8 +1,7 @@
-import React, { useEffect } from "react"
-import { observer } from "mobx-react-lite"
+import React from "react"
 import { ViewStyle } from "react-native"
 import { Screen, TrackList } from "../../components"
-import { useStores } from "../../models"
+import { useMusic } from "../../stores"
 import { color } from "../../theme"
 
 const ROOT: ViewStyle = {
@@ -10,20 +9,12 @@ const ROOT: ViewStyle = {
   flex: 1,
 }
 
-export const MusicScreen = observer(function MusicScreen() {
-  const { trackStore } = useStores()
-
-  useEffect(() => {
-    async function fetchMusic() {
-      await trackStore.fetchMusic()
-    }
-
-    fetchMusic()
-  }, [])
+export const MusicScreen = () => {
+  const [music] = useMusic()
 
   return (
     <Screen style={ROOT} preset="fixed">
-      <TrackList tracks={[...trackStore.music]} />
+      <TrackList tracks={music} />
     </Screen>
   )
-})
+}
