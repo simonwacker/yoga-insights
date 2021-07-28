@@ -53,8 +53,6 @@
     "react-native-screens": "~3.0.0",
     "react-native-unimodules": "~0.13.3",
     "react-native-web-log-box": "^0.0.5",
-    "reactotron-react-js": "^3.3.7",
-    "reactotron-react-native": "5.0.0",
     "validate.js": "0.13.1"
   },
   "devDependencies": {
