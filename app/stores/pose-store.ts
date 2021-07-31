@@ -78,7 +78,7 @@ type State = {
 export const usePoseStore = create<State>((_set, _get) => ({
   poses: poses,
   indexedPoses: poses.reduce((map, section) => {
-    for (let pose of section.data) {
+    for (const pose of section.data) {
       map[pose.trackId] = pose
     }
     return map
