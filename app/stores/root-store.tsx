@@ -4,7 +4,6 @@ import * as storage from "../utils/storage"
 import { ClassStoreProvider } from "./class-store"
 import { PoseStoreProvider } from "./pose-store"
 import { MusicStoreProvider } from "./music-store"
-import { PlaylistStoreProvider } from "./playlist-store"
 
 const PLAYLIST_STORE_STATE_STORAGE_KEY = "playlist"
 
