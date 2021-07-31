@@ -1,6 +1,6 @@
 // Inspired by https://rossbulat.medium.com/react-native-how-to-load-and-play-audio-241808f97f61
 
-import React, { useEffect, useState } from "react"
+import React, { useCallback, useEffect, useState } from "react"
 import { Pressable, View } from "react-native"
 import { Text, DownloadSwitch } from "../../components"
 import { Audio, AVPlaybackStatus } from "expo-av"
@@ -8,6 +8,31 @@ import Slider from "@react-native-community/slider"
 import { AntDesign } from "@expo/vector-icons"
 import { FileSystem } from "react-native-unimodules"
 import { AudioPlayerProps } from "./audio-player.props"
+
+const loadAndPlay = async (
+  fileUri: string,
+  webUri: string,
+  sound: Audio.Sound,
+  onPlaybackStatusUpdate: (newPlaybackStatus: AVPlaybackStatus) => void,
+) => {
+  try {
+    await sound.unloadAsync()
+    // Make sure audio is played if iOS is in silent mode, defaults to `false`.
+    // NOTE: This sets the property globally which means _all_ future audio
+    // playbacks will be affected.
+    await Audio.setAudioModeAsync({ playsInSilentModeIOS: true })
+    sound.setOnPlaybackStatusUpdate(onPlaybackStatusUpdate)
+    const { exists } = await FileSystem.getInfoAsync(fileUri)
+    const uri = exists ? fileUri : webUri
+    await sound.loadAsync(
+      { uri: uri },
+      { shouldPlay: true }, // initialStatus
+      true, // downloadFirst
+    )
+  } catch (error) {
+    __DEV__ && console.error("Failed to create, load, and play audio.", error)
+  }
+}
 
 export function AudioPlayer({
   trackId,
@@ -27,16 +52,16 @@ export function AudioPlayer({
   const [sound] = useState<Audio.Sound>(() => new Audio.Sound())
   const [playbackStatus, setPlaybackStatus] = useState<AVPlaybackStatus | undefined>()
 
-  const onPlaybackStatusUpdate = (newPlaybackStatus: AVPlaybackStatus) => {
+  const onPlaybackStatusUpdate = useCallback((newPlaybackStatus: AVPlaybackStatus) => {
     setPlaybackStatus(newPlaybackStatus)
     if (newPlaybackStatus.isLoaded && newPlaybackStatus.didJustFinish) {
       onPlaybackDidJustFinish()
     }
-  }
+  }, [])
 
   useEffect(() => {
-    loadAndPlay()
-  }, [fileUri, webUri])
+    loadAndPlay(fileUri, webUri, sound, onPlaybackStatusUpdate)
+  }, [fileUri, webUri, sound, onPlaybackStatusUpdate])
 
   useEffect(() => {
     return () => {
@@ -44,28 +69,6 @@ export function AudioPlayer({
       sound.unloadAsync()
     }
   }, [sound])
-
-  const loadAndPlay = async () => {
-    try {
-      if (playbackStatus?.isLoaded) {
-        await sound.unloadAsync()
-      }
-      // Make sure audio is played if iOS is in silent mode, defaults to `false`.
-      // NOTE: This sets the property globally which means _all_ future audio
-      // playbacks will be affected.
-      await Audio.setAudioModeAsync({ playsInSilentModeIOS: true })
-      sound.setOnPlaybackStatusUpdate(onPlaybackStatusUpdate)
-      const { exists } = await FileSystem.getInfoAsync(fileUri)
-      const uri = exists ? fileUri : webUri
-      await sound.loadAsync(
-        { uri: uri },
-        { shouldPlay: true }, // initialStatus
-        true, // downloadFirst
-      )
-    } catch (error) {
-      __DEV__ && console.error("Failed to create, load, and play audio.", error)
-    }
-  }
 
   const play = async () => {
     try {
