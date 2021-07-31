@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useCallback } from "react"
 import { FlatList, Pressable, TextStyle, View, ViewStyle } from "react-native"
 import { Screen, Text } from "../../components"
 import { color, spacing } from "../../theme"
@@ -23,8 +23,8 @@ const FLAT_LIST: ViewStyle = {
 }
 
 export const PlaylistsScreen = () => {
-  const { playlists } = usePlaylistStore()
-  const { poses } = usePoseStore()
+  const playlists = usePlaylistStore(useCallback((state) => state.playlists, []))
+  const indexedPoses = usePoseStore(useCallback((state) => state.indexedPoses, []))
 
   const navigation = useNavigation<PlayerScreenNavigationProp>()
 
@@ -39,7 +39,7 @@ export const PlaylistsScreen = () => {
             onPress={() =>
               navigation.navigate("player", {
                 initialTrackIndex: 0,
-                tracks: item.trackIds.map((trackId) => poses.indexedById[trackId]),
+                tracks: item.trackIds.map((trackId) => indexedPoses[trackId]),
               })
             }
           >

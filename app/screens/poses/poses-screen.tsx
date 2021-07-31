@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useCallback } from "react"
 import { ViewStyle } from "react-native"
 import { Screen, TrackList } from "../../components"
 import { usePoseStore } from "../../stores"
@@ -10,11 +10,11 @@ const ROOT: ViewStyle = {
 }
 
 export const PosesScreen = () => {
-  const { poses } = usePoseStore()
+  const poses = usePoseStore(useCallback((state) => state.poses, []))
 
   return (
     <Screen style={ROOT} preset="fixed">
-      <TrackList tracks={poses.inSections} />
+      <TrackList tracks={poses} />
     </Screen>
   )
 }

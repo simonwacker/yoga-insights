@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useCallback, useState } from "react"
 import { Pressable, View, ViewStyle, TextStyle, SectionList, Button, TextInput } from "react-native"
 import { Screen, Text } from "../../components"
 import { color, spacing } from "../../theme"
@@ -21,8 +21,8 @@ const SECTION_LIST: ViewStyle = {
 }
 
 export const SelectTracksScreen = () => {
-  const playlistStore = usePlaylistStore()
-  const { poses } = usePoseStore()
+  const addPlaylist = usePlaylistStore(useCallback((state) => state.addPlaylist, []))
+  const poses = usePoseStore(useCallback((state) => state.poses, []))
 
   const [selection, setSelection] = useState(new Set<string>())
   const [name, setName] = useState("")
@@ -38,17 +38,14 @@ export const SelectTracksScreen = () => {
   }
 
   const createPlaylist = () => {
-    playlistStore.dispatch({
-      type: "addPlaylist",
-      playlist: { name: name, trackIds: Array.from(selection) },
-    })
+    addPlaylist({ name: name, trackIds: Array.from(selection) })
   }
 
   return (
     <Screen style={ROOT} preset="fixed">
       <SectionList
         contentContainerStyle={SECTION_LIST}
-        sections={poses.inSections}
+        sections={poses}
         keyExtractor={(item) => item.trackId}
         renderSectionHeader={({ section }) => <Text>{section.title}</Text>}
         renderItem={({ item }) => (

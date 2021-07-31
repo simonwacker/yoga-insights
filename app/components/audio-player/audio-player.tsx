@@ -16,6 +16,7 @@ const loadAndPlay = async (
   onPlaybackStatusUpdate: (newPlaybackStatus: AVPlaybackStatus) => void,
 ) => {
   try {
+    __DEV__ && console.log(`About to load and play ${fileUri} or ${webUri}.`)
     await sound.unloadAsync()
     // Make sure audio is played if iOS is in silent mode, defaults to `false`.
     // NOTE: This sets the property globally which means _all_ future audio

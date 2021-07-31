@@ -1,7 +1,7 @@
-import React from "react"
+import React, { useCallback } from "react"
 import { ViewStyle } from "react-native"
 import { Screen, TrackList } from "../../components"
-import { useClasses } from "../../stores"
+import { useClassStore } from "../../stores"
 import { color } from "../../theme"
 
 const ROOT: ViewStyle = {
@@ -10,7 +10,7 @@ const ROOT: ViewStyle = {
 }
 
 export const ClassesScreen = () => {
-  const [classes] = useClasses()
+  const classes = useClassStore(useCallback((state) => state.classes, []))
 
   return (
     <Screen style={ROOT} preset="fixed">

@@ -1,4 +1,4 @@
-import React, { useReducer, createContext, ReactNode, useContext } from "react"
+import create from "zustand"
 import { Section, Track } from "../models"
 
 const music = [
@@ -38,28 +38,10 @@ const music = [
   },
 ]
 
-type Action = never
-type Dispatch = (action: Action) => void
-type State = Section<Track>[]
-type MusicStoreProviderProps = { children: ReactNode }
-
-const MusicStoreContext = createContext<[State, Dispatch] | undefined>(undefined)
-
-function musicStoreReducer(state: State, _action: Action) {
-  return state
+type State = {
+  music: Section<Track>[]
 }
 
-function MusicStoreProvider({ children }: MusicStoreProviderProps) {
-  const value = useReducer(musicStoreReducer, music)
-  return <MusicStoreContext.Provider value={value}>{children}</MusicStoreContext.Provider>
-}
-
-function useMusicStore() {
-  const context = useContext(MusicStoreContext)
-  if (context === undefined) {
-    throw new Error("`useMusicStore` must be used within a `MusicStoreProvider`")
-  }
-  return context
-}
-
-export { MusicStoreProvider, useMusicStore }
+export const useMusicStore = create<State>((_set, _get) => ({
+  music: music,
+}))
