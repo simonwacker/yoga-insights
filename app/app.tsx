@@ -30,6 +30,7 @@ import { ToggleStorybook } from "../storybook/toggle-storybook"
 // stack navigation, use `createNativeStackNavigator` in place of `createStackNavigator`:
 // https://github.com/kmagiera/react-native-screens#using-native-stack-navigator
 import { enableScreens } from "react-native-screens"
+import { useState } from "react"
 enableScreens()
 
 export const NAVIGATION_PERSISTENCE_KEY = "NAVIGATION_STATE"
@@ -38,6 +39,7 @@ export const NAVIGATION_PERSISTENCE_KEY = "NAVIGATION_STATE"
  * This is the root component of our app.
  */
 function App() {
+  const [ready, setReady] = useState(false)
   const navigationRef = useRef<NavigationContainerRef>(null)
 
   setRootNavigation(navigationRef)
@@ -51,10 +53,12 @@ function App() {
   useEffect(() => {
     ;(async () => {
       await initFonts() // expo
+      setReady(true)
     })()
   }, [])
 
-  // otherwise, we're ready to render the app
+  if (!ready) return null
+
   return (
     <ToggleStorybook>
       <SafeAreaProvider initialMetrics={initialWindowMetrics}>
