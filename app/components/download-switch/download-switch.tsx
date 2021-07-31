@@ -51,7 +51,7 @@ export function DownloadSwitch({
       const { exists } = await FileSystem.getInfoAsync(targetFileUri)
       setDownloadStatus(exists ? DownloadStatus.Downloaded : DownloadStatus.NotDownloaded)
     } catch (error) {
-      console.log("Failed to determine download status.", error)
+      __DEV__ && console.error("Failed to determine download status.", error)
     }
   }
 
