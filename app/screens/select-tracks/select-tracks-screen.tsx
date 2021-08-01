@@ -1,8 +1,11 @@
 import React, { useCallback, useState } from "react"
-import { Pressable, View, ViewStyle, TextStyle, SectionList, Button, TextInput } from "react-native"
+import { Pressable, View, ViewStyle, TextStyle, SectionList, Button } from "react-native"
 import { Screen, Text } from "../../components"
 import { color, spacing } from "../../theme"
-import { usePlaylistStore, usePoseStore } from "../../stores"
+import { usePoseStore } from "../../stores"
+import { useNavigation } from "@react-navigation/native"
+import { SelectTracksScreenNavigationProp } from "../../navigators"
+import { Track } from "../../models"
 
 const ROOT: ViewStyle = {
   backgroundColor: color.palette.black,
@@ -20,25 +23,27 @@ const SECTION_LIST: ViewStyle = {
   paddingHorizontal: spacing[4],
 }
 
-export const SelectTracksScreen = () => {
-  const addPlaylist = usePlaylistStore(useCallback((state) => state.addPlaylist, []))
-  const poses = usePoseStore(useCallback((state) => state.poses, []))
-
-  const [selection, setSelection] = useState(new Set<string>())
-  const [name, setName] = useState("")
-
-  const toggleTrackSelection = (trackId: string) => {
-    const newSet = new Set(selection)
-    if (selection.has(trackId)) {
-      newSet.delete(trackId)
-    } else {
-      newSet.add(trackId)
-    }
-    setSelection(newSet)
+const toIdList = (tracks: Set<Track>) => {
+  const list = []
+  for (const track of tracks) {
+    list.push(track.trackId)
   }
+  return list
+}
 
-  const createPlaylist = () => {
-    addPlaylist({ name: name, trackIds: Array.from(selection) })
+export const SelectTracksScreen = () => {
+  const navigation = useNavigation<SelectTracksScreenNavigationProp>()
+  const poses = usePoseStore(useCallback((state) => state.poses, []))
+  const [selectedTracks, setSelectedTracks] = useState(new Set<Track>())
+
+  const toggleTrackSelection = (track: Track) => {
+    const copy = new Set(selectedTracks)
+    if (copy.has(track)) {
+      copy.delete(track)
+    } else {
+      copy.add(track)
+    }
+    setSelectedTracks(copy)
   }
 
   return (
@@ -49,15 +54,21 @@ export const SelectTracksScreen = () => {
         keyExtractor={(item) => item.trackId}
         renderSectionHeader={({ section }) => <Text>{section.title}</Text>}
         renderItem={({ item }) => (
-          <Pressable onPress={() => toggleTrackSelection(item.trackId)}>
+          <Pressable onPress={() => toggleTrackSelection(item)}>
             <View style={LIST_CONTAINER}>
               <Text style={LIST_TEXT}>{item.name}</Text>
             </View>
           </Pressable>
         )}
       />
-      <TextInput accessibilityLabel="Name" value={name} onChangeText={setName} />
-      <Button onPress={createPlaylist} title="Create Playlist" />
+      <Button
+        onPress={() =>
+          navigation.navigate("orderTracks", {
+            trackIds: toIdList(selectedTracks),
+          })
+        }
+        title="Übungen sortieren"
+      />
     </Screen>
   )
 }

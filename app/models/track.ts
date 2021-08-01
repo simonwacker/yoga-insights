@@ -1,3 +1,4 @@
+// TODO Restrict extension and URL type!
 export interface Track {
   trackId: string
   name: string

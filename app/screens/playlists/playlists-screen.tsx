@@ -3,7 +3,7 @@ import { FlatList, Pressable, TextStyle, View, ViewStyle } from "react-native"
 import { Screen, Text } from "../../components"
 import { color, spacing } from "../../theme"
 import { useNavigation } from "@react-navigation/native"
-import { PlayerScreenNavigationProp } from "../../navigators"
+import { PlaylistsScreenNavigationProp } from "../../navigators"
 import { usePlaylistStore, usePoseStore } from "../../stores"
 
 const ROOT: ViewStyle = {
@@ -26,7 +26,7 @@ export const PlaylistsScreen = () => {
   const playlists = usePlaylistStore(useCallback((state) => state.playlists, []))
   const indexedPoses = usePoseStore(useCallback((state) => state.indexedPoses, []))
 
-  const navigation = useNavigation<PlayerScreenNavigationProp>()
+  const navigation = useNavigation<PlaylistsScreenNavigationProp>()
 
   return (
     <Screen style={ROOT} preset="fixed">
@@ -49,6 +49,9 @@ export const PlaylistsScreen = () => {
           </Pressable>
         )}
       />
+      <Pressable onPress={() => navigation.navigate("selectTracks")}>
+        <Text>Neue Playlist</Text>
+      </Pressable>
     </Screen>
   )
 }

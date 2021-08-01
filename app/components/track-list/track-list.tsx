@@ -4,7 +4,7 @@ import { spacing } from "../../theme"
 import { Text } from "../"
 import { flatten } from "ramda"
 import { useNavigation } from "@react-navigation/native"
-import { PlayerScreenNavigationProp } from "../../navigators"
+import { ClassesScreenNavigationProp } from "../../navigators"
 import { Section, Track } from "../../models"
 
 const CONTAINER: ViewStyle = {
@@ -34,7 +34,7 @@ export interface TrackListProps {
 }
 
 export const TrackList = ({ tracks, style }: TrackListProps) => {
-  const navigation = useNavigation<PlayerScreenNavigationProp>()
+  const navigation = useNavigation<ClassesScreenNavigationProp>()
 
   return (
     <View style={flatten([CONTAINER, style])}>
@@ -48,7 +48,7 @@ export const TrackList = ({ tracks, style }: TrackListProps) => {
             onPress={() =>
               navigation.navigate("player", {
                 initialTrackIndex: index,
-                tracks: [...section.data],
+                tracks: section.data,
               })
             }
           >
