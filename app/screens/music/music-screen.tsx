@@ -1,9 +1,7 @@
-import React from "react"
-import { observer } from "mobx-react-lite"
+import React, { useCallback } from "react"
 import { ViewStyle } from "react-native"
-import { Screen, Text } from "../../components"
-// import { useNavigation } from "@react-navigation/native"
-// import { useStores } from "../../models"
+import { Screen, TrackList } from "../../components"
+import { useMusicStore } from "../../stores"
 import { color } from "../../theme"
 
 const ROOT: ViewStyle = {
@@ -11,15 +9,12 @@ const ROOT: ViewStyle = {
   flex: 1,
 }
 
-export const MusicScreen = observer(function MusicScreen() {
-  // Pull in one of our MST stores
-  // const { someStore, anotherStore } = useStores()
+export const MusicScreen = () => {
+  const music = useMusicStore(useCallback((state) => state.music, []))
 
-  // Pull in navigation via hook
-  // const navigation = useNavigation()
   return (
-    <Screen style={ROOT} preset="scroll">
-      <Text preset="header" text="" />
+    <Screen style={ROOT} preset="fixed">
+      <TrackList tracks={music} />
     </Screen>
   )
-})
+}

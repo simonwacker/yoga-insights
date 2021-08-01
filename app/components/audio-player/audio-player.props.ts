@@ -1,16 +1,10 @@
+import { Track } from "../../models"
+
 export interface AudioPlayerProps {
-  trackId: string
-  name: string
-  fileExtension: string
-  md5FileHashValue: string
-  webUri: string
+  track: Track
   onPlaybackDidJustFinish: () => void
-  previousTrack?: {
-    name: string
-  }
+  previousTrack?: Track
   onPlayPreviousTrack: () => void
-  nextTrack?: {
-    name: string
-  }
+  nextTrack?: Track
   onPlayNextTrack: () => void
 }

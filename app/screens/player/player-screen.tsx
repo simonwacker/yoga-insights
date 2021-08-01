@@ -1,5 +1,4 @@
 import React, { useState } from "react"
-import { observer } from "mobx-react-lite"
 import { ViewStyle } from "react-native"
 import { Screen, AudioPlayer } from "../../components"
 import { useRoute } from "@react-navigation/native"
@@ -11,7 +10,7 @@ const ROOT: ViewStyle = {
   flex: 1,
 }
 
-export const PlayerScreen = observer(() => {
+export const PlayerScreen = () => {
   const route = useRoute<PlayerScreenRouteProp>()
   const { initialTrackIndex, tracks } = route.params
 
@@ -33,19 +32,13 @@ export const PlayerScreen = observer(() => {
   return (
     <Screen style={ROOT} preset="scroll">
       <AudioPlayer
-        trackId={track.trackId}
-        name={track.name}
-        fileExtension={track.fileExtension}
-        md5FileHashValue={track.md5FileHashValue}
-        webUri={track.webUri}
+        track={track}
         onPlaybackDidJustFinish={playNextTrack}
-        previousTrack={trackIndex >= 1 ? { name: tracks[trackIndex - 1].name } : undefined}
+        previousTrack={trackIndex >= 1 ? tracks[trackIndex - 1] : undefined}
         onPlayPreviousTrack={playPreviousTrack}
-        nextTrack={
-          trackIndex + 1 < tracks.length ? { name: tracks[trackIndex + 1].name } : undefined
-        }
+        nextTrack={trackIndex + 1 < tracks.length ? tracks[trackIndex + 1] : undefined}
         onPlayNextTrack={playNextTrack}
       />
     </Screen>
   )
-})
+}

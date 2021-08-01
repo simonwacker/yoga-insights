@@ -1,6 +1,6 @@
 // Inspired by https://rossbulat.medium.com/react-native-how-to-load-and-play-audio-241808f97f61
 
-import React, { useEffect, useState } from "react"
+import React, { useCallback, useEffect, useState } from "react"
 import { Pressable, View } from "react-native"
 import { Text, DownloadSwitch } from "../../components"
 import { Audio, AVPlaybackStatus } from "expo-av"
@@ -9,12 +9,34 @@ import { AntDesign } from "@expo/vector-icons"
 import { FileSystem } from "react-native-unimodules"
 import { AudioPlayerProps } from "./audio-player.props"
 
+const loadAndPlay = async (
+  fileUri: string,
+  webUri: string,
+  sound: Audio.Sound,
+  onPlaybackStatusUpdate: (newPlaybackStatus: AVPlaybackStatus) => void,
+) => {
+  try {
+    __DEV__ && console.log(`About to load and play ${fileUri} or ${webUri}.`)
+    await sound.unloadAsync()
+    // Make sure audio is played if iOS is in silent mode, defaults to `false`.
+    // NOTE: This sets the property globally which means _all_ future audio
+    // playbacks will be affected.
+    await Audio.setAudioModeAsync({ playsInSilentModeIOS: true })
+    sound.setOnPlaybackStatusUpdate(onPlaybackStatusUpdate)
+    const { exists } = await FileSystem.getInfoAsync(fileUri)
+    const uri = exists ? fileUri : webUri
+    await sound.loadAsync(
+      { uri: uri },
+      { shouldPlay: true }, // initialStatus
+      true, // downloadFirst
+    )
+  } catch (error) {
+    __DEV__ && console.error("Failed to create, load, and play audio.", error)
+  }
+}
+
 export function AudioPlayer({
-  trackId,
-  name,
-  fileExtension,
-  md5FileHashValue,
-  webUri,
+  track,
   onPlaybackDidJustFinish,
   previousTrack,
   onPlayPreviousTrack,
@@ -22,22 +44,21 @@ export function AudioPlayer({
   onPlayNextTrack,
 }: AudioPlayerProps) {
   // TODO Find a better way to come up with a file URI.
-  const fileUri = `${FileSystem.documentDirectory}${trackId}.${fileExtension}`
+  const fileUri = `${FileSystem.documentDirectory}${track.trackId}.${track.fileExtension}`
 
-  // TODO Using `const sound = new Audio.Sound()` resulted in weird behavior. Why?
   const [sound] = useState<Audio.Sound>(() => new Audio.Sound())
   const [playbackStatus, setPlaybackStatus] = useState<AVPlaybackStatus | undefined>()
 
-  const onPlaybackStatusUpdate = (newPlaybackStatus: AVPlaybackStatus) => {
+  const onPlaybackStatusUpdate = useCallback((newPlaybackStatus: AVPlaybackStatus) => {
     setPlaybackStatus(newPlaybackStatus)
     if (newPlaybackStatus.isLoaded && newPlaybackStatus.didJustFinish) {
       onPlaybackDidJustFinish()
     }
-  }
+  }, [])
 
   useEffect(() => {
-    loadAndPlay()
-  }, [fileUri, webUri])
+    loadAndPlay(fileUri, track.webUri, sound, onPlaybackStatusUpdate)
+  }, [fileUri, track.webUri, sound, onPlaybackStatusUpdate])
 
   useEffect(() => {
     return () => {
@@ -46,35 +67,13 @@ export function AudioPlayer({
     }
   }, [sound])
 
-  const loadAndPlay = async () => {
-    try {
-      if (playbackStatus?.isLoaded) {
-        await sound.unloadAsync()
-      }
-      // Make sure audio is played if iOS is in silent mode, defaults to `false`.
-      // NOTE: This sets the property globally which means _all_ future audio
-      // playbacks will be affected.
-      await Audio.setAudioModeAsync({ playsInSilentModeIOS: true })
-      sound.setOnPlaybackStatusUpdate(onPlaybackStatusUpdate)
-      const { exists } = await FileSystem.getInfoAsync(fileUri)
-      const uri = exists ? fileUri : webUri
-      await sound.loadAsync(
-        { uri: uri },
-        { shouldPlay: true }, // initialStatus
-        true, // downloadFirst
-      )
-    } catch (error) {
-      console.error("Failed to create, load, and play audio.", error)
-    }
-  }
-
   const play = async () => {
     try {
       if (playbackStatus?.isLoaded) {
         await sound.playAsync()
       }
     } catch (error) {
-      console.error("Failed to play audio.", error)
+      __DEV__ && console.error("Failed to play audio.", error)
     }
   }
 
@@ -84,7 +83,7 @@ export function AudioPlayer({
         await sound.pauseAsync()
       }
     } catch (error) {
-      console.error("Failed to pause audio.", error)
+      __DEV__ && console.error("Failed to pause audio.", error)
     }
   }
 
@@ -103,7 +102,7 @@ export function AudioPlayer({
         await sound.setPositionAsync(nextMilliseconds)
       }
     } catch (error) {
-      console.error(`Failed to jump ${seconds} seconds.`, error)
+      __DEV__ && console.error(`Failed to jump ${seconds} seconds.`, error)
     }
   }
 
@@ -148,7 +147,7 @@ export function AudioPlayer({
         </View>
       )}
       <View style={{ marginVertical: 15 }}>
-        <Text style={{ textAlign: "center" }}>{name}</Text>
+        <Text style={{ textAlign: "center" }}>{track.name}</Text>
       </View>
       <View
         style={{
@@ -296,10 +295,10 @@ export function AudioPlayer({
         }}
       >
         <DownloadSwitch
-          trackId={trackId}
-          sourceWebUri={webUri}
+          trackId={track.trackId}
+          sourceWebUri={track.webUri}
           targetFileUri={fileUri}
-          md5FileHashValue={md5FileHashValue}
+          md5FileHashValue={track.md5FileHashValue}
           onDownloadComplete={switchSource}
           onDownloadJustAboutToBeDeleted={switchSource}
         />
