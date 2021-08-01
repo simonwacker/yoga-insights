@@ -7,7 +7,7 @@ import produce from "immer" // https://github.com/pmndrs/zustand#sick-of-reducer
 type State = {
   playlists: Playlist[]
   nextPlaylistId: number
-  addPlaylist: (playlist: Playlist) => void
+  addPlaylist: (playlist: { name: string; trackIds: string[] }) => void
   renamePlaylist: (playlistId: number, name: string) => void
   removePlaylist: (playlistId: number) => void
   clearPlaylists: () => void
@@ -21,7 +21,7 @@ export const usePlaylistStore = create<State>(
       addPlaylist: (playlist) =>
         set(
           produce((state) => {
-            state.playlists.push({ ...playlist, playlistId: state.nextPlaylistId })
+            state.playlists.push({ playlistId: state.nextPlaylistId, ...playlist })
             state.nextPlaylistId += 1
           }),
         ),
