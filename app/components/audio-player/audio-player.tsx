@@ -36,11 +36,7 @@ const loadAndPlay = async (
 }
 
 export function AudioPlayer({
-  trackId,
-  name,
-  fileExtension,
-  md5FileHashValue,
-  webUri,
+  track,
   onPlaybackDidJustFinish,
   previousTrack,
   onPlayPreviousTrack,
@@ -48,7 +44,7 @@ export function AudioPlayer({
   onPlayNextTrack,
 }: AudioPlayerProps) {
   // TODO Find a better way to come up with a file URI.
-  const fileUri = `${FileSystem.documentDirectory}${trackId}.${fileExtension}`
+  const fileUri = `${FileSystem.documentDirectory}${track.trackId}.${track.fileExtension}`
 
   const [sound] = useState<Audio.Sound>(() => new Audio.Sound())
   const [playbackStatus, setPlaybackStatus] = useState<AVPlaybackStatus | undefined>()
@@ -61,8 +57,8 @@ export function AudioPlayer({
   }, [])
 
   useEffect(() => {
-    loadAndPlay(fileUri, webUri, sound, onPlaybackStatusUpdate)
-  }, [fileUri, webUri, sound, onPlaybackStatusUpdate])
+    loadAndPlay(fileUri, track.webUri, sound, onPlaybackStatusUpdate)
+  }, [fileUri, track.webUri, sound, onPlaybackStatusUpdate])
 
   useEffect(() => {
     return () => {
@@ -151,7 +147,7 @@ export function AudioPlayer({
         </View>
       )}
       <View style={{ marginVertical: 15 }}>
-        <Text style={{ textAlign: "center" }}>{name}</Text>
+        <Text style={{ textAlign: "center" }}>{track.name}</Text>
       </View>
       <View
         style={{
@@ -299,10 +295,10 @@ export function AudioPlayer({
         }}
       >
         <DownloadSwitch
-          trackId={trackId}
-          sourceWebUri={webUri}
+          trackId={track.trackId}
+          sourceWebUri={track.webUri}
           targetFileUri={fileUri}
-          md5FileHashValue={md5FileHashValue}
+          md5FileHashValue={track.md5FileHashValue}
           onDownloadComplete={switchSource}
           onDownloadJustAboutToBeDeleted={switchSource}
         />
