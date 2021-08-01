@@ -10,9 +10,12 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
 import {
   ClassesScreen,
   MusicScreen,
+  NamePlaylistScreen,
+  OrderTracksScreen,
   PlayerScreen,
   PlaylistsScreen,
   PosesScreen,
+  SelectTracksScreen,
   SettingsScreen,
 } from "../screens"
 import { RouteProp } from "@react-navigation/native"
@@ -30,6 +33,9 @@ export type MainParamList = {
       webUri: string
     }[]
   }
+  selectTracks: undefined
+  orderTracks: undefined
+  namePlaylist: undefined
 }
 
 export type PlayerScreenRouteProp = RouteProp<MainParamList, "player">
@@ -80,7 +86,7 @@ export function TabNavigator() {
       <Tab.Screen name="classes" component={ClassesScreen} options={{ title: "Stunden" }} />
       <Tab.Screen name="poses" component={PosesScreen} options={{ title: "Übungen" }} />
       <Tab.Screen name="music" component={MusicScreen} options={{ title: "Musik" }} />
-      <Tab.Screen name="playlists" component={PlaylistsScreen} options={{ title: "Favoriten" }} />
+      <Tab.Screen name="playlists" component={PlaylistsScreen} options={{ title: "Playlists" }} />
       <Tab.Screen name="settings" component={SettingsScreen} options={{ title: "Einstellungen" }} />
     </Tab.Navigator>
   )
@@ -91,6 +97,21 @@ export function MainNavigator() {
     <Stack.Navigator initialRouteName="tabs">
       <Stack.Screen name="tabs" component={TabNavigator} options={{ headerShown: false }} />
       <Stack.Screen name="player" component={PlayerScreen} options={{ title: "Player" }} />
+      <Stack.Screen
+        name="selectTracks"
+        component={SelectTracksScreen}
+        options={{ title: "Übungen auswählen" }}
+      />
+      <Stack.Screen
+        name="orderTracks"
+        component={OrderTracksScreen}
+        options={{ title: "Übungen sortieren" }}
+      />
+      <Stack.Screen
+        name="namePlaylist"
+        component={NamePlaylistScreen}
+        options={{ title: "Playlist benennen" }}
+      />
     </Stack.Navigator>
   )
 }
