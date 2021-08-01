@@ -22,6 +22,7 @@ export const usePlaylistStore = create<State>(
         set(
           produce((state) => {
             state.playlists.push({ ...playlist, playlistId: state.nextPlaylistId })
+            state.nextPlaylistId += 1
           }),
         ),
       renamePlaylist: (playlistId, name) =>
