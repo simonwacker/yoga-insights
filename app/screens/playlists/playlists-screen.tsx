@@ -33,7 +33,7 @@ export const PlaylistsScreen = () => {
       <FlatList
         contentContainerStyle={FLAT_LIST}
         data={playlists}
-        keyExtractor={(index) => index.toString()}
+        keyExtractor={(item) => item.playlistId.toString()}
         renderItem={({ item }) => (
           <Pressable
             onPress={() =>
