@@ -3,9 +3,7 @@ import { SectionList, Pressable, StyleProp, TextStyle, View, ViewStyle } from "r
 import { spacing } from "../../theme"
 import { Text } from "../"
 import { flatten } from "ramda"
-import { useNavigation } from "@react-navigation/native"
-import { ClassesScreenNavigationProp } from "../../navigators"
-import { Section, Track } from "../../models"
+import { Section } from "../../models"
 import { useTrackStore } from "../../stores"
 import { useCallback } from "react"
 
@@ -37,7 +35,6 @@ export interface TrackListProps {
 }
 
 export const TrackList = ({ sections, onSelectTrack, style }: TrackListProps) => {
-  const navigation = useNavigation<ClassesScreenNavigationProp>()
   const getTrack = useTrackStore(useCallback((state) => state.getTrack, []))
 
   return (
