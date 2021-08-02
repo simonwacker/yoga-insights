@@ -6,7 +6,7 @@ import { usePlaylistStore } from "../../stores"
 import { color } from "../../theme"
 
 const ROOT: ViewStyle = {
-  backgroundColor: color.palette.black,
+  backgroundColor: color.background,
   flex: 1,
 }
 

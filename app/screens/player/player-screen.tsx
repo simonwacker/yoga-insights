@@ -6,7 +6,7 @@ import { PlayerScreenNavigationProp, PlayerScreenRouteProp } from "../../navigat
 import { useTrackStore } from "../../stores"
 
 const ROOT: ViewStyle = {
-  backgroundColor: color.palette.black,
+  backgroundColor: color.background,
   flex: 1,
 }
 

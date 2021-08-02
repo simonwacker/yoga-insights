@@ -6,7 +6,7 @@ import { PlaylistsScreenNavigationProp, PlaylistsScreenRouteProp } from "../../n
 import { usePlaylistStore } from "../../stores"
 
 const ROOT: ViewStyle = {
-  backgroundColor: color.palette.black,
+  backgroundColor: color.background,
   flex: 1,
 }
 

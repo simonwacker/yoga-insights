@@ -6,7 +6,7 @@ import { useTrackStore } from "../../stores"
 import { SelectTracksScreenNavigationProp, SelectTracksScreenRouteProp } from "../../navigators"
 
 const ROOT: ViewStyle = {
-  backgroundColor: color.palette.black,
+  backgroundColor: color.background,
   flex: 1,
 }
 const SECTION_LIST: ViewStyle = {
