@@ -9,7 +9,7 @@ export interface ButtonProps {
   /**
    * The text to display.
    */
-  text?: string
+  title?: string
 
   /**
    * An optional style override useful for padding & margin.

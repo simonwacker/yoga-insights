@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react"
-import { Button, ViewStyle } from "react-native"
-import { Screen, FlatList, ListCheckboxItem } from "../../components"
+import { ViewStyle } from "react-native"
+import { Button, Screen, FlatList, ListCheckboxItem } from "../../components"
 import { OrderTracksScreenNavigationProp, OrderTracksScreenRouteProp } from "../../navigators"
 import { useTrackStore } from "../../stores"
 import { color } from "../../theme"

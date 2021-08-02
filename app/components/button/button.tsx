@@ -13,7 +13,7 @@ export function Button(props: ButtonProps) {
   // grab the props
   const {
     preset = "primary",
-    text,
+    title: text,
     style: styleOverride,
     textStyle: textStyleOverride,
     children,

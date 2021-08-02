@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react"
-import { Button, TextInput, ViewStyle } from "react-native"
-import { Screen } from "../../components"
+import { ViewStyle } from "react-native"
+import { Button, Screen, TextField } from "../../components"
 import { NamePlaylistScreenNavigationProp, NamePlaylistScreenRouteProp } from "../../navigators"
 import { usePlaylistStore } from "../../stores"
 import { color } from "../../theme"
@@ -27,7 +27,7 @@ export function NamePlaylistScreen({ route, navigation }: NamePlaylistScreenProp
 
   return (
     <Screen style={ROOT} preset="scroll">
-      <TextInput accessibilityLabel="Name" value={name} onChangeText={setName} />
+      <TextField accessibilityLabel="Name" value={name} onChangeText={setName} />
       <Button
         onPress={() => {
           createPlaylist()

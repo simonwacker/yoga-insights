@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react"
-import { ViewStyle, SectionList, Button } from "react-native"
-import { Screen, Text, ListCheckboxItem } from "../../components"
+import { ViewStyle, SectionList } from "react-native"
+import { Screen, Text, ListCheckboxItem, Button } from "../../components"
 import { color, spacing } from "../../theme"
 import { useTrackStore } from "../../stores"
 import { SelectTracksScreenNavigationProp, SelectTracksScreenRouteProp } from "../../navigators"

@@ -22,7 +22,7 @@ storiesOf("Button", module)
       </UseCase>
       <UseCase text="Array Style" usage="Button with array style">
         <Button
-          text="Click It"
+          title="Click It"
           preset="primary"
           onPress={() => Alert.alert("pressed")}
           style={buttonStyleArray}
