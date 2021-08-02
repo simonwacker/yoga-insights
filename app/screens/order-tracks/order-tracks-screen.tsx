@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react"
-import { Button, FlatList, Pressable, TextStyle, View, ViewStyle } from "react-native"
-import { Screen, Text } from "../../components"
+import { Button, FlatList, ViewStyle } from "react-native"
+import { Screen, TrackListCheckboxItem } from "../../components"
 import { OrderTracksScreenNavigationProp, OrderTracksScreenRouteProp } from "../../navigators"
 import { useTrackStore } from "../../stores"
 import { color, spacing } from "../../theme"
@@ -8,14 +8,6 @@ import { color, spacing } from "../../theme"
 const ROOT: ViewStyle = {
   backgroundColor: color.palette.black,
   flex: 1,
-}
-const LIST_CONTAINER: ViewStyle = {
-  alignItems: "center",
-  flexDirection: "row",
-  padding: 10,
-}
-const LIST_TEXT: TextStyle = {
-  marginLeft: 10,
 }
 const FLAT_LIST: ViewStyle = {
   paddingHorizontal: spacing[4],
@@ -50,13 +42,11 @@ export const OrderTracksScreen = ({ route, navigation }: OrderTracksScreenProps)
         data={trackIds}
         keyExtractor={(item) => item}
         renderItem={({ item }) => (
-          <Pressable onPress={() => pushOrDeleteTrack(item)}>
-            <View style={LIST_CONTAINER}>
-              <Text style={LIST_TEXT}>
-                {getTrack(item).name} {orderedTrackIds.indexOf(item)}
-              </Text>
-            </View>
-          </Pressable>
+          <TrackListCheckboxItem
+            label={`${getTrack(item).name} (${orderedTrackIds.indexOf(item)})`}
+            checked={orderedTrackIds.includes(item)}
+            onPress={() => pushOrDeleteTrack(item)}
+          />
         )}
       />
       <Button

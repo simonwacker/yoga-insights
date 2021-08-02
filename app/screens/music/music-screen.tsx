@@ -1,6 +1,6 @@
 import React, { useCallback } from "react"
 import { ViewStyle } from "react-native"
-import { Screen, TrackList } from "../../components"
+import { Screen, TrackSectionList } from "../../components"
 import { MusicScreenNavigationProp, MusicScreenRouteProp } from "../../navigators"
 import { useTrackStore } from "../../stores"
 import { color } from "../../theme"
@@ -20,7 +20,7 @@ export const MusicScreen = ({ navigation }: MusicScreenProps) => {
 
   return (
     <Screen style={ROOT} preset="fixed">
-      <TrackList
+      <TrackSectionList
         sections={musicSections}
         onSelectTrack={(initialTrackIndex, trackIds) =>
           navigation.navigate("player", {

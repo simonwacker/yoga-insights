@@ -1,6 +1,6 @@
 import React, { useCallback } from "react"
 import { ViewStyle } from "react-native"
-import { Screen, TrackList } from "../../components"
+import { Screen, TrackSectionList } from "../../components"
 import { PosesScreenNavigationProp, PosesScreenRouteProp } from "../../navigators"
 import { useTrackStore } from "../../stores"
 import { color } from "../../theme"
@@ -20,7 +20,7 @@ export const PosesScreen = ({ navigation }: PosesScreenProps) => {
 
   return (
     <Screen style={ROOT} preset="fixed">
-      <TrackList
+      <TrackSectionList
         sections={poseSections}
         onSelectTrack={(initialTrackIndex, trackIds) =>
           navigation.navigate("player", {

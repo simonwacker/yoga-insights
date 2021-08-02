@@ -1,6 +1,6 @@
 import React, { useCallback } from "react"
 import { FlatList, Pressable, TextStyle, View, ViewStyle } from "react-native"
-import { Screen, Text } from "../../components"
+import { Screen, Text, TrackListButtonItem } from "../../components"
 import { color, spacing } from "../../theme"
 import { PlaylistsScreenNavigationProp, PlaylistsScreenRouteProp } from "../../navigators"
 import { usePlaylistStore, useTrackStore } from "../../stores"
@@ -8,14 +8,6 @@ import { usePlaylistStore, useTrackStore } from "../../stores"
 const ROOT: ViewStyle = {
   backgroundColor: color.palette.black,
   flex: 1,
-}
-const LIST_CONTAINER: ViewStyle = {
-  alignItems: "center",
-  flexDirection: "row",
-  padding: 10,
-}
-const LIST_TEXT: TextStyle = {
-  marginLeft: 10,
 }
 const FLAT_LIST: ViewStyle = {
   paddingHorizontal: spacing[4],
@@ -36,18 +28,15 @@ export const PlaylistsScreen = ({ navigation }: PlaylistsScreenProps) => {
         data={playlists}
         keyExtractor={(item) => item.playlistId.toString()}
         renderItem={({ item }) => (
-          <Pressable
+          <TrackListButtonItem
+            label={item.name}
             onPress={() =>
               navigation.navigate("player", {
                 initialTrackIndex: 0,
                 trackIds: item.trackIds,
               })
             }
-          >
-            <View style={LIST_CONTAINER}>
-              <Text style={LIST_TEXT}>{item.name}</Text>
-            </View>
-          </Pressable>
+          />
         )}
       />
       <Pressable onPress={() => navigation.navigate("selectTracks")}>

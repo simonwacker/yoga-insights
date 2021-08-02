@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react"
 import { Pressable, View, ViewStyle, TextStyle, SectionList, Button } from "react-native"
-import { Screen, Text } from "../../components"
+import { Screen, Text, TrackListCheckboxItem } from "../../components"
 import { color, spacing } from "../../theme"
 import { useTrackStore } from "../../stores"
 import { SelectTracksScreenNavigationProp, SelectTracksScreenRouteProp } from "../../navigators"
@@ -8,14 +8,6 @@ import { SelectTracksScreenNavigationProp, SelectTracksScreenRouteProp } from ".
 const ROOT: ViewStyle = {
   backgroundColor: color.palette.black,
   flex: 1,
-}
-const LIST_CONTAINER: ViewStyle = {
-  alignItems: "center",
-  flexDirection: "row",
-  padding: 10,
-}
-const LIST_TEXT: TextStyle = {
-  marginLeft: 10,
 }
 const SECTION_LIST: ViewStyle = {
   paddingHorizontal: spacing[4],
@@ -49,11 +41,11 @@ export const SelectTracksScreen = ({ navigation }: SelectTracksScreenProps) => {
         keyExtractor={(item) => item}
         renderSectionHeader={({ section }) => <Text>{section.title}</Text>}
         renderItem={({ item }) => (
-          <Pressable onPress={() => toggleTrackSelection(item)}>
-            <View style={LIST_CONTAINER}>
-              <Text style={LIST_TEXT}>{getTrack(item).name}</Text>
-            </View>
-          </Pressable>
+          <TrackListCheckboxItem
+            label={getTrack(item).name}
+            checked={selectedTrackIds.has(item)}
+            onPress={() => toggleTrackSelection(item)}
+          />
         )}
       />
       <Button
