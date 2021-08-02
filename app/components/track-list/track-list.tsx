@@ -29,13 +29,14 @@ const LIST_TEXT: TextStyle = {
 
 export interface TrackListProps {
   sections: Section[]
+  onSelectTrack: (initialTrackIndex: number, trackIds: readonly string[]) => void
   /**
    * An optional style override useful for padding & margin.
    */
   style?: StyleProp<ViewStyle>
 }
 
-export const TrackList = ({ sections, style }: TrackListProps) => {
+export const TrackList = ({ sections, onSelectTrack, style }: TrackListProps) => {
   const navigation = useNavigation<ClassesScreenNavigationProp>()
   const getTrack = useTrackStore(useCallback((state) => state.getTrack, []))
 
@@ -47,14 +48,7 @@ export const TrackList = ({ sections, style }: TrackListProps) => {
         keyExtractor={(item) => item}
         renderSectionHeader={({ section }) => <Text style={SECTION_TITLE}>{section.title}</Text>}
         renderItem={({ item, index, section }) => (
-          <Pressable
-            onPress={() =>
-              navigation.navigate("player", {
-                initialTrackIndex: index,
-                trackIds: section.data,
-              })
-            }
-          >
+          <Pressable onPress={() => onSelectTrack(index, section.data)}>
             <View style={LIST_CONTAINER}>
               <Text style={LIST_TEXT}>{getTrack(item).name}</Text>
             </View>

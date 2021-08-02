@@ -1,6 +1,7 @@
 import React, { useCallback } from "react"
 import { ViewStyle } from "react-native"
 import { Screen, TrackList } from "../../components"
+import { PosesScreenNavigationProp, PosesScreenRouteProp } from "../../navigators"
 import { useTrackStore } from "../../stores"
 import { color } from "../../theme"
 
@@ -9,12 +10,25 @@ const ROOT: ViewStyle = {
   flex: 1,
 }
 
-export const PosesScreen = () => {
+export type PosesScreenProps = {
+  route: PosesScreenRouteProp
+  navigation: PosesScreenNavigationProp
+}
+
+export const PosesScreen = ({ navigation }: PosesScreenProps) => {
   const poseSections = useTrackStore(useCallback((state) => state.poseSections, []))
 
   return (
     <Screen style={ROOT} preset="fixed">
-      <TrackList sections={poseSections} />
+      <TrackList
+        sections={poseSections}
+        onSelectTrack={(initialTrackIndex, trackIds) =>
+          navigation.navigate("player", {
+            initialTrackIndex: initialTrackIndex,
+            trackIds: trackIds,
+          })
+        }
+      />
     </Screen>
   )
 }

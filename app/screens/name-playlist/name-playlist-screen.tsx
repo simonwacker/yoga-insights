@@ -1,4 +1,3 @@
-import { useNavigation, useRoute } from "@react-navigation/native"
 import React, { useCallback, useState } from "react"
 import { Button, TextInput, ViewStyle } from "react-native"
 import { Screen } from "../../components"
@@ -11,9 +10,12 @@ const ROOT: ViewStyle = {
   flex: 1,
 }
 
-export const NamePlaylistScreen = () => {
-  const navigation = useNavigation<NamePlaylistScreenNavigationProp>()
-  const route = useRoute<NamePlaylistScreenRouteProp>()
+export type NamePlaylistScreenProps = {
+  route: NamePlaylistScreenRouteProp
+  navigation: NamePlaylistScreenNavigationProp
+}
+
+export const NamePlaylistScreen = ({ route, navigation }: NamePlaylistScreenProps) => {
   const { trackIds } = route.params
 
   const [name, setName] = useState("")

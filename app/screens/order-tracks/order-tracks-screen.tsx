@@ -1,4 +1,3 @@
-import { useNavigation, useRoute } from "@react-navigation/native"
 import React, { useCallback, useState } from "react"
 import { Button, FlatList, Pressable, TextStyle, View, ViewStyle } from "react-native"
 import { Screen, Text } from "../../components"
@@ -22,9 +21,12 @@ const FLAT_LIST: ViewStyle = {
   paddingHorizontal: spacing[4],
 }
 
-export const OrderTracksScreen = () => {
-  const navigation = useNavigation<OrderTracksScreenNavigationProp>()
-  const route = useRoute<OrderTracksScreenRouteProp>()
+export type OrderTracksScreenProps = {
+  route: OrderTracksScreenRouteProp
+  navigation: OrderTracksScreenNavigationProp
+}
+
+export const OrderTracksScreen = ({ route, navigation }: OrderTracksScreenProps) => {
   const { trackIds } = route.params
 
   const getTrack = useTrackStore(useCallback((state) => state.getTrack, []))

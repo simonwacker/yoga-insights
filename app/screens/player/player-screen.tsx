@@ -1,9 +1,8 @@
 import React, { useState, useCallback } from "react"
 import { ViewStyle } from "react-native"
 import { Screen, AudioPlayer } from "../../components"
-import { useRoute } from "@react-navigation/native"
 import { color } from "../../theme"
-import { PlayerScreenRouteProp } from "../../navigators"
+import { PlayerScreenNavigationProp, PlayerScreenRouteProp } from "../../navigators"
 import { useTrackStore } from "../../stores"
 
 const ROOT: ViewStyle = {
@@ -11,8 +10,12 @@ const ROOT: ViewStyle = {
   flex: 1,
 }
 
-export const PlayerScreen = () => {
-  const route = useRoute<PlayerScreenRouteProp>()
+export type PlayerScreenProps = {
+  route: PlayerScreenRouteProp
+  navigation: PlayerScreenNavigationProp
+}
+
+export const PlayerScreen = ({ route }: PlayerScreenProps) => {
   const { initialTrackIndex, trackIds } = route.params
 
   const getTrack = useTrackStore(useCallback((state) => state.getTrack, []))

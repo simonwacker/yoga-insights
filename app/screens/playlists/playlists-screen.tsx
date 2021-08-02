@@ -2,8 +2,7 @@ import React, { useCallback } from "react"
 import { FlatList, Pressable, TextStyle, View, ViewStyle } from "react-native"
 import { Screen, Text } from "../../components"
 import { color, spacing } from "../../theme"
-import { useNavigation } from "@react-navigation/native"
-import { PlaylistsScreenNavigationProp } from "../../navigators"
+import { PlaylistsScreenNavigationProp, PlaylistsScreenRouteProp } from "../../navigators"
 import { usePlaylistStore, useTrackStore } from "../../stores"
 
 const ROOT: ViewStyle = {
@@ -22,10 +21,13 @@ const FLAT_LIST: ViewStyle = {
   paddingHorizontal: spacing[4],
 }
 
-export const PlaylistsScreen = () => {
-  const playlists = usePlaylistStore(useCallback((state) => state.playlists, []))
+export type PlaylistsScreenProps = {
+  route: PlaylistsScreenRouteProp
+  navigation: PlaylistsScreenNavigationProp
+}
 
-  const navigation = useNavigation<PlaylistsScreenNavigationProp>()
+export const PlaylistsScreen = ({ navigation }: PlaylistsScreenProps) => {
+  const playlists = usePlaylistStore(useCallback((state) => state.playlists, []))
 
   return (
     <Screen style={ROOT} preset="fixed">

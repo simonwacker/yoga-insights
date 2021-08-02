@@ -3,8 +3,7 @@ import { Pressable, View, ViewStyle, TextStyle, SectionList, Button } from "reac
 import { Screen, Text } from "../../components"
 import { color, spacing } from "../../theme"
 import { useTrackStore } from "../../stores"
-import { useNavigation } from "@react-navigation/native"
-import { SelectTracksScreenNavigationProp } from "../../navigators"
+import { SelectTracksScreenNavigationProp, SelectTracksScreenRouteProp } from "../../navigators"
 
 const ROOT: ViewStyle = {
   backgroundColor: color.palette.black,
@@ -22,8 +21,12 @@ const SECTION_LIST: ViewStyle = {
   paddingHorizontal: spacing[4],
 }
 
-export const SelectTracksScreen = () => {
-  const navigation = useNavigation<SelectTracksScreenNavigationProp>()
+export type SelectTracksScreenProps = {
+  route: SelectTracksScreenRouteProp
+  navigation: SelectTracksScreenNavigationProp
+}
+
+export const SelectTracksScreen = ({ navigation }: SelectTracksScreenProps) => {
   const poseSections = useTrackStore(useCallback((state) => state.poseSections, []))
   const getTrack = useTrackStore(useCallback((state) => state.getTrack, []))
   const [selectedTrackIds, setSelectedTrackIds] = useState(new Set<string>())

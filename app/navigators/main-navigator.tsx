@@ -19,7 +19,6 @@ import {
   SettingsScreen,
 } from "../screens"
 import { CompositeNavigationProp, NavigatorScreenParams, RouteProp } from "@react-navigation/native"
-import { Track } from "../models"
 
 /**
  * This type allows TypeScript to know what routes are defined in this navigator
@@ -59,78 +58,42 @@ export type ClassesScreenNavigationProp = CompositeNavigationProp<
   BottomTabNavigationProp<TabParamList, "classes">,
   StackNavigationProp<MainParamList>
 >
-export type ClassesProps = {
-  route: ClassesScreenRouteProp
-  navigation: ClassesScreenNavigationProp
-}
 
 export type PosesScreenRouteProp = RouteProp<TabParamList, "poses">
 export type PosesScreenNavigationProp = CompositeNavigationProp<
   BottomTabNavigationProp<TabParamList, "poses">,
   StackNavigationProp<MainParamList>
 >
-export type PosesProps = {
-  route: PosesScreenRouteProp
-  navigation: PosesScreenNavigationProp
-}
 
 export type MusicScreenRouteProp = RouteProp<TabParamList, "music">
 export type MusicScreenNavigationProp = CompositeNavigationProp<
   BottomTabNavigationProp<TabParamList, "music">,
   StackNavigationProp<MainParamList>
 >
-export type MusicProps = {
-  route: MusicScreenRouteProp
-  navigation: MusicScreenNavigationProp
-}
 
 export type PlaylistsScreenRouteProp = RouteProp<TabParamList, "playlists">
 export type PlaylistsScreenNavigationProp = CompositeNavigationProp<
   BottomTabNavigationProp<TabParamList, "playlists">,
   StackNavigationProp<MainParamList>
 >
-export type PlaylistsProps = {
-  route: PlaylistsScreenRouteProp
-  navigation: PlaylistsScreenNavigationProp
-}
 
 export type SettingsScreenRouteProp = RouteProp<TabParamList, "settings">
 export type SettingsScreenNavigationProp = CompositeNavigationProp<
   BottomTabNavigationProp<TabParamList, "settings">,
   StackNavigationProp<MainParamList>
 >
-export type SettingsProps = {
-  route: SettingsScreenRouteProp
-  navigation: SettingsScreenNavigationProp
-}
 
 export type PlayerScreenRouteProp = RouteProp<MainParamList, "player">
 export type PlayerScreenNavigationProp = StackNavigationProp<MainParamList, "player">
-export type PlayerProps = {
-  route: PlayerScreenRouteProp
-  navigation: PlayerScreenNavigationProp
-}
 
 export type SelectTracksScreenRouteProp = RouteProp<MainParamList, "orderTracks">
 export type SelectTracksScreenNavigationProp = StackNavigationProp<MainParamList, "orderTracks">
-export type SelectTracksProps = {
-  route: SelectTracksScreenRouteProp
-  navigation: SelectTracksScreenNavigationProp
-}
 
 export type OrderTracksScreenRouteProp = RouteProp<MainParamList, "orderTracks">
 export type OrderTracksScreenNavigationProp = StackNavigationProp<MainParamList, "orderTracks">
-export type OrderTracksProps = {
-  route: OrderTracksScreenRouteProp
-  navigation: OrderTracksScreenNavigationProp
-}
 
 export type NamePlaylistScreenRouteProp = RouteProp<MainParamList, "namePlaylist">
 export type NamePlaylistScreenNavigationProp = StackNavigationProp<MainParamList, "namePlaylist">
-export type NamePlaylistProps = {
-  route: NamePlaylistScreenRouteProp
-  navigation: NamePlaylistScreenNavigationProp
-}
 
 const Stack = createStackNavigator<MainParamList>()
 
