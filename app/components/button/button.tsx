@@ -28,7 +28,7 @@ export function Button(props: ButtonProps) {
   const content = children || <Text text={text} style={textStyles} />
 
   return (
-    <Pressable style={viewStyles} {...rest}>
+    <Pressable accessible accessibilityRole="button" style={viewStyles} {...rest}>
       {content}
     </Pressable>
   )
