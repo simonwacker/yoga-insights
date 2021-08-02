@@ -1,5 +1,4 @@
 import { StyleProp, ViewStyle } from "react-native"
-import { TxKeyPath } from "../../i18n"
 
 export interface CheckboxProps {
   /**
@@ -26,11 +25,6 @@ export interface CheckboxProps {
    * The text to display if there isn't a tx.
    */
   text?: string
-
-  /**
-   * The i18n lookup key.
-   */
-  tx?: TxKeyPath
 
   /**
    * Multiline or clipped single line?

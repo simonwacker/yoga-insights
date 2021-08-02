@@ -42,7 +42,7 @@ export function Checkbox(props: CheckboxProps) {
   return (
     <Pressable disabled={!props.onToggle} onPress={onPress} style={rootStyle}>
       <View style={outlineStyle}>{props.value && <View style={fillStyle} />}</View>
-      <Text text={props.text} tx={props.tx} numberOfLines={numberOfLines} style={LABEL} />
+      <Text text={props.text} numberOfLines={numberOfLines} style={LABEL} />
     </Pressable>
   )
 }

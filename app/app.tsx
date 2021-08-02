@@ -10,7 +10,6 @@
  * if you're interested in adding screens and navigators.
  */
 import "react-native-gesture-handler"
-import "./i18n"
 import "./utils/ignore-warnings"
 import React, { useEffect, useRef } from "react"
 import { NavigationContainerRef } from "@react-navigation/native"

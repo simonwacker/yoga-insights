@@ -13,7 +13,6 @@ export function Button(props: ButtonProps) {
   // grab the props
   const {
     preset = "primary",
-    tx,
     text,
     style: styleOverride,
     textStyle: textStyleOverride,
@@ -26,7 +25,7 @@ export function Button(props: ButtonProps) {
   const textStyle = textPresets[preset] || textPresets.primary
   const textStyles = [textStyle, textStyleOverride]
 
-  const content = children || <Text tx={tx} text={text} style={textStyles} />
+  const content = children || <Text text={text} style={textStyles} />
 
   return (
     <Pressable style={viewStyles} {...rest}>

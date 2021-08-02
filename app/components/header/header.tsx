@@ -5,7 +5,6 @@ import { Button } from "../button/button"
 import { Text } from "../text/text"
 import { Icon } from "../icon/icon"
 import { spacing } from "../../theme"
-import { translate } from "../../i18n/"
 
 // static styles
 const ROOT: ViewStyle = {
@@ -25,17 +24,8 @@ const RIGHT: ViewStyle = { width: 32 }
  * Header that appears on many screens. Will hold navigation buttons and screen title.
  */
 export function Header(props: HeaderProps) {
-  const {
-    onLeftPress,
-    onRightPress,
-    rightIcon,
-    leftIcon,
-    headerText,
-    headerTx,
-    style,
-    titleStyle,
-  } = props
-  const header = headerText || (headerTx && translate(headerTx)) || ""
+  const { onLeftPress, onRightPress, rightIcon, leftIcon, headerText, style, titleStyle } = props
+  const header = headerText || ""
 
   return (
     <View style={[ROOT, style]}>

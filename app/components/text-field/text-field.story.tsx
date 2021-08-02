@@ -42,19 +42,6 @@ storiesOf("TextField", module)
           )}
         </State>
       </UseCase>
-
-      <UseCase text="i18n text" usage="Use placeholderTx and labelTx for i18n lookups">
-        <State initial={{ value: "" }}>
-          {({ state, setState }) => (
-            <TextField
-              onChangeText={(value) => setState({ value })}
-              value={state.value}
-              placeholderTx="storybook.placeholder"
-              labelTx="storybook.field"
-            />
-          )}
-        </State>
-      </UseCase>
     </Story>
   ))
   .add("Style Overrides", () => (

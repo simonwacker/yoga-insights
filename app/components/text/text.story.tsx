@@ -54,12 +54,6 @@ storiesOf("Text", module)
           <Text text="Heyo!" />
         </View>
       </UseCase>
-      <UseCase text="tx" usage="Used for looking up i18n keys.">
-        <View style={VIEWSTYLE}>
-          <Text tx="common.ok" />
-          <Text tx="common.cancel" />
-        </View>
-      </UseCase>
       <UseCase
         text="children"
         usage="Used like you would normally use a React Native <Text> component."

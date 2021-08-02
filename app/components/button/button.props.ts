@@ -1,15 +1,13 @@
-import { StyleProp, TextStyle, PressableProps, ViewStyle } from "react-native"
+import { StyleProp, TextStyle, ViewStyle } from "react-native"
 import { ButtonPresetNames } from "./button.presets"
-import { TxKeyPath } from "../../i18n"
 
-export interface ButtonProps extends PressableProps {
-  /**
-   * Text which is looked up via i18n.
-   */
-  tx?: TxKeyPath
+// Having `extends PressableProps` does not work because `children` is not optional there.
+export interface ButtonProps {
+  onPress?: () => void
+  disabled?: boolean
 
   /**
-   * The text to display if not using `tx` or nested components.
+   * The text to display.
    */
   text?: string
 
@@ -31,5 +29,5 @@ export interface ButtonProps extends PressableProps {
   /**
    * One of the different types of text presets.
    */
-  children: React.ReactNode
+  children?: React.ReactNode
 }
