@@ -1,6 +1,6 @@
 import React, { useCallback } from "react"
-import { Pressable, ViewStyle } from "react-native"
-import { Screen, Text, ListButtonItem, FlatList } from "../../components"
+import { ViewStyle } from "react-native"
+import { Button, Screen, ListButtonItem, FlatList } from "../../components"
 import { color } from "../../theme"
 import { PlaylistsScreenNavigationProp, PlaylistsScreenRouteProp } from "../../navigators"
 import { usePlaylistStore } from "../../stores"
@@ -35,9 +35,7 @@ export function PlaylistsScreen({ navigation }: PlaylistsScreenProps) {
           />
         )}
       />
-      <Pressable onPress={() => navigation.navigate("selectTracks")}>
-        <Text>Neue Playlist</Text>
-      </Pressable>
+      <Button title="Neue Playlist" onPress={() => navigation.navigate("selectTracks")} />
     </Screen>
   )
 }
