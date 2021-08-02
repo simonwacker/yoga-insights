@@ -1,5 +1,5 @@
 export interface Playlist {
-  playlistId: number
-  name: string
-  trackIds: string[]
+  readonly playlistId: number
+  readonly name: string
+  readonly trackIds: string[]
 }

@@ -1,4 +1,4 @@
-export interface Section<Model> {
+export interface Section {
   title: string
-  data: Model[]
+  data: string[]
 }

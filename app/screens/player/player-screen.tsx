@@ -1,9 +1,10 @@
-import React, { useState } from "react"
+import React, { useState, useCallback } from "react"
 import { ViewStyle } from "react-native"
 import { Screen, AudioPlayer } from "../../components"
 import { useRoute } from "@react-navigation/native"
 import { color } from "../../theme"
 import { PlayerScreenRouteProp } from "../../navigators"
+import { useTrackStore } from "../../stores"
 
 const ROOT: ViewStyle = {
   backgroundColor: color.palette.black,
@@ -12,10 +13,10 @@ const ROOT: ViewStyle = {
 
 export const PlayerScreen = () => {
   const route = useRoute<PlayerScreenRouteProp>()
-  const { initialTrackIndex, tracks } = route.params
+  const { initialTrackIndex, trackIds } = route.params
 
+  const getTrack = useTrackStore(useCallback((state) => state.getTrack, []))
   const [trackIndex, setTrackIndex] = useState(initialTrackIndex)
-  const track = tracks[trackIndex]
 
   const playPreviousTrack = () => {
     if (trackIndex > 0) {
@@ -24,7 +25,7 @@ export const PlayerScreen = () => {
   }
 
   const playNextTrack = () => {
-    if (trackIndex + 1 < tracks.length) {
+    if (trackIndex + 1 < trackIds.length) {
       setTrackIndex(trackIndex + 1)
     }
   }
@@ -32,11 +33,13 @@ export const PlayerScreen = () => {
   return (
     <Screen style={ROOT} preset="scroll">
       <AudioPlayer
-        track={track}
+        track={getTrack(trackIds[trackIndex])}
         onPlaybackDidJustFinish={playNextTrack}
-        previousTrack={trackIndex >= 1 ? tracks[trackIndex - 1] : undefined}
+        previousTrack={trackIndex >= 1 ? getTrack(trackIds[trackIndex - 1]) : undefined}
         onPlayPreviousTrack={playPreviousTrack}
-        nextTrack={trackIndex + 1 < tracks.length ? tracks[trackIndex + 1] : undefined}
+        nextTrack={
+          trackIndex + 1 < trackIds.length ? getTrack(trackIds[trackIndex + 1]) : undefined
+        }
         onPlayNextTrack={playNextTrack}
       />
     </Screen>

@@ -9,7 +9,7 @@ storiesOf("TrackList", module)
   .add("Style Presets", () => (
     <Story>
       <UseCase text="Primary" usage="The primary.">
-        <TrackList tracks={[]} style={{ backgroundColor: color.error }} />
+        <TrackList sections={[]} style={{ backgroundColor: color.error }} />
       </UseCase>
     </Story>
   ))

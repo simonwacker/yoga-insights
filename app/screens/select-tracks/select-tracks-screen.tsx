@@ -2,10 +2,9 @@ import React, { useCallback, useState } from "react"
 import { Pressable, View, ViewStyle, TextStyle, SectionList, Button } from "react-native"
 import { Screen, Text } from "../../components"
 import { color, spacing } from "../../theme"
-import { usePoseStore } from "../../stores"
+import { useTrackStore } from "../../stores"
 import { useNavigation } from "@react-navigation/native"
 import { SelectTracksScreenNavigationProp } from "../../navigators"
-import { Track } from "../../models"
 
 const ROOT: ViewStyle = {
   backgroundColor: color.palette.black,
@@ -23,40 +22,33 @@ const SECTION_LIST: ViewStyle = {
   paddingHorizontal: spacing[4],
 }
 
-const toIdList = (tracks: Set<Track>) => {
-  const list = []
-  for (const track of tracks) {
-    list.push(track.trackId)
-  }
-  return list
-}
-
 export const SelectTracksScreen = () => {
   const navigation = useNavigation<SelectTracksScreenNavigationProp>()
-  const poses = usePoseStore(useCallback((state) => state.poses, []))
-  const [selectedTracks, setSelectedTracks] = useState(new Set<Track>())
+  const poseSections = useTrackStore(useCallback((state) => state.poseSections, []))
+  const getTrack = useTrackStore(useCallback((state) => state.getTrack, []))
+  const [selectedTrackIds, setSelectedTrackIds] = useState(new Set<string>())
 
-  const toggleTrackSelection = (track: Track) => {
-    const copy = new Set(selectedTracks)
-    if (copy.has(track)) {
-      copy.delete(track)
+  const toggleTrackSelection = (trackId: string) => {
+    const copy = new Set(selectedTrackIds)
+    if (copy.has(trackId)) {
+      copy.delete(trackId)
     } else {
-      copy.add(track)
+      copy.add(trackId)
     }
-    setSelectedTracks(copy)
+    setSelectedTrackIds(copy)
   }
 
   return (
     <Screen style={ROOT} preset="fixed">
       <SectionList
         contentContainerStyle={SECTION_LIST}
-        sections={poses}
-        keyExtractor={(item) => item.trackId}
+        sections={poseSections}
+        keyExtractor={(item) => item}
         renderSectionHeader={({ section }) => <Text>{section.title}</Text>}
         renderItem={({ item }) => (
           <Pressable onPress={() => toggleTrackSelection(item)}>
             <View style={LIST_CONTAINER}>
-              <Text style={LIST_TEXT}>{item.name}</Text>
+              <Text style={LIST_TEXT}>{getTrack(item).name}</Text>
             </View>
           </Pressable>
         )}
@@ -64,7 +56,7 @@ export const SelectTracksScreen = () => {
       <Button
         onPress={() =>
           navigation.navigate("orderTracks", {
-            trackIds: toIdList(selectedTracks),
+            trackIds: Array.from(selectedTrackIds),
           })
         }
         title="Übungen sortieren"

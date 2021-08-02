@@ -3,7 +3,7 @@ import React, { useCallback, useState } from "react"
 import { Button, FlatList, Pressable, TextStyle, View, ViewStyle } from "react-native"
 import { Screen, Text } from "../../components"
 import { OrderTracksScreenNavigationProp, OrderTracksScreenRouteProp } from "../../navigators"
-import { usePoseStore } from "../../stores"
+import { useTrackStore } from "../../stores"
 import { color, spacing } from "../../theme"
 
 const ROOT: ViewStyle = {
@@ -27,7 +27,7 @@ export const OrderTracksScreen = () => {
   const route = useRoute<OrderTracksScreenRouteProp>()
   const { trackIds } = route.params
 
-  const indexedPoses = usePoseStore(useCallback((state) => state.indexedPoses, []))
+  const getTrack = useTrackStore(useCallback((state) => state.getTrack, []))
   const [orderedTrackIds, setOrderedTrackIds] = useState(new Array<string>())
 
   const pushOrDeleteTrack = (trackId: string) => {
@@ -51,7 +51,7 @@ export const OrderTracksScreen = () => {
           <Pressable onPress={() => pushOrDeleteTrack(item)}>
             <View style={LIST_CONTAINER}>
               <Text style={LIST_TEXT}>
-                {indexedPoses[item].name} {orderedTrackIds.indexOf(item)}
+                {getTrack(item).name} {orderedTrackIds.indexOf(item)}
               </Text>
             </View>
           </Pressable>

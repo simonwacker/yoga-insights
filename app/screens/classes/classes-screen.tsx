@@ -1,7 +1,7 @@
 import React, { useCallback } from "react"
 import { ViewStyle } from "react-native"
 import { Screen, TrackList } from "../../components"
-import { useClassStore } from "../../stores"
+import { useTrackStore } from "../../stores"
 import { color } from "../../theme"
 
 const ROOT: ViewStyle = {
@@ -10,11 +10,11 @@ const ROOT: ViewStyle = {
 }
 
 export const ClassesScreen = () => {
-  const classes = useClassStore(useCallback((state) => state.classes, []))
+  const classSections = useTrackStore(useCallback((state) => state.classSections, []))
 
   return (
     <Screen style={ROOT} preset="fixed">
-      <TrackList tracks={classes} />
+      <TrackList sections={classSections} />
     </Screen>
   )
 }

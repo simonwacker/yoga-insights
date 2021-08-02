@@ -4,7 +4,7 @@ import { Screen, Text } from "../../components"
 import { color, spacing } from "../../theme"
 import { useNavigation } from "@react-navigation/native"
 import { PlaylistsScreenNavigationProp } from "../../navigators"
-import { usePlaylistStore, usePoseStore } from "../../stores"
+import { usePlaylistStore, useTrackStore } from "../../stores"
 
 const ROOT: ViewStyle = {
   backgroundColor: color.palette.black,
@@ -24,7 +24,6 @@ const FLAT_LIST: ViewStyle = {
 
 export const PlaylistsScreen = () => {
   const playlists = usePlaylistStore(useCallback((state) => state.playlists, []))
-  const indexedPoses = usePoseStore(useCallback((state) => state.indexedPoses, []))
 
   const navigation = useNavigation<PlaylistsScreenNavigationProp>()
 
@@ -39,7 +38,7 @@ export const PlaylistsScreen = () => {
             onPress={() =>
               navigation.navigate("player", {
                 initialTrackIndex: 0,
-                tracks: item.trackIds.map((trackId) => indexedPoses[trackId]),
+                trackIds: item.trackIds,
               })
             }
           >

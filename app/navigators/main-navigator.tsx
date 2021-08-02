@@ -43,14 +43,14 @@ export type MainParamList = {
   tabs: NavigatorScreenParams<TabParamList>
   player: {
     initialTrackIndex: number
-    tracks: readonly Track[]
+    trackIds: readonly string[]
   }
   selectTracks: undefined
   orderTracks: {
     trackIds: readonly string[]
   }
   namePlaylist: {
-    trackIds: readonly string[]
+    trackIds: string[]
   }
 }
 
