@@ -15,7 +15,7 @@ export type ClassesScreenProps = {
   navigation: ClassesScreenNavigationProp
 }
 
-export const ClassesScreen = ({ navigation }: ClassesScreenProps) => {
+export function ClassesScreen({ navigation }: ClassesScreenProps) {
   const classSections = useTrackStore(useCallback((state) => state.classSections, []))
 
   return (

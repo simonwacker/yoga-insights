@@ -15,7 +15,7 @@ export type MusicScreenProps = {
   navigation: MusicScreenNavigationProp
 }
 
-export const MusicScreen = ({ navigation }: MusicScreenProps) => {
+export function MusicScreen({ navigation }: MusicScreenProps) {
   const musicSections = useTrackStore(useCallback((state) => state.musicSections, []))
 
   return (

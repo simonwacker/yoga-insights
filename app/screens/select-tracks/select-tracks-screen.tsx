@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react"
-import { Pressable, View, ViewStyle, TextStyle, SectionList, Button } from "react-native"
-import { Screen, Text, TrackListCheckboxItem } from "../../components"
+import { ViewStyle, SectionList, Button } from "react-native"
+import { Screen, Text, ListCheckboxItem } from "../../components"
 import { color, spacing } from "../../theme"
 import { useTrackStore } from "../../stores"
 import { SelectTracksScreenNavigationProp, SelectTracksScreenRouteProp } from "../../navigators"
@@ -18,7 +18,7 @@ export type SelectTracksScreenProps = {
   navigation: SelectTracksScreenNavigationProp
 }
 
-export const SelectTracksScreen = ({ navigation }: SelectTracksScreenProps) => {
+export function SelectTracksScreen({ navigation }: SelectTracksScreenProps) {
   const poseSections = useTrackStore(useCallback((state) => state.poseSections, []))
   const getTrack = useTrackStore(useCallback((state) => state.getTrack, []))
   const [selectedTrackIds, setSelectedTrackIds] = useState(new Set<string>())
@@ -41,7 +41,7 @@ export const SelectTracksScreen = ({ navigation }: SelectTracksScreenProps) => {
         keyExtractor={(item) => item}
         renderSectionHeader={({ section }) => <Text>{section.title}</Text>}
         renderItem={({ item }) => (
-          <TrackListCheckboxItem
+          <ListCheckboxItem
             label={getTrack(item).name}
             checked={selectedTrackIds.has(item)}
             onPress={() => toggleTrackSelection(item)}

@@ -15,7 +15,7 @@ export type NamePlaylistScreenProps = {
   navigation: NamePlaylistScreenNavigationProp
 }
 
-export const NamePlaylistScreen = ({ route, navigation }: NamePlaylistScreenProps) => {
+export function NamePlaylistScreen({ route, navigation }: NamePlaylistScreenProps) {
   const { trackIds } = route.params
 
   const [name, setName] = useState("")

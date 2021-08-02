@@ -15,7 +15,7 @@ export type PlayerScreenProps = {
   navigation: PlayerScreenNavigationProp
 }
 
-export const PlayerScreen = ({ route }: PlayerScreenProps) => {
+export function PlayerScreen({ route }: PlayerScreenProps) {
   const { initialTrackIndex, trackIds } = route.params
 
   const getTrack = useTrackStore(useCallback((state) => state.getTrack, []))

@@ -1,19 +1,14 @@
 import * as React from "react"
 import { storiesOf } from "@storybook/react-native"
 import { StoryScreen, Story, UseCase } from "../../../storybook/views"
-import { color } from "../../theme"
-import { TrackFlatList } from "./track-flat-list"
+import { ListButtonItem } from "./list-button-item"
 
-storiesOf("TrackFlatList", module)
+storiesOf("ListButtonItem", module)
   .addDecorator((fn) => <StoryScreen>{fn()}</StoryScreen>)
   .add("Style Presets", () => (
     <Story>
       <UseCase text="Primary" usage="The primary.">
-        <TrackFlatList
-          trackIds={[]}
-          onSelectTrack={(initialTrackIndex, trackIds) => {}}
-          style={{ backgroundColor: color.error }}
-        />
+        <ListButtonItem label="" onPress={() => {}} />
       </UseCase>
     </Story>
   ))

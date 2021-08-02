@@ -15,20 +15,14 @@ const LIST_TEXT: TextStyle = {
   color: color.primary,
 }
 
-export interface TrackListCheckboxItemProps {
+export interface ListButtonItemProps {
   label: string
-  checked: boolean
   onPress: () => void
 }
 
-export function TrackListCheckboxItem({ label, checked, onPress }: TrackListCheckboxItemProps) {
+export function ListButtonItem({ label, onPress }: ListButtonItemProps) {
   return (
-    <Pressable
-      accessible
-      accessibilityRole="checkbox"
-      accessibilityState={{ checked: checked }}
-      onPress={onPress}
-    >
+    <Pressable accessible accessibilityRole="button" onPress={onPress}>
       <View style={LIST_CONTAINER}>
         <Text style={LIST_TEXT}>{label}</Text>
       </View>

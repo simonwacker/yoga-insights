@@ -14,7 +14,7 @@ export type SettingsScreenProps = {
   navigation: SettingsScreenNavigationProp
 }
 
-export const SettingsScreen = ({}: SettingsScreenProps) => {
+export function SettingsScreen({}: SettingsScreenProps) {
   return (
     <Screen style={ROOT} preset="scroll">
       <Text preset="header" text="" />

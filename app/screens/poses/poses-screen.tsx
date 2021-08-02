@@ -15,7 +15,7 @@ export type PosesScreenProps = {
   navigation: PosesScreenNavigationProp
 }
 
-export const PosesScreen = ({ navigation }: PosesScreenProps) => {
+export function PosesScreen({ navigation }: PosesScreenProps) {
   const poseSections = useTrackStore(useCallback((state) => state.poseSections, []))
 
   return (
