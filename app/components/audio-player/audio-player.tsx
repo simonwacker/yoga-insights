@@ -2,7 +2,8 @@
 
 import React, { useCallback, useEffect, useState } from "react"
 import { Pressable, View } from "react-native"
-import { Text, DownloadSwitch } from "../../components"
+import { DownloadSwitch } from "../download-switch/download-switch"
+import { Text } from "../text/text"
 import { Audio, AVPlaybackStatus } from "expo-av"
 import Slider from "@react-native-community/slider"
 import { AntDesign } from "@expo/vector-icons"

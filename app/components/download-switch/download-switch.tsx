@@ -3,7 +3,7 @@ import { DownloadResumable, FileSystemDownloadResult } from "expo-file-system"
 import { DownloadSwitchProps } from "./download-switch.props"
 import { FileSystem } from "react-native-unimodules"
 import { Switch, View } from "react-native"
-import { Text } from "../../components"
+import { Text } from "../text/text"
 
 enum DownloadStatus {
   Unknown = "UNKNOWN",
