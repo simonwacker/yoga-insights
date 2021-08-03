@@ -49,6 +49,7 @@ export function SelectTracksScreen({ navigation }: SelectTracksScreenProps) {
         )}
       />
       <Button
+        disabled={selectedTrackIds.size === 0}
         onPress={() =>
           navigation.navigate("orderTracks", {
             trackIds: Array.from(selectedTrackIds),

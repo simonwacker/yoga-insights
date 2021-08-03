@@ -29,6 +29,7 @@ export function NamePlaylistScreen({ route, navigation }: NamePlaylistScreenProp
     <Screen style={ROOT} preset="scroll">
       <TextField accessibilityLabel="Name" value={name} onChangeText={setName} />
       <Button
+        disabled={name === ""}
         onPress={() => {
           createPlaylist()
           navigation.navigate("tabs", { screen: "playlists" })

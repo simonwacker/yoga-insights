@@ -46,6 +46,7 @@ export function OrderTracksScreen({ route, navigation }: OrderTracksScreenProps)
         )}
       />
       <Button
+        disabled={trackIds.length !== orderedTrackIds.length}
         onPress={() => navigation.navigate("namePlaylist", { trackIds: orderedTrackIds })}
         title="Playlist benennen"
       />
