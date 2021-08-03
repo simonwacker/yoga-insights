@@ -5,6 +5,7 @@ import { FileSystem } from "react-native-unimodules"
 import { Switch, TextStyle, View, ViewStyle } from "react-native"
 import { Text } from "../text/text"
 import { color, spacing } from "../../theme"
+import { scale } from "../../theme/scale"
 
 const ROOT: ViewStyle = {
   marginVertical: spacing.medium,
@@ -14,7 +15,7 @@ const ROOT: ViewStyle = {
 }
 const PERCENTAGE: TextStyle = {
   color: color.text,
-  fontSize: 9,
+  fontSize: scale.tiny,
 }
 
 enum DownloadStatus {

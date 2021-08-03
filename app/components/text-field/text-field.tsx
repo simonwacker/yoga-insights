@@ -1,6 +1,7 @@
 import React from "react"
 import { StyleProp, TextInput, TextInputProps, TextStyle, View, ViewStyle } from "react-native"
 import { color, spacing, typography } from "../../theme"
+import { scale } from "../../theme/scale"
 import { Text } from "../text/text"
 
 // the base styling for the container
@@ -13,7 +14,7 @@ const INPUT: TextStyle = {
   fontFamily: typography.primary,
   color: color.background,
   minHeight: 44,
-  fontSize: 15,
+  fontSize: scale.medium,
   backgroundColor: color.text,
 }
 

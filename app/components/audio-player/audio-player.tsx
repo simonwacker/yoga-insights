@@ -11,6 +11,7 @@ import { FileSystem } from "react-native-unimodules"
 import { AudioPlayerProps } from "./audio-player.props"
 import { color, spacing } from "../../theme"
 import { TextStyle } from "react-native"
+import { scale } from "../../theme/scale"
 
 const ROOT: ViewStyle = {
   flex: 1,
@@ -21,7 +22,7 @@ const TEXT: TextStyle = {
   textAlign: "center",
 }
 const HANDLE: ViewStyle = { marginHorizontal: spacing.medium }
-const HANDLE_TEXT: TextStyle = { fontSize: 9 }
+const HANDLE_TEXT: TextStyle = { fontSize: scale.tiny }
 const ROW: ViewStyle = {
   flexDirection: "row",
   justifyContent: "center",
