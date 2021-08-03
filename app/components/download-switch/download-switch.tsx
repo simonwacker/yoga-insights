@@ -2,8 +2,20 @@ import React, { useEffect, useState } from "react"
 import { DownloadResumable, FileSystemDownloadResult } from "expo-file-system"
 import { DownloadSwitchProps } from "./download-switch.props"
 import { FileSystem } from "react-native-unimodules"
-import { Switch, View } from "react-native"
+import { Switch, TextStyle, View, ViewStyle } from "react-native"
 import { Text } from "../text/text"
+import { color, spacing } from "../../theme"
+
+const ROOT: ViewStyle = {
+  marginVertical: spacing.medium,
+  marginHorizontal: spacing.medium,
+  flexDirection: "row",
+  justifyContent: "center",
+}
+const PERCENTAGE: TextStyle = {
+  color: color.text,
+  fontSize: 12,
+}
 
 enum DownloadStatus {
   Unknown = "UNKNOWN",
@@ -148,14 +160,7 @@ export function DownloadSwitch({
   }
 
   return (
-    <View
-      style={{
-        marginVertical: 15,
-        marginHorizontal: 15,
-        flexDirection: "row",
-        justifyContent: "center",
-      }}
-    >
+    <View style={ROOT}>
       <Switch
         accessible={true}
         accessibilityLabel={`Zustand: ${getSwitchAccessibilityLabelState()}`}
@@ -182,7 +187,7 @@ export function DownloadSwitch({
           accessibilityLabel={`${Math.round(downloadProgress * 100)}%`}
           accessibilityHint="prozentualer Herunterladefortschritt"
           accessibilityRole="text"
-          style={{ color: "white", fontSize: 12 }}
+          style={PERCENTAGE}
         >
           {Math.round(downloadProgress * 100)}%
         </Text>

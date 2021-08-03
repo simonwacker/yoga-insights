@@ -11,7 +11,7 @@ import { spacing } from "../../theme"
 import { Text } from "../text/text"
 
 const SECTION_LIST: ViewStyle = {
-  paddingHorizontal: spacing[4],
+  paddingHorizontal: spacing.medium,
 }
 const SECTION_TITLE: TextStyle = {
   marginLeft: 10,

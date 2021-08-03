@@ -7,7 +7,7 @@ const LIST_CONTAINER: ViewStyle = {
   alignItems: "center",
   flexDirection: "row",
   padding: 10,
-  // paddingVertical: spacing[1],
+  // paddingVertical: spacing.tiny,
   alignSelf: "flex-start",
 }
 const BOX_DIMENSIONS = { width: 16, height: 16 }

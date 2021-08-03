@@ -10,7 +10,7 @@ const ROOT: ViewStyle = {
   flex: 1,
 }
 const SECTION_LIST: ViewStyle = {
-  paddingHorizontal: spacing[4],
+  paddingHorizontal: spacing.medium,
 }
 
 export type SelectTracksScreenProps = {
