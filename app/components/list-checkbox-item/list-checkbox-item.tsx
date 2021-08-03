@@ -7,6 +7,23 @@ const LIST_CONTAINER: ViewStyle = {
   alignItems: "center",
   flexDirection: "row",
   padding: 10,
+  // paddingVertical: spacing[1],
+  alignSelf: "flex-start",
+}
+const BOX_DIMENSIONS = { width: 16, height: 16 }
+const BOX_OUTLINE: ViewStyle = {
+  ...BOX_DIMENSIONS,
+  marginTop: 2, // finicky and will depend on font/line-height/baseline/weather
+  justifyContent: "center",
+  alignItems: "center",
+  borderWidth: 1,
+  borderColor: color.primaryDarker,
+  borderRadius: 1,
+}
+const BOX_FILL: ViewStyle = {
+  width: BOX_DIMENSIONS.width - 4,
+  height: BOX_DIMENSIONS.height - 4,
+  backgroundColor: color.primary,
 }
 const LIST_TEXT: TextStyle = {
   marginLeft: 10,
@@ -30,6 +47,7 @@ export function ListCheckboxItem({ label, checked, onPress }: ListCheckboxItemPr
       onPress={onPress}
     >
       <View style={LIST_CONTAINER}>
+        <View style={BOX_OUTLINE}>{checked && <View style={BOX_FILL} />}</View>
         <Text style={LIST_TEXT}>{label}</Text>
       </View>
     </Pressable>
