@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react"
-import { ViewStyle, SectionList } from "react-native"
-import { Screen, Text, ListCheckboxItem, Button } from "../../components"
+import { ViewStyle } from "react-native"
+import { Screen, SectionList, ListCheckboxItem, Button } from "../../components"
 import { color, spacing } from "../../theme"
 import { useTrackStore } from "../../stores"
 import { SelectTracksScreenNavigationProp, SelectTracksScreenRouteProp } from "../../navigators"
@@ -36,10 +36,10 @@ export function SelectTracksScreen({ navigation }: SelectTracksScreenProps) {
   return (
     <Screen style={ROOT} preset="fixed">
       <SectionList
+        getSectionTitle={(section) => section.title}
         contentContainerStyle={SECTION_LIST}
         sections={poseSections}
         keyExtractor={(item) => item}
-        renderSectionHeader={({ section }) => <Text>{section.title}</Text>}
         renderItem={({ item }) => (
           <ListCheckboxItem
             label={getTrack(item).name}

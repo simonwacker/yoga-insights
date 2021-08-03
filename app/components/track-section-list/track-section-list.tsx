@@ -1,22 +1,10 @@
 import * as React from "react"
-import { SectionList, StyleProp, TextStyle, View, ViewStyle } from "react-native"
-import { spacing } from "../../theme"
-import { Text } from "../text/text"
-import { flatten } from "ramda"
+import { StyleProp, ViewStyle } from "react-native"
 import { Section } from "../../models"
 import { useTrackStore } from "../../stores"
 import { useCallback } from "react"
 import { ListButtonItem } from "../list-button-item/list-button-item"
-
-const CONTAINER: ViewStyle = {
-  justifyContent: "center",
-}
-const SECTION_LIST: ViewStyle = {
-  paddingHorizontal: spacing[4],
-}
-const SECTION_TITLE: TextStyle = {
-  marginLeft: 10,
-}
+import { SectionList } from "../section-list/section-list"
 
 export interface TrackSectionListProps {
   sections: Section[]
@@ -31,19 +19,17 @@ export function TrackSectionList({ sections, onSelectTrack, style }: TrackSectio
   const getTrack = useTrackStore(useCallback((state) => state.getTrack, []))
 
   return (
-    <View style={flatten([CONTAINER, style])}>
-      <SectionList
-        contentContainerStyle={SECTION_LIST}
-        sections={sections}
-        keyExtractor={(item) => item}
-        renderSectionHeader={({ section }) => <Text style={SECTION_TITLE}>{section.title}</Text>}
-        renderItem={({ item, index, section }) => (
-          <ListButtonItem
-            label={getTrack(item).name}
-            onPress={() => onSelectTrack(index, section.data)}
-          />
-        )}
-      />
-    </View>
+    <SectionList
+      getSectionTitle={(section) => section.title}
+      style={style}
+      sections={sections}
+      keyExtractor={(item) => item}
+      renderItem={({ item, index, section }) => (
+        <ListButtonItem
+          label={getTrack(item).name}
+          onPress={() => onSelectTrack(index, section.data)}
+        />
+      )}
+    />
   )
 }
