@@ -1,19 +1,14 @@
 import * as React from "react"
 import { Pressable, TextStyle, View, ViewStyle } from "react-native"
-import { color, typography } from "../../theme"
+import { spacing } from "../../theme"
 import { Text } from "../text/text"
 
 const LIST_CONTAINER: ViewStyle = {
   alignItems: "center",
   flexDirection: "row",
-  padding: 10,
+  padding: spacing.small,
 }
-const LIST_TEXT: TextStyle = {
-  marginLeft: 10,
-  fontFamily: typography.primary,
-  fontSize: 14,
-  color: color.primary,
-}
+const LIST_TEXT: TextStyle = {}
 
 export interface ListButtonItemProps {
   label: string

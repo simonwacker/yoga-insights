@@ -1,13 +1,12 @@
 import * as React from "react"
 import { Pressable, TextStyle, View, ViewStyle } from "react-native"
-import { color, typography } from "../../theme"
+import { color, spacing } from "../../theme"
 import { Text } from "../text/text"
 
 const LIST_CONTAINER: ViewStyle = {
   alignItems: "center",
   flexDirection: "row",
-  padding: 10,
-  // paddingVertical: spacing.tiny,
+  padding: spacing.small,
   alignSelf: "flex-start",
 }
 const BOX_DIMENSIONS = { width: 16, height: 16 }
@@ -26,10 +25,7 @@ const BOX_FILL: ViewStyle = {
   backgroundColor: color.primary,
 }
 const LIST_TEXT: TextStyle = {
-  marginLeft: 10,
-  fontFamily: typography.primary,
-  fontSize: 14,
-  color: color.primary,
+  marginLeft: spacing.small,
 }
 
 export interface ListCheckboxItemProps {

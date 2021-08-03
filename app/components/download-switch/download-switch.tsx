@@ -14,7 +14,7 @@ const ROOT: ViewStyle = {
 }
 const PERCENTAGE: TextStyle = {
   color: color.text,
-  fontSize: 12,
+  fontSize: 9,
 }
 
 enum DownloadStatus {

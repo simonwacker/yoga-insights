@@ -13,7 +13,7 @@ const INPUT: TextStyle = {
   fontFamily: typography.primary,
   color: color.background,
   minHeight: 44,
-  fontSize: 18,
+  fontSize: 15,
   backgroundColor: color.text,
 }
 

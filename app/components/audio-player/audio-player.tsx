@@ -1,7 +1,7 @@
 // Inspired by https://rossbulat.medium.com/react-native-how-to-load-and-play-audio-241808f97f61
 
 import React, { useCallback, useEffect, useState } from "react"
-import { Pressable, View } from "react-native"
+import { Pressable, View, ViewStyle } from "react-native"
 import { DownloadSwitch } from "../download-switch/download-switch"
 import { Text } from "../text/text"
 import { Audio, AVPlaybackStatus } from "expo-av"
@@ -9,6 +9,26 @@ import Slider from "@react-native-community/slider"
 import { AntDesign } from "@expo/vector-icons"
 import { FileSystem } from "react-native-unimodules"
 import { AudioPlayerProps } from "./audio-player.props"
+import { color, spacing } from "../../theme"
+import { TextStyle } from "react-native"
+
+const ROOT: ViewStyle = {
+  flex: 1,
+  flexDirection: "column",
+  justifyContent: "center",
+}
+const TEXT: TextStyle = {
+  textAlign: "center",
+}
+const HANDLE: ViewStyle = { marginHorizontal: spacing.medium }
+const HANDLE_TEXT: TextStyle = { fontSize: 9 }
+const ROW: ViewStyle = {
+  flexDirection: "row",
+  justifyContent: "center",
+  marginVertical: spacing.medium,
+  marginHorizontal: spacing.medium,
+}
+const SLIDER_STYLE: ViewStyle = { flex: 1, alignSelf: "center", marginHorizontal: 10 }
 
 const loadAndPlay = async (
   fileUri: string,
@@ -137,47 +157,40 @@ export function AudioPlayer({
   }
 
   return (
-    <View style={{ flex: 1, flexDirection: "column", justifyContent: "center" }}>
+    <View style={ROOT}>
       {/* <AutoImage
           source={img_speaker}
           style={{ width: 150, height: 150, marginBottom: 15, alignSelf: "center" }}
         /> */}
       {!playbackStatus?.isLoaded && playbackStatus?.error && (
-        <View style={{ marginVertical: 15 }}>
-          <Text style={{ textAlign: "center" }}>Error: {playbackStatus.error}</Text>
+        <View style={ROW}>
+          <Text style={TEXT}>Error: {playbackStatus.error}</Text>
         </View>
       )}
-      <View style={{ marginVertical: 15 }}>
-        <Text style={{ textAlign: "center" }}>{track.name}</Text>
+      <View style={ROW}>
+        <Text style={TEXT}>{track.name}</Text>
       </View>
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "center",
-          marginVertical: 15,
-          marginHorizontal: 15,
-        }}
-      >
+      <View style={ROW}>
         <Pressable
           disabled={!previousTrack}
           accessible={true}
           accessibilityLabel={`Vorheriges Stück abspielen ${previousTrack?.name}`}
           accessibilityRole="button"
           onPress={onPlayPreviousTrack}
-          style={{ marginHorizontal: 10 }}
+          style={HANDLE}
         >
-          <AntDesign name="stepbackward" size={30} color="white" />
+          <AntDesign name="stepbackward" size={30} color={color.text} />
         </Pressable>
         <Pressable
           accessible={true}
           accessibilityLabel="30 Sekunden zurückspulen"
           accessibilityRole="button"
           onPress={jumpPrev30Seconds}
-          style={{ marginHorizontal: 10 }}
+          style={HANDLE}
         >
-          <AntDesign name="left" size={30} color="white" />
+          <AntDesign name="left" size={30} color={color.text} />
           {/* <AutoImage source={img_playjumpleft} style={{ width: 30, height: 30 }} /> */}
-          <Text style={{ color: "white", fontSize: 12 }}>30</Text>
+          <Text style={HANDLE_TEXT}>30</Text>
         </Pressable>
         {!playbackStatus?.isLoaded && (
           <AntDesign
@@ -186,8 +199,8 @@ export function AudioPlayer({
             accessibilityRole="text"
             name="loading1"
             size={30}
-            color="white"
-            style={{ marginHorizontal: 10 }}
+            color={color.text}
+            style={HANDLE}
           />
         )}
         {playbackStatus?.isLoaded && !playbackStatus.shouldPlay && (
@@ -196,9 +209,9 @@ export function AudioPlayer({
             accessibilityLabel="abspielen"
             accessibilityRole="button"
             onPress={play}
-            style={{ marginHorizontal: 10 }}
+            style={HANDLE}
           >
-            <AntDesign name="playcircleo" size={30} color="white" />
+            <AntDesign name="playcircleo" size={30} color={color.text} />
             {/* <AutoImage source={img_play} style={{ width: 30, height: 30 }} /> */}
           </Pressable>
         )}
@@ -208,9 +221,9 @@ export function AudioPlayer({
             accessibilityLabel="pausieren"
             accessibilityRole="button"
             onPress={pause}
-            style={{ marginHorizontal: 10 }}
+            style={HANDLE}
           >
-            <AntDesign name="pausecircleo" size={30} color="white" />
+            <AntDesign name="pausecircleo" size={30} color={color.text} />
             {/* <AutoImage source={img_pause} style={{ width: 30, height: 30 }} /> */}
           </Pressable>
         )}
@@ -219,11 +232,11 @@ export function AudioPlayer({
           accessibilityLabel="30 Sekunden vorspulen"
           accessibilityRole="button"
           onPress={jumpNext30Seconds}
-          style={{ marginHorizontal: 10 }}
+          style={HANDLE}
         >
           {/* <AutoImage source={img_playjumpright} style={{ width: 30, height: 30 }} /> */}
-          <AntDesign name="right" size={30} color="white" />
-          <Text style={{ color: "white", fontSize: 12 }}>30</Text>
+          <AntDesign name="right" size={30} color={color.text} />
+          <Text style={HANDLE_TEXT}>30</Text>
         </Pressable>
         <Pressable
           disabled={!nextTrack}
@@ -231,19 +244,12 @@ export function AudioPlayer({
           accessibilityLabel={`Nächstes Stück abspielen ${nextTrack?.name}`}
           accessibilityRole="button"
           onPress={onPlayNextTrack}
-          style={{ marginHorizontal: 10 }}
+          style={HANDLE}
         >
-          <AntDesign name="stepforward" size={30} color="white" />
+          <AntDesign name="stepforward" size={30} color={color.text} />
         </Pressable>
       </View>
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "center",
-          marginVertical: 15,
-          marginHorizontal: 15,
-        }}
-      >
+      <View style={ROW}>
         <Text
           accessible={true}
           accessibilityLabel={conertToAudioTimePhrase(
@@ -251,7 +257,7 @@ export function AudioPlayer({
           )}
           accessibilityHint="Spielzeit"
           accessibilityRole="text"
-          style={{ color: "white", alignSelf: "center" }}
+          style={TEXT}
         >
           {conertToAudioTimeString(playbackStatus?.isLoaded ? playbackStatus.positionMillis : 0)}
         </Text>
@@ -272,9 +278,9 @@ export function AudioPlayer({
           value={playbackStatus?.isLoaded ? playbackStatus.positionMillis : 0}
           maximumValue={playbackStatus?.isLoaded ? playbackStatus.durationMillis : 0}
           maximumTrackTintColor="gray"
-          minimumTrackTintColor="white"
-          thumbTintColor="white"
-          style={{ flex: 1, alignSelf: "center", marginHorizontal: 10 }}
+          minimumTrackTintColor={color.text}
+          thumbTintColor={color.text}
+          style={SLIDER_STYLE}
         />
         <Text
           accessible={true}
@@ -283,18 +289,12 @@ export function AudioPlayer({
           )}
           accessibilityHint="Spieldauer"
           accessibilityRole="text"
-          style={{ color: "white", alignSelf: "center" }}
+          style={TEXT}
         >
           {conertToAudioTimeString(playbackStatus?.isLoaded ? playbackStatus.durationMillis : 0)}
         </Text>
       </View>
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "center",
-          marginVertical: 15,
-        }}
-      >
+      <View style={ROW}>
         <DownloadSwitch
           trackId={track.trackId}
           sourceWebUri={track.webUri}
