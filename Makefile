@@ -85,3 +85,7 @@ run: ## Run command `${COMMAND}` within fresh service `node`
 usb: ## Connect to and list USB devices
 	adb -a -d devices
 .PHONY: usb
+
+update: ## Update packages known by expo to compatible versions
+	expo update
+.PHONY: update
