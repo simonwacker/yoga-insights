@@ -105,11 +105,11 @@ export function TabNavigator() {
   return (
     <Tab.Navigator
       initialRouteName="classes"
-      tabBarOptions={{
-        activeTintColor: palette.white,
-        inactiveTintColor: palette.black,
-        activeBackgroundColor: palette.black,
-        inactiveBackgroundColor: palette.white,
+      screenOptions={{
+        tabBarActiveTintColor: palette.white,
+        tabBarInactiveTintColor: palette.black,
+        tabBarActiveBackgroundColor: palette.black,
+        tabBarInactiveBackgroundColor: palette.white,
       }}
     >
       <Tab.Screen name="classes" component={ClassesScreen} options={{ title: "Stunden" }} />

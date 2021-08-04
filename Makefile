@@ -86,6 +86,26 @@ usb: ## Connect to and list USB devices
 	adb -a -d devices
 .PHONY: usb
 
-update: ## Update packages known by expo to compatible versions
+install: ## Install packages as specified in `yarn.lock`
+	yarn install --pure-lockfile
+.PHONY: install
+
+upgrade: ## Upgrade packages to their latest version based on the specified range in `package.json`
+	yarn upgrade
+.PHONY: upgrade
+
+expo: ## Update packages known by expo to compatible versions possibly changing `package.json`
 	expo update
-.PHONY: update
+.PHONY: expo
+
+outdated: ## List outdated packages
+	yarn outdated
+.PHONY: outdated
+
+android: ## Run app on android
+	yarn run android
+.PHONY: android
+
+ios: ## Run app on iOS
+	yarn run ios
+.PHONY: ios

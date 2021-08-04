@@ -93,10 +93,10 @@ ENV PATH=/home/node/.npm-global/bin:${PATH}
 RUN \
   npm install \
     --global \
-    npm@latest \
-    expo-cli@latest \
-    ignite-cli@latest \
-    sharp-cli@latest
+    npm@latest && \
+  npm install \
+    --global \
+    yarn@latest
 
 # Make local node executables known to shell.
 ENV PATH=/app/node_modules/.bin:${PATH}
@@ -117,10 +117,12 @@ COPY \
   ./bin/
 
 RUN \
-  npm install \
-    --no-optional && \
-  npm cache clean \
-    --force
+  yarn install \
+    --ignore-optional \
+    --non-interactive \
+    --pure-lockfile && \
+  yarn cache clean \
+    --all
 
 # Create directory `/app/.expo` such that the corresponding volume is owned by
 # the user `node`.

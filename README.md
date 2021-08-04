@@ -4,7 +4,7 @@ Android devices, in particular, enable USB debugging, and connect your device
 via USB to your machine. Run `make up` to start services and `make shell` to
 enter shell within running container. There, run `make usb` to list devices
 connected via USB and start Android Debug Bridge server in background. Then,
-run `npm run android` to open app on Android device. You can view the expo
+run `yarn run android` to open app on Android device. You can view the expo
 developer tools in your browser by navigating to
 `http://${HOST_IP_ADDRESS}:19002`. You can print your IP address by running
 `make ip` on your machine.
