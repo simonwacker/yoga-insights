@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react"
 import { BackHandler } from "react-native"
 import { PartialState, NavigationState, NavigationContainerRef } from "@react-navigation/native"
+import * as storage from "../utils/storage"
 
 export const RootNavigation = {
   navigate(name: string) {
@@ -89,7 +90,7 @@ export function useBackButtonHandler(
 /**
  * Custom hook for persisting navigation state.
  */
-export function useNavigationPersistence(storage: any, persistenceKey: string) {
+export function useNavigationPersistence(persistenceKey: string) {
   const [initialNavigationState, setInitialNavigationState] = useState()
   const [isRestoringNavigationState, setIsRestoringNavigationState] = useState(true)
 

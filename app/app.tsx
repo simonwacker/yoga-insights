@@ -14,7 +14,6 @@ import React, { useEffect, useRef } from "react"
 import { NavigationContainerRef } from "@react-navigation/native"
 import { SafeAreaProvider, initialWindowMetrics } from "react-native-safe-area-context"
 import { initFonts } from "./theme/fonts" // expo
-import * as storage from "./utils/storage"
 import {
   useBackButtonHandler,
   RootNavigator,
@@ -43,7 +42,6 @@ function App() {
   setRootNavigation(navigationRef)
   useBackButtonHandler(navigationRef, canExit)
   const { initialNavigationState, onNavigationStateChange } = useNavigationPersistence(
-    storage,
     NAVIGATION_PERSISTENCE_KEY,
   )
 
