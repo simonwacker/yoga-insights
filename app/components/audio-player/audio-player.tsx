@@ -12,6 +12,7 @@ import { AudioPlayerProps } from "./audio-player.props"
 import { color, spacing } from "../../theme"
 import { TextStyle } from "react-native"
 import { scale } from "../../theme/scale"
+import { getTrackFileUri } from "../../utils/file"
 
 const ROOT: ViewStyle = {
   flex: 1,
@@ -65,8 +66,7 @@ export function AudioPlayer({
   nextTrack,
   onPlayNextTrack,
 }: AudioPlayerProps) {
-  // TODO Find a better way to come up with a file URI.
-  const fileUri = `${FileSystem.documentDirectory}${track.trackId}.${track.fileExtension}`
+  const fileUri = getTrackFileUri(track)
 
   const [sound] = useState<Audio.Sound>(() => new Audio.Sound())
   const [playbackStatus, setPlaybackStatus] = useState<AVPlaybackStatus | undefined>()

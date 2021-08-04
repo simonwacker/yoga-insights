@@ -28,6 +28,8 @@ import { ToggleStorybook } from "../storybook/toggle-storybook"
 // https://github.com/kmagiera/react-native-screens#using-native-stack-navigator
 import { enableScreens } from "react-native-screens"
 import { useState } from "react"
+import { FileSystem } from "react-native-unimodules"
+import { tracksDirectoryUri } from "./utils/file"
 enableScreens()
 
 export const NAVIGATION_PERSISTENCE_KEY = "NAVIGATION_STATE"
@@ -49,6 +51,7 @@ function App() {
   useEffect(() => {
     ;(async () => {
       await initFonts() // expo
+      await FileSystem.makeDirectoryAsync(tracksDirectoryUri, { intermediates: true })
       setReady(true)
     })()
   }, [])
