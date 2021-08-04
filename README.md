@@ -16,10 +16,12 @@ If we ever should need to make queries, using
 [React Query](https://react-query.tanstack.com/overview)
 may be a good idea.
 
-If we ever should need more state management than React contexts provide, using
-[Jotai](https://github.com/pmndrs/jotai)
-(or [Recoil](https://recoiljs.org/))
-may be a good idea.
+To update packages within the range specified in `package.json`, first run
+`make upgrade` and, if after doing so Expo complains about some package
+version, run `make expo` to have Expo choose a compatible version and tell
+which packages it does not manage. For the latter packages you may update the
+version in `package.json`, for example to the latest version reported by `make
+outdated`, and repeat this process.
 
 # Welcome to your new ignited app!
 
