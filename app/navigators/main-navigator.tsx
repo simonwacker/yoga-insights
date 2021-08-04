@@ -19,6 +19,7 @@ import {
   SettingsScreen,
 } from "../screens"
 import { CompositeNavigationProp, NavigatorScreenParams, RouteProp } from "@react-navigation/native"
+import { palette } from "../theme/palette"
 
 /**
  * This type allows TypeScript to know what routes are defined in this navigator
@@ -104,14 +105,12 @@ export function TabNavigator() {
   return (
     <Tab.Navigator
       initialRouteName="classes"
-      tabBarOptions={
-        {
-          // activeTintColor: "#fc9d61",
-          // inactiveTintColor: "#fc9d61",
-          // activeBackgroundColor: "#e6a1ff",
-          // inactiveBackgroundColor: "#f2ccff",
-        }
-      }
+      tabBarOptions={{
+        activeTintColor: palette.white,
+        inactiveTintColor: palette.black,
+        activeBackgroundColor: palette.black,
+        inactiveBackgroundColor: palette.white,
+      }}
     >
       <Tab.Screen name="classes" component={ClassesScreen} options={{ title: "Stunden" }} />
       <Tab.Screen name="poses" component={PosesScreen} options={{ title: "Übungen" }} />

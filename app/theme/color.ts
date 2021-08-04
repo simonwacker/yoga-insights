@@ -23,7 +23,7 @@ export const color = {
   /**
    * The screen background.
    */
-  background: palette.black,
+  background: palette.purple,
   /**
    * The main tinting color.
    */
@@ -31,7 +31,7 @@ export const color = {
   /**
    * The main tinting color, but darker.
    */
-  primaryDarker: palette.orangeDarker,
+  primaryDarker: palette.darkOrange,
   /**
    * A subtle color used for borders and lines.
    */
