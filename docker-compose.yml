@@ -38,6 +38,7 @@ services:
       - /dev/bus/usb:/dev/bus/usb
       - expo:/app/.expo
       - node_modules:/app/node_modules
+      - npm_global:/home/node/.npm-global/
     environment:
       # For details on `REACT_NATIVE_PACKAGER_HOSTNAME` see
       # https://github.com/kerbe/docker-expo#usage-of-this-docker-container
@@ -50,3 +51,4 @@ services:
 volumes:
   expo:
   node_modules:
+  npm_global:
