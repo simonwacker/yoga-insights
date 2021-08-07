@@ -1,16 +1,13 @@
 import React, { useCallback, useState } from "react"
 import { ViewStyle } from "react-native"
 import { Screen, SectionList, ListCheckboxItem, Button } from "../../components"
-import { color, spacing } from "../../theme"
+import { color } from "../../theme"
 import { useTrackStore } from "../../stores"
 import { SelectTracksScreenNavigationProp, SelectTracksScreenRouteProp } from "../../navigators"
 
 const ROOT: ViewStyle = {
   backgroundColor: color.background,
   flex: 1,
-}
-const SECTION_LIST: ViewStyle = {
-  paddingHorizontal: spacing.medium,
 }
 
 export type SelectTracksScreenProps = {
@@ -37,7 +34,6 @@ export function SelectTracksScreen({ navigation }: SelectTracksScreenProps) {
     <Screen style={ROOT} preset="fixed">
       <SectionList
         getSectionTitle={(section) => section.title}
-        contentContainerStyle={SECTION_LIST}
         sections={poseSections}
         keyExtractor={(item) => item}
         renderItem={({ item }) => (
