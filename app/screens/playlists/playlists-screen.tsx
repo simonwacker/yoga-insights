@@ -29,13 +29,14 @@ export function PlaylistsScreen({ navigation }: PlaylistsScreenProps) {
             onPress={() =>
               navigation.navigate("player", {
                 initialTrackIndex: 0,
-                trackIds: item.trackIds,
+                trackIds: item.poseIds,
+                backgroundMusicId: item.musicId,
               })
             }
           />
         )}
       />
-      <Button title="Neue Playlist" onPress={() => navigation.navigate("selectTracks")} />
+      <Button title="Neue Playlist" onPress={() => navigation.navigate("selectPoses")} />
     </Screen>
   )
 }

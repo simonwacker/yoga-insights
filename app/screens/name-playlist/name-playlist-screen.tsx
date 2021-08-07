@@ -16,13 +16,13 @@ export type NamePlaylistScreenProps = {
 }
 
 export function NamePlaylistScreen({ route, navigation }: NamePlaylistScreenProps) {
-  const { trackIds } = route.params
+  const { poseIds, musicId } = route.params
 
   const [name, setName] = useState("")
   const addPlaylist = usePlaylistStore(useCallback((state) => state.addPlaylist, []))
 
   const createPlaylist = () => {
-    addPlaylist({ name: name, trackIds: trackIds })
+    addPlaylist({ name: name, poseIds: poseIds, musicId: musicId })
   }
 
   return (

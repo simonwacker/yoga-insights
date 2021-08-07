@@ -26,6 +26,7 @@ export function PosesScreen({ navigation }: PosesScreenProps) {
           navigation.navigate("player", {
             initialTrackIndex: initialTrackIndex,
             trackIds: trackIds,
+            backgroundMusicId: null,
           })
         }
       />

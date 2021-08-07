@@ -4,9 +4,9 @@ import React, { useCallback, useEffect, useState } from "react"
 import { Pressable, View, ViewStyle } from "react-native"
 import { DownloadSwitch } from "../download-switch/download-switch"
 import { Text } from "../text/text"
-import { Audio, AVPlaybackStatus } from "expo-av"
+import { Audio, AVPlaybackStatus, AVPlaybackStatusToSet } from "expo-av"
 import Slider from "@react-native-community/slider"
-import { AntDesign } from "@expo/vector-icons"
+import { AntDesign, FontAwesome5 } from "@expo/vector-icons"
 import { FileSystem } from "react-native-unimodules"
 import { AudioPlayerProps } from "./audio-player.props"
 import { color, spacing } from "../../theme"
@@ -36,6 +36,7 @@ const loadAndPlay = async (
   fileUri: string,
   webUri: string,
   sound: Audio.Sound,
+  initialStatus: AVPlaybackStatusToSet,
   onPlaybackStatusUpdate: (newPlaybackStatus: AVPlaybackStatus) => void,
 ) => {
   try {
@@ -50,7 +51,7 @@ const loadAndPlay = async (
     const uri = exists ? fileUri : webUri
     await sound.loadAsync(
       { uri: uri },
-      { shouldPlay: true }, // initialStatus
+      initialStatus,
       true, // downloadFirst
     )
   } catch (error) {
@@ -60,6 +61,7 @@ const loadAndPlay = async (
 
 export function AudioPlayer({
   track,
+  backgroundMusic,
   onPlaybackDidJustFinish,
   previousTrack,
   onPlayPreviousTrack,
@@ -67,9 +69,17 @@ export function AudioPlayer({
   onPlayNextTrack,
 }: AudioPlayerProps) {
   const fileUri = getTrackFileUri(track)
+  const backgroundFileUri = backgroundMusic === null ? null : getTrackFileUri(backgroundMusic)
 
   const [sound] = useState<Audio.Sound>(() => new Audio.Sound())
-  const [playbackStatus, setPlaybackStatus] = useState<AVPlaybackStatus | undefined>()
+  const [playbackStatus, setPlaybackStatus] = useState<AVPlaybackStatus | null>(null)
+
+  const [backgroundSound] = useState<Audio.Sound | null>(() =>
+    backgroundMusic === null ? null : new Audio.Sound(),
+  )
+  const [backgroundPlaybackStatus, setBackgroundPlaybackStatus] = useState<AVPlaybackStatus | null>(
+    null,
+  )
 
   const onPlaybackStatusUpdate = useCallback((newPlaybackStatus: AVPlaybackStatus) => {
     setPlaybackStatus(newPlaybackStatus)
@@ -78,9 +88,30 @@ export function AudioPlayer({
     }
   }, [])
 
+  const onBackgroundPlaybackStatusUpdate = useCallback((newPlaybackStatus: AVPlaybackStatus) => {
+    setBackgroundPlaybackStatus(newPlaybackStatus)
+  }, [])
+
   useEffect(() => {
-    loadAndPlay(fileUri, track.webUri, sound, onPlaybackStatusUpdate)
+    loadAndPlay(fileUri, track.webUri, sound, { shouldPlay: true }, onPlaybackStatusUpdate)
   }, [fileUri, track.webUri, sound, onPlaybackStatusUpdate])
+
+  useEffect(() => {
+    if (backgroundFileUri && backgroundMusic?.webUri && backgroundSound) {
+      loadAndPlay(
+        backgroundFileUri,
+        backgroundMusic.webUri,
+        backgroundSound,
+        { shouldPlay: true, isLooping: true, volume: 0.5 },
+        onBackgroundPlaybackStatusUpdate,
+      )
+    }
+  }, [
+    backgroundFileUri,
+    backgroundMusic?.webUri,
+    backgroundSound,
+    onBackgroundPlaybackStatusUpdate,
+  ])
 
   useEffect(() => {
     return () => {
@@ -89,10 +120,22 @@ export function AudioPlayer({
     }
   }, [sound])
 
+  useEffect(() => {
+    return backgroundSound === null
+      ? undefined
+      : () => {
+          backgroundSound.setOnPlaybackStatusUpdate(() => {})
+          backgroundSound.unloadAsync()
+        }
+  }, [backgroundSound])
+
   const play = async () => {
     try {
       if (playbackStatus?.isLoaded) {
         await sound.playAsync()
+      }
+      if (backgroundSound && backgroundPlaybackStatus?.isLoaded) {
+        await backgroundSound.playAsync()
       }
     } catch (error) {
       __DEV__ && console.error("Failed to play audio.", error)
@@ -103,6 +146,13 @@ export function AudioPlayer({
     try {
       if (playbackStatus?.isLoaded && playbackStatus.shouldPlay) {
         await sound.pauseAsync()
+      }
+      if (
+        backgroundSound &&
+        backgroundPlaybackStatus?.isLoaded &&
+        backgroundPlaybackStatus.shouldPlay
+      ) {
+        await backgroundSound.pauseAsync()
       }
     } catch (error) {
       __DEV__ && console.error("Failed to pause audio.", error)
@@ -125,6 +175,44 @@ export function AudioPlayer({
       }
     } catch (error) {
       __DEV__ && console.error(`Failed to jump ${seconds} seconds.`, error)
+    }
+  }
+
+  const muteBackgroundMusic = async () => {
+    try {
+      if (backgroundSound && backgroundPlaybackStatus?.isLoaded) {
+        await backgroundSound.setIsMutedAsync(true)
+      }
+    } catch (error) {
+      __DEV__ && console.error("Failed to mute background music.", error)
+    }
+  }
+  const unmuteBackgroundMusic = async () => {
+    try {
+      if (backgroundSound && backgroundPlaybackStatus?.isLoaded) {
+        await backgroundSound.setIsMutedAsync(false)
+      }
+    } catch (error) {
+      __DEV__ && console.error("Failed to un-mute background music.", error)
+    }
+  }
+
+  const decreaseBackgroundMusicVolume = () => creaseBackgroundMusicVolume(-0.1)
+  const increaseBackgroundMusicVolume = () => creaseBackgroundMusicVolume(0.1)
+  const creaseBackgroundMusicVolume = async (amount: number) => {
+    try {
+      if (backgroundSound && backgroundPlaybackStatus?.isLoaded) {
+        let nextVolume = backgroundPlaybackStatus.volume + amount
+        if (nextVolume < 0) {
+          nextVolume = 0
+        } else if (nextVolume > 1) {
+          nextVolume = 1
+        }
+        await backgroundSound.setVolumeAsync(nextVolume)
+      }
+    } catch (error) {
+      __DEV__ &&
+        console.error(`Failed to de- or increase background music volume by ${amount}.`, error)
     }
   }
 
@@ -305,6 +393,50 @@ export function AudioPlayer({
           onDownloadJustAboutToBeDeleted={switchSource}
         />
       </View>
+      {backgroundMusic && (
+        <View style={ROW}>
+          <Pressable
+            accessible={true}
+            accessibilityLabel="Hintergrundmusik leiser machen"
+            accessibilityRole="button"
+            onPress={decreaseBackgroundMusicVolume}
+            style={HANDLE}
+          >
+            <FontAwesome5 name="volume-down" size={30} color={color.text} />
+          </Pressable>
+          {backgroundPlaybackStatus?.isLoaded && backgroundPlaybackStatus.isMuted && (
+            <Pressable
+              accessible={true}
+              accessibilityLabel="laut stellen"
+              accessibilityRole="button"
+              onPress={unmuteBackgroundMusic}
+              style={HANDLE}
+            >
+              <FontAwesome5 name="volume-mute" size={30} color={color.text} />
+            </Pressable>
+          )}
+          {backgroundPlaybackStatus?.isLoaded && !backgroundPlaybackStatus.isMuted && (
+            <Pressable
+              accessible={true}
+              accessibilityLabel="stumm schalten"
+              accessibilityRole="button"
+              onPress={muteBackgroundMusic}
+              style={HANDLE}
+            >
+              <FontAwesome5 name="volume-off" size={30} color={color.text} />
+            </Pressable>
+          )}
+          <Pressable
+            accessible={true}
+            accessibilityLabel="Hintergrundmusik lauter machen"
+            accessibilityRole="button"
+            onPress={increaseBackgroundMusicVolume}
+            style={HANDLE}
+          >
+            <FontAwesome5 name="volume-up" size={30} color={color.text} />
+          </Pressable>
+        </View>
+      )}
     </View>
   )
 }

@@ -7,7 +7,7 @@ import produce from "immer" // https://github.com/pmndrs/zustand#sick-of-reducer
 type State = {
   playlists: Playlist[]
   nextPlaylistId: number
-  addPlaylist: (playlist: { name: string; trackIds: string[] }) => void
+  addPlaylist: (playlist: { name: string; poseIds: string[]; musicId: string | null }) => void
   renamePlaylist: (playlistId: number, name: string) => void
   removePlaylist: (playlistId: number) => void
   clearPlaylists: () => void

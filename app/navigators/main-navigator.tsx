@@ -11,11 +11,12 @@ import {
   ClassesScreen,
   MusicScreen,
   NamePlaylistScreen,
-  OrderTracksScreen,
+  OrderPosesScreen,
   PlayerScreen,
   PlaylistsScreen,
   PosesScreen,
-  SelectTracksScreen,
+  SelectMusicScreen,
+  SelectPosesScreen,
   SettingsScreen,
 } from "../screens"
 import { CompositeNavigationProp, NavigatorScreenParams, RouteProp } from "@react-navigation/native"
@@ -44,13 +45,18 @@ export type MainParamList = {
   player: {
     initialTrackIndex: number
     trackIds: readonly string[]
+    backgroundMusicId: string | null
   }
-  selectTracks: undefined
-  orderTracks: {
-    trackIds: readonly string[]
+  selectPoses: undefined
+  orderPoses: {
+    poseIds: readonly string[]
+  }
+  selectMusic: {
+    poseIds: string[]
   }
   namePlaylist: {
-    trackIds: string[]
+    poseIds: string[]
+    musicId: string | null
   }
 }
 
@@ -87,11 +93,14 @@ export type SettingsScreenNavigationProp = CompositeNavigationProp<
 export type PlayerScreenRouteProp = RouteProp<MainParamList, "player">
 export type PlayerScreenNavigationProp = StackNavigationProp<MainParamList, "player">
 
-export type SelectTracksScreenRouteProp = RouteProp<MainParamList, "orderTracks">
-export type SelectTracksScreenNavigationProp = StackNavigationProp<MainParamList, "orderTracks">
+export type SelectPosesScreenRouteProp = RouteProp<MainParamList, "selectPoses">
+export type SelectPosesScreenNavigationProp = StackNavigationProp<MainParamList, "selectPoses">
 
-export type OrderTracksScreenRouteProp = RouteProp<MainParamList, "orderTracks">
-export type OrderTracksScreenNavigationProp = StackNavigationProp<MainParamList, "orderTracks">
+export type OrderPosesScreenRouteProp = RouteProp<MainParamList, "orderPoses">
+export type OrderPosesScreenNavigationProp = StackNavigationProp<MainParamList, "orderPoses">
+
+export type SelectMusicScreenRouteProp = RouteProp<MainParamList, "selectMusic">
+export type SelectMusicScreenNavigationProp = StackNavigationProp<MainParamList, "selectMusic">
 
 export type NamePlaylistScreenRouteProp = RouteProp<MainParamList, "namePlaylist">
 export type NamePlaylistScreenNavigationProp = StackNavigationProp<MainParamList, "namePlaylist">
@@ -127,14 +136,19 @@ export function MainNavigator() {
       <Stack.Screen name="tabs" component={TabNavigator} options={{ headerShown: false }} />
       <Stack.Screen name="player" component={PlayerScreen} options={{ title: "Player" }} />
       <Stack.Screen
-        name="selectTracks"
-        component={SelectTracksScreen}
+        name="selectPoses"
+        component={SelectPosesScreen}
         options={{ title: "Übungen auswählen" }}
       />
       <Stack.Screen
-        name="orderTracks"
-        component={OrderTracksScreen}
+        name="orderPoses"
+        component={OrderPosesScreen}
         options={{ title: "Übungen sortieren" }}
+      />
+      <Stack.Screen
+        name="selectMusic"
+        component={SelectMusicScreen}
+        options={{ title: "Hintergrundmusik auswählen" }}
       />
       <Stack.Screen
         name="namePlaylist"

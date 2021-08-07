@@ -3,31 +3,31 @@ import { ViewStyle } from "react-native"
 import { Screen, SectionList, ListCheckboxItem, Button } from "../../components"
 import { color } from "../../theme"
 import { useTrackStore } from "../../stores"
-import { SelectTracksScreenNavigationProp, SelectTracksScreenRouteProp } from "../../navigators"
+import { SelectPosesScreenNavigationProp, SelectPosesScreenRouteProp } from "../../navigators"
 
 const ROOT: ViewStyle = {
   backgroundColor: color.background,
   flex: 1,
 }
 
-export type SelectTracksScreenProps = {
-  route: SelectTracksScreenRouteProp
-  navigation: SelectTracksScreenNavigationProp
+export type SelectPosesScreenProps = {
+  route: SelectPosesScreenRouteProp
+  navigation: SelectPosesScreenNavigationProp
 }
 
-export function SelectTracksScreen({ navigation }: SelectTracksScreenProps) {
+export function SelectPosesScreen({ navigation }: SelectPosesScreenProps) {
   const poseSections = useTrackStore(useCallback((state) => state.poseSections, []))
   const getTrack = useTrackStore(useCallback((state) => state.getTrack, []))
-  const [selectedTrackIds, setSelectedTrackIds] = useState(new Set<string>())
+  const [selectedPoseIds, setSelectedPoseIds] = useState(new Set<string>())
 
-  const toggleTrackSelection = (trackId: string) => {
-    const copy = new Set(selectedTrackIds)
-    if (copy.has(trackId)) {
-      copy.delete(trackId)
+  const togglePoseSelection = (poseId: string) => {
+    const copy = new Set(selectedPoseIds)
+    if (copy.has(poseId)) {
+      copy.delete(poseId)
     } else {
-      copy.add(trackId)
+      copy.add(poseId)
     }
-    setSelectedTrackIds(copy)
+    setSelectedPoseIds(copy)
   }
 
   return (
@@ -39,16 +39,16 @@ export function SelectTracksScreen({ navigation }: SelectTracksScreenProps) {
         renderItem={({ item }) => (
           <ListCheckboxItem
             label={getTrack(item).name}
-            checked={selectedTrackIds.has(item)}
-            onPress={() => toggleTrackSelection(item)}
+            checked={selectedPoseIds.has(item)}
+            onPress={() => togglePoseSelection(item)}
           />
         )}
       />
       <Button
-        disabled={selectedTrackIds.size === 0}
+        disabled={selectedPoseIds.size === 0}
         onPress={() =>
-          navigation.navigate("orderTracks", {
-            trackIds: Array.from(selectedTrackIds),
+          navigation.navigate("orderPoses", {
+            poseIds: Array.from(selectedPoseIds),
           })
         }
         title="Übungen sortieren"

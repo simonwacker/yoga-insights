@@ -26,6 +26,7 @@ export function MusicScreen({ navigation }: MusicScreenProps) {
           navigation.navigate("player", {
             initialTrackIndex: initialTrackIndex,
             trackIds: trackIds,
+            backgroundMusicId: null,
           })
         }
       />
