@@ -81,13 +81,20 @@ export function AudioPlayer({
     null,
   )
 
-  const onPlaybackStatusUpdate = useCallback((newPlaybackStatus: AVPlaybackStatus) => {
-    setPlaybackStatus(newPlaybackStatus)
-    if (newPlaybackStatus.isLoaded && newPlaybackStatus.didJustFinish) {
-      onPlaybackDidJustFinish()
-    }
-  }, [])
+  // For why we use `useCallback` here see
+  // https://reactjs.org/docs/hooks-faq.html#is-it-safe-to-omit-functions-from-the-list-of-dependencies
+  const onPlaybackStatusUpdate = useCallback(
+    (newPlaybackStatus: AVPlaybackStatus) => {
+      setPlaybackStatus(newPlaybackStatus)
+      if (newPlaybackStatus.isLoaded && newPlaybackStatus.didJustFinish) {
+        onPlaybackDidJustFinish()
+      }
+    },
+    [onPlaybackDidJustFinish],
+  )
 
+  // For why we use `useCallback` here see
+  // https://reactjs.org/docs/hooks-faq.html#is-it-safe-to-omit-functions-from-the-list-of-dependencies
   const onBackgroundPlaybackStatusUpdate = useCallback((newPlaybackStatus: AVPlaybackStatus) => {
     setBackgroundPlaybackStatus(newPlaybackStatus)
   }, [])

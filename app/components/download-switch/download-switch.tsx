@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import React, { useCallback, useEffect, useState } from "react"
 import { DownloadResumable, FileSystemDownloadResult } from "expo-file-system"
 import { DownloadSwitchProps } from "./download-switch.props"
 import { FileSystem } from "react-native-unimodules"
@@ -26,6 +26,16 @@ enum DownloadStatus {
   Downloaded = "DOWNLOADED",
 }
 
+function Download(
+  trackId: string,
+  sourceWebUri: string,
+  targetFileUri: string,
+  md5FileHashValue: string,
+  onDownloadProgressUpdate: (percentage: number) => void,
+  onDownloadComplete: (targetFileUri: string) => Promise<void>,
+  onDownloadJustAboutToBeDeleted: (sourceWebUri: string) => Promise<void>,
+) {}
+
 export function DownloadSwitch({
   trackId,
   sourceWebUri,
@@ -36,37 +46,38 @@ export function DownloadSwitch({
 }: DownloadSwitchProps) {
   const [downloadProgress, setDownloadProgress] = useState(0)
   const [downloadStatus, setDownloadStatus] = useState(DownloadStatus.Unknown)
-  const [resumableDownload, setResumableDownload] = useState<DownloadResumable | undefined>()
-  const temporaryFileUri = FileSystem.cacheDirectory + trackId
+  const [resumableDownload, setResumableDownload] = useState<DownloadResumable | null>(null)
+  const temporaryFileUri = FileSystem.cacheDirectory + "tracks/" + trackId
 
   const onResumableDownloadProgressUpdate = ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
     setDownloadProgress(totalBytesWritten / totalBytesExpectedToWrite)
   }
 
   useEffect(() => {
+    // For why this function lives inside `useEffect` read
+    // https://reactjs.org/docs/hooks-faq.html#is-it-safe-to-omit-functions-from-the-list-of-dependencies
+    const determineDownloadStatus = async () => {
+      try {
+        const { exists } = await FileSystem.getInfoAsync(targetFileUri)
+        setDownloadStatus(exists ? DownloadStatus.Downloaded : DownloadStatus.NotDownloaded)
+      } catch (error) {
+        __DEV__ && console.error("Failed to determine download status.", error)
+      }
+    }
     determineDownloadStatus()
   }, [targetFileUri])
 
   useEffect(() => {
-    return resumableDownload
-      ? () => {
+    return resumableDownload === null
+      ? undefined
+      : () => {
           resumableDownload._removeSubscription()
         }
-      : undefined
   }, [resumableDownload])
 
   useEffect(() => {
     return () => FileSystem.deleteAsync(temporaryFileUri, { idempotent: true })
-  }, [])
-
-  const determineDownloadStatus = async () => {
-    try {
-      const { exists } = await FileSystem.getInfoAsync(targetFileUri)
-      setDownloadStatus(exists ? DownloadStatus.Downloaded : DownloadStatus.NotDownloaded)
-    } catch (error) {
-      __DEV__ && console.error("Failed to determine download status.", error)
-    }
-  }
+  }, [temporaryFileUri])
 
   const switchDownloadStatus = async () => {
     try {

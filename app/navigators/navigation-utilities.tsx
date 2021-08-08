@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react"
+import React, { useState, useEffect, useRef, useCallback } from "react"
 import { BackHandler } from "react-native"
 import { PartialState, NavigationState, NavigationContainerRef } from "@react-navigation/native"
 import * as storage from "../utils/storage"
@@ -111,14 +111,16 @@ export function useNavigationPersistence(persistenceKey: string) {
     storage.save(persistenceKey, state)
   }
 
-  const restoreState = async () => {
+  // For why we use `useCallback` here see
+  // https://reactjs.org/docs/hooks-faq.html#is-it-safe-to-omit-functions-from-the-list-of-dependencies
+  const restoreState = useCallback(async () => {
     try {
       const state = await storage.load(persistenceKey)
       if (state) setInitialNavigationState(state)
     } finally {
       setIsRestoringNavigationState(false)
     }
-  }
+  }, [persistenceKey])
 
   useEffect(() => {
     if (isRestoringNavigationState) restoreState()
