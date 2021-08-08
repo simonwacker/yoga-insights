@@ -33,11 +33,20 @@ export function PlayerScreen({ route }: PlayerScreenProps) {
     }
   }
 
+  const getTracksToDownload = () => {
+    let tracks = trackIds.map((trackId) => getTrack(trackId))
+    if (backgroundMusicId === null) {
+      return tracks
+    }
+    return [...tracks, getTrack(backgroundMusicId)]
+  }
+
   return (
     <Screen style={ROOT} preset="scroll">
       <AudioPlayer
         track={getTrack(trackIds[trackIndex])}
         backgroundMusic={backgroundMusicId === null ? null : getTrack(backgroundMusicId)}
+        tracksToDownload={getTracksToDownload()}
         onPlaybackDidJustFinish={playNextTrack}
         previousTrack={trackIndex >= 1 ? getTrack(trackIds[trackIndex - 1]) : undefined}
         onPlayPreviousTrack={playPreviousTrack}

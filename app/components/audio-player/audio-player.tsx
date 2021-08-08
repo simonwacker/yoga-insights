@@ -62,6 +62,7 @@ const loadAndPlay = async (
 export function AudioPlayer({
   track,
   backgroundMusic,
+  tracksToDownload,
   onPlaybackDidJustFinish,
   previousTrack,
   onPlayPreviousTrack,
@@ -239,17 +240,19 @@ export function AudioPlayer({
     return `${hours} Stunden, ${minutes} Minuten und ${seconds} Sekunden`
   }
 
-  const switchSource = async (uri: string) => {
-    const oldPlaybackStatus = playbackStatus
-    await sound.unloadAsync()
-    await sound.loadAsync(
-      { uri: uri },
-      {
-        shouldPlay: !oldPlaybackStatus?.isLoaded || oldPlaybackStatus.shouldPlay,
-        positionMillis: oldPlaybackStatus?.isLoaded ? oldPlaybackStatus.positionMillis : 0,
-      },
-      true,
-    )
+  const switchSource = async (trackId: string, uri: string) => {
+    if (trackId === track.trackId) {
+      const oldPlaybackStatus = playbackStatus
+      await sound.unloadAsync()
+      await sound.loadAsync(
+        { uri: uri },
+        {
+          shouldPlay: !oldPlaybackStatus?.isLoaded || oldPlaybackStatus.shouldPlay,
+          positionMillis: oldPlaybackStatus?.isLoaded ? oldPlaybackStatus.positionMillis : 0,
+        },
+        true,
+      )
+    }
   }
 
   return (
@@ -390,16 +393,6 @@ export function AudioPlayer({
           {conertToAudioTimeString(playbackStatus?.isLoaded ? playbackStatus.durationMillis : 0)}
         </Text>
       </View>
-      <View style={ROW}>
-        <DownloadSwitch
-          trackId={track.trackId}
-          sourceWebUri={track.webUri}
-          targetFileUri={fileUri}
-          md5FileHashValue={track.md5FileHashValue}
-          onDownloadComplete={switchSource}
-          onDownloadJustAboutToBeDeleted={switchSource}
-        />
-      </View>
       {backgroundMusic && (
         <View style={ROW}>
           <Pressable
@@ -443,6 +436,33 @@ export function AudioPlayer({
             <FontAwesome5 name="volume-up" size={30} color={color.text} />
           </Pressable>
         </View>
+      )}
+      <View style={ROW}>
+        <Text>Diese Stunde/Übung/Musik herunterladen oder löschen:</Text>
+      </View>
+      {/* TODO One download switch needs to tell the other when some track was downloaded. */}
+      <View style={ROW}>
+        <DownloadSwitch
+          tracks={[track]}
+          onDownloadComplete={switchSource}
+          onDownloadJustAboutToBeDeleted={switchSource}
+        />
+      </View>
+      {tracksToDownload.length >= 2 && (
+        <>
+          <View style={ROW}>
+            <Text>
+              Jede Stunde/Übung/Musik dieses/dieser Abschnitts/Playlist herunterladen oder löschen:
+            </Text>
+          </View>
+          <View style={ROW}>
+            <DownloadSwitch
+              tracks={tracksToDownload}
+              onDownloadComplete={switchSource}
+              onDownloadJustAboutToBeDeleted={switchSource}
+            />
+          </View>
+        </>
       )}
     </View>
   )
