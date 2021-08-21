@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { DownloadResumable, FileSystemDownloadResult } from "expo-file-system"
 import { DownloadSwitchProps } from "./download-switch.props"
 import { FileSystem } from "react-native-unimodules"
