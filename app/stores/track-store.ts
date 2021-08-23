@@ -150,8 +150,9 @@ type State = {
 
 export const useTrackStore = create<State>((_set, _get) => ({
   getTrack: (trackId: string) => {
-    if (indexedTracks.has(trackId)) {
-      return indexedTracks.get(trackId)
+    const track = indexedTracks.get(trackId)
+    if (track !== undefined) {
+      return track
     } else {
       console.error(`Unknown track ID ${trackId}`)
       return fallbackTrack

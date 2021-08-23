@@ -30,6 +30,10 @@ export const setRootNavigation = (
  * Gets the current screen from any navigation state.
  */
 export function getActiveRouteName(state: NavigationState | PartialState<NavigationState>) {
+  if (state.index === undefined) {
+    throw new Error("expected state.index to exist")
+  }
+
   const route = state.routes[state.index]
 
   // Found the active route -- return the name

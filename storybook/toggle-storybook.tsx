@@ -14,7 +14,7 @@ import { loadString, saveString } from "../app/utils/storage"
  */
 export function ToggleStorybook(props) {
   const [showStorybook, setShowStorybook] = useState(false)
-  const [StorybookUIRoot, setStorybookUIRoot] = useState(null)
+  const [StorybookUIRoot, setStorybookUIRoot] = useState<any>(null)
 
   useEffect(() => {
     if (__DEV__ && DevSettings) {

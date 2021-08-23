@@ -41,7 +41,7 @@ export function SettingsScreen({}: SettingsScreenProps) {
 
   return (
     <Screen style={ROOT} preset="scroll">
-      {tracksDirectoryInfo ? (
+      {tracksDirectoryInfo?.exists ? (
         <Text
           text={`Der Speicherbedarf aller Downloads beträgt ${Math.round(
             tracksDirectoryInfo.size / 1000000,

@@ -176,7 +176,10 @@ export function AudioPlayer({
         let nextMilliseconds = playbackStatus.positionMillis + milliseconds
         if (nextMilliseconds < 0) {
           nextMilliseconds = 0
-        } else if (nextMilliseconds > playbackStatus.durationMillis) {
+        } else if (
+          playbackStatus.durationMillis &&
+          nextMilliseconds > playbackStatus.durationMillis
+        ) {
           nextMilliseconds = playbackStatus.durationMillis
         }
         await sound.setPositionAsync(nextMilliseconds)
@@ -226,14 +229,14 @@ export function AudioPlayer({
 
   const padZero = (x: number) => (x < 10 ? "0" + x.toString() : x.toString())
 
-  const conertToAudioTimeString = (milliseconds: number) => {
+  const convertToAudioTimeString = (milliseconds: number) => {
     const hours = Math.floor(milliseconds / (1000 * 60 * 60))
     const minutes = Math.floor((milliseconds / (1000 * 60)) % 60)
     const seconds = Math.floor((milliseconds / 1000) % 60)
     return `${padZero(hours)}:${padZero(minutes)}:${padZero(seconds)}`
   }
 
-  const conertToAudioTimePhrase = (milliseconds: number) => {
+  const convertToAudioTimePhrase = (milliseconds: number) => {
     const hours = Math.floor(milliseconds / (1000 * 60 * 60))
     const minutes = Math.floor((milliseconds / (1000 * 60)) % 60)
     const seconds = Math.floor((milliseconds / 1000) % 60)
@@ -351,21 +354,21 @@ export function AudioPlayer({
       <View style={ROW}>
         <Text
           accessible={true}
-          accessibilityLabel={conertToAudioTimePhrase(
+          accessibilityLabel={convertToAudioTimePhrase(
             playbackStatus?.isLoaded ? playbackStatus.positionMillis : 0,
           )}
           accessibilityHint="Spielzeit"
           accessibilityRole="text"
           style={TEXT}
         >
-          {conertToAudioTimeString(playbackStatus?.isLoaded ? playbackStatus.positionMillis : 0)}
+          {convertToAudioTimeString(playbackStatus?.isLoaded ? playbackStatus.positionMillis : 0)}
         </Text>
         <Slider
           disabled
           accessible={true}
           accessibilityLabel={`
               ${
-                playbackStatus?.isLoaded
+                playbackStatus?.isLoaded && playbackStatus.durationMillis
                   ? Math.round(
                       (playbackStatus.positionMillis / playbackStatus.durationMillis) * 100,
                     )
@@ -383,14 +386,20 @@ export function AudioPlayer({
         />
         <Text
           accessible={true}
-          accessibilityLabel={conertToAudioTimePhrase(
-            playbackStatus?.isLoaded ? playbackStatus.durationMillis : 0,
+          accessibilityLabel={convertToAudioTimePhrase(
+            playbackStatus?.isLoaded && playbackStatus.durationMillis
+              ? playbackStatus.durationMillis
+              : 0,
           )}
           accessibilityHint="Spieldauer"
           accessibilityRole="text"
           style={TEXT}
         >
-          {conertToAudioTimeString(playbackStatus?.isLoaded ? playbackStatus.durationMillis : 0)}
+          {convertToAudioTimeString(
+            playbackStatus?.isLoaded && playbackStatus.durationMillis
+              ? playbackStatus.durationMillis
+              : 0,
+          )}
         </Text>
       </View>
       {backgroundMusic && (
