@@ -39,7 +39,7 @@ export const NAVIGATION_PERSISTENCE_KEY = "NAVIGATION_STATE"
  */
 function App() {
   const [ready, setReady] = useState(false)
-  const navigationRef = useRef<NavigationContainerRef>(null)
+  const navigationRef = useRef<NavigationContainerRef<Record<string, never>>>(null)
 
   setRootNavigation(navigationRef)
   useBackButtonHandler(navigationRef, canExit)
