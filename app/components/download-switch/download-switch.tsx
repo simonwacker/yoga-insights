@@ -173,7 +173,9 @@ export function DownloadSwitch({
     statuses.set(track.trackId, DownloadStatus.Downloading)
     const downloadResult = await download()
     if (downloadResult === undefined) {
-      return
+      const errorMessage = `downloadResult is undefined, FileSystemDownloadResult expected; trackId: ${track.trackId}`
+      __DEV__ && console.error(errorMessage)
+      throw new Error(errorMessage)
     }
     const { uri, md5, status: statusCode } = downloadResult
     if (statusCode !== 200) {
