@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { DownloadResumable, FileSystemDownloadResult } from "expo-file-system"
 import { DownloadSwitchProps } from "./download-switch.props"
 import { FileSystem } from "react-native-unimodules"
@@ -154,8 +154,8 @@ export function DownloadSwitch({
   const [progressPercentages] = useState<Map<string, number>>(
     () => new Map(tracks.map((track) => [track.trackId, 0])),
   )
-  const [resumableDownloads] = useState<Map<string, DownloadResumable | null>>(
-    () => new Map(tracks.map((track) => [track.trackId, null])),
+  const [resumableDownloads] = useState<Map<string, DownloadResumable | undefined>>(
+    () => new Map(tracks.map((track) => [track.trackId, undefined])),
   )
 
   const updateTrackProgressPercentage = (track: Track, percentage: number) => {
@@ -167,11 +167,17 @@ export function DownloadSwitch({
 
   const handleDownload = async (
     track: Track,
-    download: () => Promise<FileSystemDownloadResult>,
+    download: () => Promise<FileSystemDownloadResult | undefined>,
   ) => {
     // TODO Check `newAbortSignal.aborted` after every `await`?
     statuses.set(track.trackId, DownloadStatus.Downloading)
-    const { uri, md5, status: statusCode } = await download()
+    const downloadResult = await download()
+    if (downloadResult === undefined) {
+      const errorMessage = `downloadResult is undefined, FileSystemDownloadResult expected; trackId: ${track.trackId}`
+      __DEV__ && console.error(errorMessage)
+      throw new Error(errorMessage)
+    }
+    const { uri, md5, status: statusCode } = downloadResult
     if (statusCode !== 200) {
       console.warn(
         `Downloading track ${track.trackId} responded with HTTP status code ${statusCode}, expected 200.`,
@@ -187,10 +193,10 @@ export function DownloadSwitch({
     await FileSystem.moveAsync({ from: uri, to: getTrackFileUri(track) })
     statuses.set(track.trackId, DownloadStatus.Downloaded)
     const resumableDownload = resumableDownloads.get(track.trackId)
-    if (resumableDownload !== null) {
+    if (resumableDownload !== undefined) {
       resumableDownload._callback = undefined
       resumableDownload._removeSubscription()
-      resumableDownloads.set(track.trackId, null)
+      resumableDownloads.set(track.trackId, undefined)
     }
     await onDownloadComplete(track.trackId, getTrackFileUri(track))
   }
@@ -224,17 +230,21 @@ export function DownloadSwitch({
               case DownloadStatus.Downloading: {
                 if (downloadStatusToBe === DownloadStatusToBe.NotDownloaded) {
                   __DEV__ && console.log(`Pausing download of track ${track.trackId}`)
-                  await resumableDownloads.get(track.trackId).pauseAsync()
-                  statuses.set(track.trackId, DownloadStatus.Paused)
+                  const download = resumableDownloads.get(track.trackId)
+                  if (download) {
+                    await download.pauseAsync()
+                    statuses.set(track.trackId, DownloadStatus.Paused)
+                  }
                 }
                 break
               }
               case DownloadStatus.Paused: {
                 if (downloadStatusToBe === DownloadStatusToBe.Downloaded) {
                   __DEV__ && console.log(`Resuming download of track ${track.trackId}`)
-                  await handleDownload(track, () =>
-                    resumableDownloads.get(track.trackId).resumeAsync(),
-                  )
+                  const download = resumableDownloads.get(track.trackId)
+                  if (download) {
+                    await handleDownload(track, () => download.resumeAsync())
+                  }
                 }
                 break
               }
@@ -314,14 +324,16 @@ export function DownloadSwitch({
     }
     __DEV__ && console.log("Determining download status.", tracks, switchStatus, statuses)
     determineDownloadStatuses()
-    return () => (isMounted = false)
+    return () => {
+      isMounted = false
+    }
   }, []) // tracks, switchStatus, statuses // TODO List dependencies in a proper way. Get inspired by https://github.com/facebook/react/issues/14476#issuecomment-471199055
 
   useEffect(() => {
     return () => {
       __DEV__ && console.log("Removing callbacks and subscriptions.", resumableDownloads)
       for (const resumableDownload of resumableDownloads.values()) {
-        if (resumableDownload !== null) {
+        if (resumableDownload !== undefined) {
           resumableDownload._callback = undefined
           resumableDownload._removeSubscription()
         }

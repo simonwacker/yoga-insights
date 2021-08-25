@@ -5,9 +5,13 @@
  * will use once logged in.
  */
 import React from "react"
-import { NavigationContainer, NavigationContainerRef } from "@react-navigation/native"
+import {
+  NavigationContainer,
+  NavigationContainerRef,
+  NavigatorScreenParams,
+} from "@react-navigation/native"
 import { createStackNavigator } from "@react-navigation/stack"
-import { MainNavigator } from "./main-navigator"
+import { MainNavigator, MainParamList } from "./main-navigator"
 
 /**
  * This type allows TypeScript to know what routes are defined in this navigator
@@ -18,7 +22,7 @@ import { MainNavigator } from "./main-navigator"
  *   https://reactnavigation.org/docs/typescript#type-checking-the-navigator
  */
 export type RootParamList = {
-  mainStack: undefined
+  mainStack: NavigatorScreenParams<MainParamList>
 }
 
 const Stack = createStackNavigator<RootParamList>()
@@ -42,11 +46,11 @@ const RootStack = () => {
 }
 
 export const RootNavigator = React.forwardRef<
-  NavigationContainerRef,
+  NavigationContainerRef<RootParamList>,
   Partial<React.ComponentProps<typeof NavigationContainer>>
 >((props, ref) => {
   return (
-    <NavigationContainer {...props} ref={ref}>
+    <NavigationContainer<RootParamList> {...props} ref={ref}>
       <RootStack />
     </NavigationContainer>
   )

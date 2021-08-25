@@ -14,7 +14,8 @@ import { loadString, saveString } from "../app/utils/storage"
  */
 export function ToggleStorybook(props) {
   const [showStorybook, setShowStorybook] = useState(false)
-  const [StorybookUIRoot, setStorybookUIRoot] = useState(null)
+  // TODO: Use proper type for React component instead of any or get rid of storybook altogether.
+  const [StorybookUIRoot, setStorybookUIRoot] = useState<any>(null)
 
   useEffect(() => {
     if (__DEV__ && DevSettings) {

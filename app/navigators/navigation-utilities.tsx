@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react"
 import { BackHandler } from "react-native"
 import { PartialState, NavigationState, NavigationContainerRef } from "@react-navigation/native"
 import * as storage from "../utils/storage"
+import { RootParamList } from "./root-navigator"
 
 export const RootNavigation = {
   navigate(name: string) {
@@ -14,7 +15,7 @@ export const RootNavigation = {
   },
 }
 
-export const setRootNavigation = (ref: React.RefObject<NavigationContainerRef>) => {
+export const setRootNavigation = (ref: React.RefObject<NavigationContainerRef<RootParamList>>) => {
   for (const method in RootNavigation) {
     RootNavigation[method] = (...args: any) => {
       if (ref.current) {
@@ -28,6 +29,10 @@ export const setRootNavigation = (ref: React.RefObject<NavigationContainerRef>) 
  * Gets the current screen from any navigation state.
  */
 export function getActiveRouteName(state: NavigationState | PartialState<NavigationState>) {
+  if (state.index === undefined) {
+    throw new Error("expected state.index to exist")
+  }
+
   const route = state.routes[state.index]
 
   // Found the active route -- return the name
@@ -42,7 +47,7 @@ export function getActiveRouteName(state: NavigationState | PartialState<Navigat
  * the navigation or allows exiting the app.
  */
 export function useBackButtonHandler(
-  ref: React.RefObject<NavigationContainerRef>,
+  ref: React.RefObject<NavigationContainerRef<RootParamList>>,
   canExit: (routeName: string) => boolean,
 ) {
   const canExitRef = useRef(canExit)

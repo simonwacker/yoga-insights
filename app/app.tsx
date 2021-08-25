@@ -20,6 +20,7 @@ import {
   canExit,
   setRootNavigation,
   useNavigationPersistence,
+  RootParamList,
 } from "./navigators"
 import { ToggleStorybook } from "../storybook/toggle-storybook"
 
@@ -39,7 +40,7 @@ export const NAVIGATION_PERSISTENCE_KEY = "NAVIGATION_STATE"
  */
 function App() {
   const [ready, setReady] = useState(false)
-  const navigationRef = useRef<NavigationContainerRef>(null)
+  const navigationRef = useRef<NavigationContainerRef<RootParamList>>(null)
 
   setRootNavigation(navigationRef)
   useBackButtonHandler(navigationRef, canExit)
