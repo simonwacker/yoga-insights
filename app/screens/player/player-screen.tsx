@@ -45,7 +45,7 @@ export function PlayerScreen({ route }: PlayerScreenProps) {
     <Screen style={ROOT} preset="scroll">
       <AudioPlayer
         track={getTrack(trackIds[trackIndex])}
-        backgroundMusic={backgroundMusicId === null ? null : getTrack(backgroundMusicId)}
+        backgroundMusic={backgroundMusicId === null ? undefined : getTrack(backgroundMusicId)}
         tracksToDownload={getTracksToDownload()}
         onPlaybackDidJustFinish={playNextTrack}
         previousTrack={trackIndex >= 1 ? getTrack(trackIds[trackIndex - 1]) : undefined}
