@@ -172,11 +172,7 @@ export function MainNavigator() {
         component={TabNavigator}
         options={({ route }) => ({ headerShown: false, headerTitle: getHeaderTitle(route) })}
       />
-      <Stack.Screen
-        name="player"
-        component={PlayerScreen}
-        options={{ title: "Player", headerBackTitleVisible: true }}
-      />
+      <Stack.Screen name="player" component={PlayerScreen} options={{ title: "Player" }} />
       <Stack.Screen
         name="selectPoses"
         component={SelectPosesScreen}
