@@ -19,7 +19,12 @@ import {
   SelectPosesScreen,
   SettingsScreen,
 } from "../screens"
-import { CompositeNavigationProp, NavigatorScreenParams, RouteProp } from "@react-navigation/native"
+import {
+  CompositeNavigationProp,
+  NavigatorScreenParams,
+  RouteProp,
+  getFocusedRouteNameFromRoute,
+} from "@react-navigation/native"
 import { palette } from "../theme/palette"
 
 /**
@@ -90,6 +95,9 @@ export type SettingsScreenNavigationProp = CompositeNavigationProp<
   StackNavigationProp<MainParamList>
 >
 
+export type TabsScreenRouteProp = RouteProp<MainParamList, "tabs">
+export type TabsScreenNavigationProp = StackNavigationProp<MainParamList, "tabs">
+
 export type PlayerScreenRouteProp = RouteProp<MainParamList, "player">
 export type PlayerScreenNavigationProp = StackNavigationProp<MainParamList, "player">
 
@@ -105,6 +113,28 @@ export type SelectMusicScreenNavigationProp = StackNavigationProp<MainParamList,
 export type NamePlaylistScreenRouteProp = RouteProp<MainParamList, "namePlaylist">
 export type NamePlaylistScreenNavigationProp = StackNavigationProp<MainParamList, "namePlaylist">
 
+const initialRouteName: keyof TabParamList = "classes"
+
+const titles: { [key in keyof TabParamList]: string } = {
+  classes: "Stunden",
+  poses: "Übungen",
+  music: "Musik",
+  playlists: "Playlists",
+  settings: "Einstellungen",
+}
+
+function getHeaderTitle(route: TabsScreenRouteProp) {
+  // If the focused route is not found, we need to assume it's the initial
+  // screen This can happen during if there hasn't been any navigation inside
+  // the screen
+  const maybeRouteName = getFocusedRouteNameFromRoute(route)
+  const routeName =
+    maybeRouteName != null && maybeRouteName in titles
+      ? (maybeRouteName as keyof TabParamList)
+      : initialRouteName
+  return titles[routeName]
+}
+
 const Stack = createStackNavigator<MainParamList>()
 
 // Documentation: https://reactnavigation.org/docs/tab-based-navigation
@@ -113,7 +143,7 @@ const Tab = createBottomTabNavigator<TabParamList>()
 export function TabNavigator() {
   return (
     <Tab.Navigator
-      initialRouteName="classes"
+      initialRouteName={initialRouteName}
       screenOptions={{
         tabBarActiveTintColor: palette.white,
         tabBarInactiveTintColor: palette.black,
@@ -121,11 +151,15 @@ export function TabNavigator() {
         tabBarInactiveBackgroundColor: palette.white,
       }}
     >
-      <Tab.Screen name="classes" component={ClassesScreen} options={{ title: "Stunden" }} />
-      <Tab.Screen name="poses" component={PosesScreen} options={{ title: "Übungen" }} />
-      <Tab.Screen name="music" component={MusicScreen} options={{ title: "Musik" }} />
-      <Tab.Screen name="playlists" component={PlaylistsScreen} options={{ title: "Playlists" }} />
-      <Tab.Screen name="settings" component={SettingsScreen} options={{ title: "Einstellungen" }} />
+      <Tab.Screen name="classes" component={ClassesScreen} options={{ title: titles.classes }} />
+      <Tab.Screen name="poses" component={PosesScreen} options={{ title: titles.poses }} />
+      <Tab.Screen name="music" component={MusicScreen} options={{ title: titles.music }} />
+      <Tab.Screen
+        name="playlists"
+        component={PlaylistsScreen}
+        options={{ title: titles.playlists }}
+      />
+      <Tab.Screen name="settings" component={SettingsScreen} options={{ title: titles.settings }} />
     </Tab.Navigator>
   )
 }
@@ -133,8 +167,16 @@ export function TabNavigator() {
 export function MainNavigator() {
   return (
     <Stack.Navigator initialRouteName="tabs">
-      <Stack.Screen name="tabs" component={TabNavigator} options={{ headerShown: false }} />
-      <Stack.Screen name="player" component={PlayerScreen} options={{ title: "Player" }} />
+      <Stack.Screen
+        name="tabs"
+        component={TabNavigator}
+        options={({ route }) => ({ headerShown: false, headerTitle: getHeaderTitle(route) })}
+      />
+      <Stack.Screen
+        name="player"
+        component={PlayerScreen}
+        options={{ title: "Player", headerBackTitleVisible: true }}
+      />
       <Stack.Screen
         name="selectPoses"
         component={SelectPosesScreen}
