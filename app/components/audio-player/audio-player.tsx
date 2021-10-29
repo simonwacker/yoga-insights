@@ -70,6 +70,7 @@ export function AudioPlayer({
 
   const [sound] = useState<Audio.Sound>(() => new Audio.Sound())
   const [playbackStatus, setPlaybackStatus] = useState<AVPlaybackStatus | null>(null)
+  const [slidingPosition, setSlidingPosition] = useState<number | null>(null)
 
   const [backgroundSound] = useState<Audio.Sound | null>(() =>
     backgroundMusic === null ? null : new Audio.Sound(),
@@ -167,6 +168,35 @@ export function AudioPlayer({
     }
   }
 
+  const onSlidingStart = async (milliseconds: number) => {
+    setSlidingPosition(milliseconds)
+    await pause()
+  }
+
+  const slide = async (milliseconds: number) => {
+    try {
+      setSlidingPosition(milliseconds)
+    } catch (error) {
+      console.error(`Failed to slide to ${milliseconds} milliseconds.`, error)
+    }
+  }
+
+  const onSlidingComplete = async (milliseconds: number) => {
+    try {
+      if (playbackStatus?.isLoaded) {
+        await sound.setPositionAsync(
+          playbackStatus.durationMillis && milliseconds > playbackStatus.durationMillis
+            ? playbackStatus.durationMillis
+            : milliseconds,
+        )
+      }
+      setSlidingPosition(null)
+      await play()
+    } catch (error) {
+      console.error(`Failed to slide to ${milliseconds} milliseconds.`, error)
+    }
+  }
+
   const jumpPrev30Seconds = () => jumpSeconds(-30)
   const jumpNext30Seconds = () => jumpSeconds(30)
   const jumpSeconds = async (seconds: number) => {
@@ -242,6 +272,8 @@ export function AudioPlayer({
     const seconds = Math.floor((milliseconds / 1000) % 60)
     return `${hours} Stunden, ${minutes} Minuten und ${seconds} Sekunden`
   }
+
+  const playbackPosition = playbackStatus?.isLoaded ? playbackStatus.positionMillis : 0
 
   return (
     <View style={ROOT}>
@@ -339,17 +371,14 @@ export function AudioPlayer({
       <View style={ROW}>
         <Text
           accessible={true}
-          accessibilityLabel={convertToAudioTimePhrase(
-            playbackStatus?.isLoaded ? playbackStatus.positionMillis : 0,
-          )}
+          accessibilityLabel={convertToAudioTimePhrase(slidingPosition ?? playbackPosition)}
           accessibilityHint="Spielzeit"
           accessibilityRole="text"
           style={TEXT}
         >
-          {convertToAudioTimeString(playbackStatus?.isLoaded ? playbackStatus.positionMillis : 0)}
+          {convertToAudioTimeString(slidingPosition ?? playbackPosition)}
         </Text>
         <Slider
-          disabled
           accessible={true}
           accessibilityLabel={`
               ${
@@ -362,12 +391,16 @@ export function AudioPlayer({
             `}
           accessibilityHint="prozentuale Spielzeit"
           accessibilityRole="progressbar"
-          value={playbackStatus?.isLoaded ? playbackStatus.positionMillis : 0}
+          value={playbackPosition}
+          minimumValue={0}
           maximumValue={playbackStatus?.isLoaded ? playbackStatus.durationMillis : 0}
           maximumTrackTintColor="gray"
           minimumTrackTintColor={color.text}
           thumbTintColor={color.text}
           style={SLIDER_STYLE}
+          onSlidingStart={onSlidingStart}
+          onValueChange={slide}
+          onSlidingComplete={onSlidingComplete}
         />
         <Text
           accessible={true}
