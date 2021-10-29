@@ -1,13 +1,11 @@
-import React, { useEffect, useState } from "react"
-import { DownloadResumable, FileSystemDownloadResult } from "expo-file-system"
+import React from "react"
 import { DownloadSwitchProps } from "./download-switch.props"
-import { FileSystem } from "react-native-unimodules"
 import { Switch, TextStyle, View, ViewStyle } from "react-native"
 import { Text } from "../text/text"
 import { color, spacing } from "../../theme"
 import { scale } from "../../theme/scale"
-import { Track } from "../../models"
-import { getTrackFileUri } from "../../utils/file"
+import { DownloadState } from "../../clients/TrackDownloadsClient"
+import { useDownload } from "../../hooks/useDownload"
 
 const ROOT: ViewStyle = {
   marginVertical: spacing.medium,
@@ -20,385 +18,49 @@ const PERCENTAGE: TextStyle = {
   fontSize: scale.tiny,
 }
 
-enum DownloadStatus {
-  Unknown = "UNKNOWN",
-  NotDownloaded = "NOT_DOWNLOADED",
-  Downloading = "DOWNLOADING",
-  Paused = "PAUSED",
-  Downloaded = "DOWNLOADED",
-}
-
-enum DownloadStatusToBe {
-  Unknown = "UNKNOWN",
-  NotDownloaded = "NOT_DOWNLOADED",
-  Downloaded = "DOWNLOADED",
-}
-
-enum DownloadSwitchStatus {
-  Unknown = "UNKNOWN",
-  Deleting = "DELETING",
-  NotDownloaded = "NOT_DOWNLOADED",
-  Downloading = "DOWNLOADING",
-  Downloaded = "DOWNLOADED",
-}
-
-function any(
-  statuses: Map<string, DownloadStatus>,
-  predicate: (status: DownloadStatus) => boolean,
-) {
-  for (const status of statuses.values()) {
-    if (predicate(status)) {
-      return true
-    }
-  }
-  return false
-}
-
-function all(
-  statuses: Map<string, DownloadStatus>,
-  predicate: (status: DownloadStatus) => boolean,
-) {
-  for (const status of statuses.values()) {
-    if (!predicate(status)) {
-      return false
-    }
-  }
-  return true
-}
-
-function getSwitchStatus(status: DownloadSwitchStatus, statuses: Map<string, DownloadStatus>) {
+function getSwitchAccessibilityLabelState(status: DownloadState["type"]): string {
   switch (status) {
-    case DownloadSwitchStatus.Unknown:
-      if (any(statuses, (status) => status === DownloadStatus.Unknown)) {
-        return DownloadSwitchStatus.Unknown
-      }
-      if (all(statuses, (status) => status === DownloadStatus.Downloaded)) {
-        return DownloadSwitchStatus.Downloaded
-      }
-      if (any(statuses, (status) => status === DownloadStatus.NotDownloaded)) {
-        return DownloadSwitchStatus.NotDownloaded
-      }
-      console.error(`Impossible state!`, status, statuses)
-      break
-    case DownloadSwitchStatus.Deleting:
-      if (
-        all(
-          statuses,
-          (status) => status === DownloadStatus.NotDownloaded || status === DownloadStatus.Paused,
-        )
-      ) {
-        return DownloadSwitchStatus.NotDownloaded
-      }
-      break
-    case DownloadSwitchStatus.Downloading:
-      if (all(statuses, (status) => status === DownloadStatus.Downloaded)) {
-        return DownloadSwitchStatus.Downloaded
-      }
-      break
+    case "UNKNOWN":
+      return "unbekannter Herunterladzustand"
+    case "NOT_DOWNLOADED":
+      return "nicht heruntergeladen"
+    case "DOWNLOADING":
+      return "beim Herunterladen"
+    case "DOWNLOADED":
+      return "heruntergeladen"
+    case "FAILED_DOWNLOADING":
+      return "Fehler beim Herunterladen"
+    case "DOWNLOAD_PAUSED":
+      return "pausiert"
   }
-  return status
 }
 
-function computeProgressPercentage(progressPercentages: Map<string, number>) {
-  let sum = 0
-  for (const value of progressPercentages.values()) {
-    sum += value
-  }
-  return sum / progressPercentages.size
-}
-
-function getDownloadStatusToBe(status: DownloadSwitchStatus) {
+function getSwitchAccessibilityHintAction(status: DownloadState["type"]): string {
   switch (status) {
-    case DownloadSwitchStatus.Unknown:
-      return DownloadStatusToBe.Unknown
-    case DownloadSwitchStatus.Deleting:
-    case DownloadSwitchStatus.NotDownloaded:
-      return DownloadStatusToBe.NotDownloaded
-    case DownloadSwitchStatus.Downloading:
-    case DownloadSwitchStatus.Downloaded:
-      return DownloadStatusToBe.Downloaded
+    case "UNKNOWN":
+      return ""
+    case "FAILED_DOWNLOADING":
+    case "NOT_DOWNLOADED":
+      return "herunterladen"
+    case "DOWNLOADING":
+      return "abbrechen"
+    case "DOWNLOAD_PAUSED":
+      return "fortsetzen"
+    case "DOWNLOADED":
+      return "löschen"
   }
 }
 
-function getTemporaryFileUri(track: Track) {
-  return `${FileSystem.cacheDirectory}${track.trackId}.${track.fileExtension}`
-}
+export function DownloadSwitch({ tracks }: DownloadSwitchProps) {
+  const { state: downloadState, start, pause, clear } = useDownload(tracks[0])
 
-type AbortSignal = {
-  aborted: boolean
-}
-
-export function DownloadSwitch({
-  tracks,
-  onDownloadComplete,
-  onDownloadJustAboutToBeDeleted,
-}: DownloadSwitchProps) {
-  // TODO Abort long-running asynchronous tasks, aka, promises, more safely.
-  // Maybe with SWR as said on
-  // https://github.com/vercel/swr#conditional-fetching
-  const [abortSignal, setAbortSignal] = useState<AbortSignal>(() => {
-    return {
-      aborted: false,
-    }
-  })
-  const [switchStatus, setSwitchStatus] = useState(DownloadSwitchStatus.Unknown)
-  const [progressPercentage, setProgressPercentage] = useState(0)
-  // TODO We currently update these maps' values directly without changing the
-  // map, that is, we do not use the setters returned by `useState`. Doing
-  // otherwise required me to seemingly unnecessarily copy that map before each
-  // update. There probably is some benefit to doing this though. What are the
-  // advantages and disadvantages?
-  const [statuses] = useState<Map<string, DownloadStatus>>(
-    () => new Map(tracks.map((track) => [track.trackId, DownloadStatus.Unknown])),
-  )
-  const [progressPercentages] = useState<Map<string, number>>(
-    () => new Map(tracks.map((track) => [track.trackId, 0])),
-  )
-  const [resumableDownloads] = useState<Map<string, DownloadResumable | undefined>>(
-    () => new Map(tracks.map((track) => [track.trackId, undefined])),
-  )
-
-  const updateTrackProgressPercentage = (track: Track, percentage: number) => {
-    if (progressPercentages.get(track.trackId) !== percentage) {
-      progressPercentages.set(track.trackId, percentage)
-      setProgressPercentage(computeProgressPercentage(progressPercentages))
-    }
-  }
-
-  const handleDownload = async (
-    track: Track,
-    download: () => Promise<FileSystemDownloadResult | undefined>,
-  ) => {
-    // TODO Check `newAbortSignal.aborted` after every `await`?
-    statuses.set(track.trackId, DownloadStatus.Downloading)
-    const downloadResult = await download()
-    if (downloadResult === undefined) {
-      const errorMessage = `downloadResult is undefined, FileSystemDownloadResult expected; trackId: ${track.trackId}`
-      __DEV__ && console.error(errorMessage)
-      throw new Error(errorMessage)
-    }
-    const { uri, md5, status: statusCode } = downloadResult
-    if (statusCode !== 200) {
-      console.warn(
-        `Downloading track ${track.trackId} responded with HTTP status code ${statusCode}, expected 200.`,
-      )
-    }
-    if (md5 !== track.md5FileHashValue) {
-      // TODO Delete downloaded file?
-      console.error(
-        `Downloaded track ${track.trackId} has wrong md5 hash value ${md5}, expected ${track.md5FileHashValue}.`,
-      )
-    }
-    __DEV__ && console.log(`Downloaded track ${track.trackId}.`)
-    await FileSystem.moveAsync({ from: uri, to: getTrackFileUri(track) })
-    statuses.set(track.trackId, DownloadStatus.Downloaded)
-    const resumableDownload = resumableDownloads.get(track.trackId)
-    if (resumableDownload !== undefined) {
-      resumableDownload._callback = undefined
-      resumableDownload._removeSubscription()
-      resumableDownloads.set(track.trackId, undefined)
-    }
-    await onDownloadComplete(track.trackId, getTrackFileUri(track))
-  }
-
-  const updateStatus = async (newStatus: DownloadSwitchStatus, newAbortSignal: AbortSignal) => {
-    __DEV__ && console.log(`Updating status from ${switchStatus} to ${newStatus}`)
-    setSwitchStatus(newStatus)
-    const downloadStatusToBe = getDownloadStatusToBe(newStatus)
-    await Promise.all(
-      tracks.map(async (track) => {
-        try {
-          if (newAbortSignal.aborted) {
-            console.log(`Aborting updating status for ${track.trackId} to ${newStatus}.`)
-          } else {
-            switch (statuses.get(track.trackId)) {
-              case DownloadStatus.Unknown: {
-                console.error(`Download status of track ${track.trackId} is unknown.`)
-                break
-              }
-              case DownloadStatus.Downloaded: {
-                if (downloadStatusToBe === DownloadStatusToBe.NotDownloaded) {
-                  __DEV__ && console.log(`Deleting track ${track.trackId}`)
-                  await onDownloadJustAboutToBeDeleted(track.trackId, track.webUri)
-                  // TODO Check `newAbortSignal.aborted` after every `await`?
-                  await FileSystem.deleteAsync(getTrackFileUri(track))
-                  updateTrackProgressPercentage(track, 0)
-                  statuses.set(track.trackId, DownloadStatus.NotDownloaded)
-                }
-                break
-              }
-              case DownloadStatus.Downloading: {
-                if (downloadStatusToBe === DownloadStatusToBe.NotDownloaded) {
-                  __DEV__ && console.log(`Pausing download of track ${track.trackId}`)
-                  const download = resumableDownloads.get(track.trackId)
-                  if (download) {
-                    await download.pauseAsync()
-                    statuses.set(track.trackId, DownloadStatus.Paused)
-                  }
-                }
-                break
-              }
-              case DownloadStatus.Paused: {
-                if (downloadStatusToBe === DownloadStatusToBe.Downloaded) {
-                  __DEV__ && console.log(`Resuming download of track ${track.trackId}`)
-                  const download = resumableDownloads.get(track.trackId)
-                  if (download) {
-                    await handleDownload(track, () => download.resumeAsync())
-                  }
-                }
-                break
-              }
-              case DownloadStatus.NotDownloaded: {
-                if (downloadStatusToBe === DownloadStatusToBe.Downloaded) {
-                  __DEV__ && console.log(`Downloading track ${track.trackId}`)
-                  await handleDownload(track, () => {
-                    // TODO Is it possible that there already is a resumable
-                    // download instance for this track (maybe some race
-                    // condition)? In this case it needs to be cleaned up
-                    // properly or reused!
-                    const newResumableDownload = FileSystem.createDownloadResumable(
-                      track.webUri,
-                      getTemporaryFileUri(track),
-                      { md5: true },
-                      ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
-                        updateTrackProgressPercentage(
-                          track,
-                          totalBytesWritten / totalBytesExpectedToWrite,
-                        )
-                      },
-                    )
-                    resumableDownloads.set(track.trackId, newResumableDownload)
-                    return newResumableDownload.downloadAsync()
-                  })
-                }
-                break
-              }
-            }
-          }
-        } catch (error) {
-          console.error(`Switching download status of track ${track.trackId} failed.`, error)
-        }
-      }),
-    )
-    const evenNewerState = getSwitchStatus(newStatus, statuses)
-    if (newAbortSignal.aborted) {
-      __DEV__ && console.log(`Aborting updating status from ${newStatus} to ${evenNewerState}.`)
-    } else {
-      __DEV__ && console.log(`Updating status again now from ${newStatus} to ${evenNewerState}`)
-      setSwitchStatus(evenNewerState)
-    }
-  }
-
-  useEffect(() => {
-    // TODO Use some better approach to avoid updating state of unmounted
-    // component. The current approach is inspired by
-    // https://juliangaramendy.dev/blog/use-promise-subscription
-    // They adivce the usage of SWR instead as detailed in
-    // https://juliangaramendy.dev/blog/managing-remote-data-with-swr
-    // According to its documentation SWR supports react native; do a full-text
-    // search on https://github.com/vercel/swr
-    // SWR may also be used to abort promises as detailed on
-    // https://github.com/vercel/swr#conditional-fetching
-    let isMounted = true
-    // For why this function lives inside `useEffect` read
-    // https://reactjs.org/docs/hooks-faq.html#is-it-safe-to-omit-functions-from-the-list-of-dependencies
-    const determineDownloadStatuses = async () => {
-      await Promise.all(
-        tracks.map(async (track) => {
-          try {
-            const { exists } = await FileSystem.getInfoAsync(getTrackFileUri(track))
-            if (isMounted) {
-              statuses.set(
-                track.trackId,
-                exists ? DownloadStatus.Downloaded : DownloadStatus.NotDownloaded,
-              )
-            }
-          } catch (error) {
-            console.error(`Failed to determine download status of track ${track.trackId}.`, error)
-          }
-        }),
-      )
-      if (isMounted) {
-        setSwitchStatus(getSwitchStatus(switchStatus, statuses))
-      }
-    }
-    __DEV__ && console.log("Determining download status.", tracks, switchStatus, statuses)
-    determineDownloadStatuses()
-    return () => {
-      isMounted = false
-    }
-  }, []) // tracks, switchStatus, statuses // TODO List dependencies in a proper way. Get inspired by https://github.com/facebook/react/issues/14476#issuecomment-471199055
-
-  useEffect(() => {
-    return () => {
-      __DEV__ && console.log("Removing callbacks and subscriptions.", resumableDownloads)
-      for (const resumableDownload of resumableDownloads.values()) {
-        if (resumableDownload !== undefined) {
-          resumableDownload._callback = undefined
-          resumableDownload._removeSubscription()
-        }
-      }
-    }
-  }, []) // resumableDownloads // TODO List dependencies in a proper way. Get inspired by https://github.com/facebook/react/issues/14476#issuecomment-471199055
-
-  useEffect(() => {
-    return () => {
-      __DEV__ && console.log("Deleting temporary files.", tracks)
-      Promise.all(
-        tracks.map(async (track) => {
-          try {
-            await FileSystem.deleteAsync(getTemporaryFileUri(track), { idempotent: true })
-          } catch (error) {
-            console.error(`Failed to delete temporary file of track ${track.trackId}`)
-          }
-        }),
-      )
-    }
-  }, []) // tracks // TODO List dependencies in a proper way. Get inspired by https://github.com/facebook/react/issues/14476#issuecomment-471199055
-
-  const doSwitchStatus = () => {
-    abortSignal.aborted = true
-    const newAbortSignal = { aborted: false }
-    setAbortSignal(newAbortSignal)
-    switch (switchStatus) {
-      case DownloadSwitchStatus.Unknown:
-        console.error(`Switched status in unknown status --- impossible!`)
-        return Promise.resolve
-      case DownloadSwitchStatus.Deleting:
-      case DownloadSwitchStatus.NotDownloaded:
-        return updateStatus(DownloadSwitchStatus.Downloading, newAbortSignal)
-      case DownloadSwitchStatus.Downloading:
-      case DownloadSwitchStatus.Downloaded:
-        return updateStatus(DownloadSwitchStatus.Deleting, newAbortSignal)
-    }
-  }
-
-  const getSwitchAccessibilityLabelState = () => {
-    switch (switchStatus) {
-      case DownloadSwitchStatus.Unknown:
-        return "unbekannter Herunterladzustand"
-      case DownloadSwitchStatus.Deleting:
-        return "beim Löschen"
-      case DownloadSwitchStatus.NotDownloaded:
-        return "nicht heruntergeladen"
-      case DownloadSwitchStatus.Downloading:
-        return "beim Herunterladen"
-      case DownloadSwitchStatus.Downloaded:
-        return "heruntergeladen"
-    }
-  }
-
-  const getSwitchAccessibilityHintAction = () => {
-    switch (switchStatus) {
-      case DownloadSwitchStatus.Unknown:
-        return ""
-      case DownloadSwitchStatus.Deleting:
-      case DownloadSwitchStatus.NotDownloaded:
-        return "herunterladen"
-      case DownloadSwitchStatus.Downloading:
-        return "abbrechen"
-      case DownloadSwitchStatus.Downloaded:
-        return "löschen"
+  const onSwitchValueChange = () => {
+    if (downloadState.type === "NOT_DOWNLOADED" || downloadState.type === "DOWNLOAD_PAUSED") {
+      start()
+    } else if (downloadState.type === "DOWNLOADING") {
+      pause()
+    } else if (downloadState.type === "DOWNLOADED") {
+      clear()
     }
   }
 
@@ -406,35 +68,32 @@ export function DownloadSwitch({
     <View style={ROOT}>
       <Switch
         accessible={true}
-        accessibilityLabel={`Zustand: ${getSwitchAccessibilityLabelState()}`}
-        accessibilityHint={`Aktion: ${getSwitchAccessibilityHintAction()}`}
+        accessibilityLabel={`Zustand: ${getSwitchAccessibilityLabelState(downloadState.type)}`}
+        accessibilityHint={`Aktion: ${getSwitchAccessibilityHintAction(downloadState.type)}`}
         accessibilityRole="switch"
         trackColor={{ false: "#767577", true: "#81b0ff" }}
         thumbColor={
-          switchStatus === DownloadSwitchStatus.Downloading ||
-          switchStatus === DownloadSwitchStatus.Downloaded
+          downloadState.type === "DOWNLOADING" || downloadState.type === "DOWNLOADED"
             ? "#f5dd4b"
             : "#f4f3f4"
         }
         ios_backgroundColor="#3e3e3e"
-        disabled={switchStatus === DownloadSwitchStatus.Unknown}
-        value={
-          switchStatus === DownloadSwitchStatus.Downloading ||
-          switchStatus === DownloadSwitchStatus.Downloaded
-        }
-        onValueChange={doSwitchStatus}
+        disabled={downloadState.type === "UNKNOWN"}
+        value={downloadState.type === "DOWNLOADING" || downloadState.type === "DOWNLOADED"}
+        onValueChange={onSwitchValueChange}
       />
-      {switchStatus === DownloadSwitchStatus.Downloading && (
+      {downloadState.type === "DOWNLOADING" && (
         <Text
           accessible={true}
-          accessibilityLabel={`${Math.round(progressPercentage * 100)}%`}
+          accessibilityLabel={`${Math.round(downloadState.progress * 100)}%`}
           accessibilityHint="prozentualer Herunterladefortschritt"
           accessibilityRole="text"
           style={PERCENTAGE}
         >
-          {Math.round(progressPercentage * 100)}%
+          {Math.round(downloadState.progress * 100)}%
         </Text>
       )}
+      <Text>{downloadState.type}</Text>
     </View>
   )
 }

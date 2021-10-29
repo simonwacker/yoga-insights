@@ -7,12 +7,11 @@ import { Text } from "../text/text"
 import { Audio, AVPlaybackStatus, AVPlaybackStatusToSet } from "expo-av"
 import Slider from "@react-native-community/slider"
 import { AntDesign, FontAwesome5 } from "@expo/vector-icons"
-import { FileSystem } from "react-native-unimodules"
 import { AudioPlayerProps } from "./audio-player.props"
 import { color, spacing } from "../../theme"
 import { TextStyle } from "react-native"
 import { scale } from "../../theme/scale"
-import { getTrackFileUri } from "../../utils/file"
+import { useAudioSource } from "../../hooks/useAudioSource"
 
 const ROOT: ViewStyle = {
   flex: 1,
@@ -33,22 +32,19 @@ const ROW: ViewStyle = {
 const SLIDER_STYLE: ViewStyle = { flex: 1, alignSelf: "center", marginHorizontal: 10 }
 
 const loadAndPlay = async (
-  fileUri: string,
-  webUri: string,
+  uri: string,
   sound: Audio.Sound,
   initialStatus: AVPlaybackStatusToSet,
   onPlaybackStatusUpdate: (newPlaybackStatus: AVPlaybackStatus) => void,
 ) => {
   try {
-    __DEV__ && console.log(`About to load and play ${fileUri} or ${webUri}.`)
+    __DEV__ && console.log(`About to load and play ${uri}.`)
     await sound.unloadAsync()
     // Make sure audio is played if iOS is in silent mode, defaults to `false`.
     // NOTE: This sets the property globally which means _all_ future audio
     // playbacks will be affected.
     await Audio.setAudioModeAsync({ playsInSilentModeIOS: true })
     sound.setOnPlaybackStatusUpdate(onPlaybackStatusUpdate)
-    const { exists } = await FileSystem.getInfoAsync(fileUri)
-    const uri = exists ? fileUri : webUri
     await sound.loadAsync(
       { uri: uri },
       initialStatus,
@@ -69,8 +65,8 @@ export function AudioPlayer({
   nextTrack,
   onPlayNextTrack,
 }: AudioPlayerProps) {
-  const fileUri = getTrackFileUri(track)
-  const backgroundFileUri = backgroundMusic === null ? null : getTrackFileUri(backgroundMusic)
+  const exerciseAudioSource = useAudioSource(track)
+  const backgroundAudioSource = useAudioSource(backgroundMusic ?? undefined)
 
   const [sound] = useState<Audio.Sound>(() => new Audio.Sound())
   const [playbackStatus, setPlaybackStatus] = useState<AVPlaybackStatus | null>(null)
@@ -101,25 +97,29 @@ export function AudioPlayer({
   }, [])
 
   useEffect(() => {
-    loadAndPlay(fileUri, track.webUri, sound, { shouldPlay: true }, onPlaybackStatusUpdate)
-  }, [fileUri, track.webUri, sound, onPlaybackStatusUpdate])
+    if (exerciseAudioSource) {
+      loadAndPlay(
+        exerciseAudioSource.uri,
+        sound,
+        {
+          shouldPlay: !playbackStatus?.isLoaded || playbackStatus.shouldPlay,
+          positionMillis: playbackStatus?.isLoaded ? playbackStatus.positionMillis : 0,
+        },
+        onPlaybackStatusUpdate,
+      )
+    }
+  }, [exerciseAudioSource?.uri, sound, onPlaybackStatusUpdate])
 
   useEffect(() => {
-    if (backgroundFileUri && backgroundMusic?.webUri && backgroundSound) {
+    if (backgroundAudioSource && backgroundSound) {
       loadAndPlay(
-        backgroundFileUri,
-        backgroundMusic.webUri,
+        backgroundAudioSource.uri,
         backgroundSound,
         { shouldPlay: true, isLooping: true, volume: 0.5 },
         onBackgroundPlaybackStatusUpdate,
       )
     }
-  }, [
-    backgroundFileUri,
-    backgroundMusic?.webUri,
-    backgroundSound,
-    onBackgroundPlaybackStatusUpdate,
-  ])
+  }, [backgroundAudioSource?.uri, backgroundSound, onBackgroundPlaybackStatusUpdate])
 
   useEffect(() => {
     return () => {
@@ -241,21 +241,6 @@ export function AudioPlayer({
     const minutes = Math.floor((milliseconds / (1000 * 60)) % 60)
     const seconds = Math.floor((milliseconds / 1000) % 60)
     return `${hours} Stunden, ${minutes} Minuten und ${seconds} Sekunden`
-  }
-
-  const switchSource = async (trackId: string, uri: string) => {
-    if (trackId === track.trackId) {
-      const oldPlaybackStatus = playbackStatus
-      await sound.unloadAsync()
-      await sound.loadAsync(
-        { uri: uri },
-        {
-          shouldPlay: !oldPlaybackStatus?.isLoaded || oldPlaybackStatus.shouldPlay,
-          positionMillis: oldPlaybackStatus?.isLoaded ? oldPlaybackStatus.positionMillis : 0,
-        },
-        true,
-      )
-    }
   }
 
   return (
@@ -449,13 +434,8 @@ export function AudioPlayer({
       <View style={ROW}>
         <Text>Diese Stunde/Übung/Musik herunterladen oder löschen:</Text>
       </View>
-      {/* TODO One download switch needs to tell the other when some track was downloaded. */}
       <View style={ROW}>
-        <DownloadSwitch
-          tracks={[track]}
-          onDownloadComplete={switchSource}
-          onDownloadJustAboutToBeDeleted={switchSource}
-        />
+        <DownloadSwitch tracks={[track]} />
       </View>
       {tracksToDownload.length >= 2 && (
         <>
@@ -465,11 +445,7 @@ export function AudioPlayer({
             </Text>
           </View>
           <View style={ROW}>
-            <DownloadSwitch
-              tracks={tracksToDownload}
-              onDownloadComplete={switchSource}
-              onDownloadJustAboutToBeDeleted={switchSource}
-            />
+            <DownloadSwitch tracks={tracksToDownload} />
           </View>
         </>
       )}

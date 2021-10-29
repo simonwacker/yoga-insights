@@ -33,6 +33,9 @@ export function SettingsScreen({}: SettingsScreenProps) {
     })()
   }, [])
 
+  // TODO: This has to go through the TracksClient, otherwise the cache might
+  // become stale and display tracks as downloaded even though the entire
+  // directory has been deleted.
   const clearDownloads = async () => {
     await FileSystem.deleteAsync(tracksDirectoryUri)
     await FileSystem.makeDirectoryAsync(tracksDirectoryUri, { intermediates: true })

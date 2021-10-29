@@ -31,6 +31,8 @@ import { enableScreens } from "react-native-screens"
 import { useState } from "react"
 import { FileSystem } from "react-native-unimodules"
 import { tracksDirectoryUri } from "./utils/file"
+import { TrackDownloadsClientProvider } from "./contexts/TrackDownloadsClientContext"
+import { TrackDownloadsClient } from "./clients/TrackDownloadsClient"
 enableScreens()
 
 export const NAVIGATION_PERSISTENCE_KEY = "NAVIGATION_STATE"
@@ -62,11 +64,13 @@ function App() {
   return (
     <ToggleStorybook>
       <SafeAreaProvider initialMetrics={initialWindowMetrics}>
-        <RootNavigator
-          ref={navigationRef}
-          initialState={initialNavigationState}
-          onStateChange={onNavigationStateChange}
-        />
+        <TrackDownloadsClientProvider client={new TrackDownloadsClient()}>
+          <RootNavigator
+            ref={navigationRef}
+            initialState={initialNavigationState}
+            onStateChange={onNavigationStateChange}
+          />
+        </TrackDownloadsClientProvider>
       </SafeAreaProvider>
     </ToggleStorybook>
   )

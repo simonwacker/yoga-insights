@@ -2,7 +2,7 @@ import { Track } from "../../models"
 
 export interface AudioPlayerProps {
   track: Track
-  backgroundMusic: Track | null
+  backgroundMusic?: Track
   tracksToDownload: Track[]
   onPlaybackDidJustFinish: () => void
   previousTrack?: Track
