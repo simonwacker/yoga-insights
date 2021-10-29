@@ -1,5 +1,5 @@
 import { DownloadResumable, FileSystemDownloadResult } from "expo-file-system"
-import { FileSystem } from "react-native-unimodules"
+import * as FileSystem from "expo-file-system"
 import { Track } from "../models"
 import { getTrackFileUri } from "../utils/file"
 import { assertNotUndefined } from "../utils/types"

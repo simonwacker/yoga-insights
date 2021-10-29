@@ -29,7 +29,7 @@ import { ToggleStorybook } from "../storybook/toggle-storybook"
 // https://github.com/kmagiera/react-native-screens#using-native-stack-navigator
 import { enableScreens } from "react-native-screens"
 import { useState } from "react"
-import { FileSystem } from "react-native-unimodules"
+import * as FileSystem from "expo-file-system"
 import { tracksDirectoryUri } from "./utils/file"
 import { TrackDownloadsClientProvider } from "./contexts/TrackDownloadsClientContext"
 import { TrackDownloadsClient } from "./clients/TrackDownloadsClient"

@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from "react"
 import { useEffect } from "react"
 import { ViewStyle } from "react-native"
-import { FileSystem } from "react-native-unimodules"
+import * as FileSystem from "expo-file-system"
 import { Button, Screen, Text } from "../../components"
 import { SettingsScreenNavigationProp, SettingsScreenRouteProp } from "../../navigators"
 import { usePlaylistStore } from "../../stores"

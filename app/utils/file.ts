@@ -1,4 +1,4 @@
-import { FileSystem } from "react-native-unimodules"
+import * as FileSystem from "expo-file-system"
 import { Track } from "../models"
 
 export const tracksDirectoryUri = `${FileSystem.documentDirectory}tracks/`
