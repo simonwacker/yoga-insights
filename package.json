@@ -103,7 +103,8 @@
   "jest": {
     "preset": "jest-expo",
     "setupFiles": [
-      "<rootDir>/test/setup.ts"
+      "<rootDir>/test/setup.ts",
+      "<rootDir>/test/mock-async-storage.js"
     ],
     "testPathIgnorePatterns": [
       "/node_modules/",
