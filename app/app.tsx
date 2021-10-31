@@ -22,7 +22,6 @@ import {
   useNavigationPersistence,
   RootParamList,
 } from "./navigators"
-import { ToggleStorybook } from "../storybook/toggle-storybook"
 
 // This puts screens in a native ViewController or Activity. If you want fully native
 // stack navigation, use `createNativeStackNavigator` in place of `createStackNavigator`:
@@ -62,17 +61,15 @@ function App() {
   if (!ready) return null
 
   return (
-    <ToggleStorybook>
-      <SafeAreaProvider initialMetrics={initialWindowMetrics}>
-        <TrackDownloadsClientProvider client={new TrackDownloadsClient()}>
-          <RootNavigator
-            ref={navigationRef}
-            initialState={initialNavigationState}
-            onStateChange={onNavigationStateChange}
-          />
-        </TrackDownloadsClientProvider>
-      </SafeAreaProvider>
-    </ToggleStorybook>
+    <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+      <TrackDownloadsClientProvider client={new TrackDownloadsClient()}>
+        <RootNavigator
+          ref={navigationRef}
+          initialState={initialNavigationState}
+          onStateChange={onNavigationStateChange}
+        />
+      </TrackDownloadsClientProvider>
+    </SafeAreaProvider>
   )
 }
 
