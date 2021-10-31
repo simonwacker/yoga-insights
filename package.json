@@ -12,9 +12,8 @@
     "format:json": "prettier --write \"app/**/*.json\"",
     "format:md": "prettier --write \"**/*.md\"",
     "format:ts": "prettier --write \"app/**/*.ts{,x}\"",
-    "lint": "eslint App.js app storybook test --fix --ext .js,.ts,.tsx && yarn format",
+    "lint": "eslint App.js app test --fix --ext .js,.ts,.tsx && yarn format",
     "patch": "patch-package",
-    "storybook": "start-storybook -p 9001 -c ./storybook",
     "test": "jest",
     "adb": "adb reverse tcp:9090 tcp:9090 && adb reverse tcp:3000 tcp:3000 && adb reverse tcp:9001 tcp:9001 && adb reverse tcp:8081 tcp:8081",
     "postinstall": "node ./bin/postInstall",
@@ -55,9 +54,6 @@
     "@babel/plugin-proposal-decorators": "^7.12.1",
     "@babel/plugin-proposal-optional-catch-binding": "^7.12.1",
     "@babel/runtime": "^7.12.5",
-    "@storybook/addon-storyshots": "^6.1.10",
-    "@storybook/react-native": "^5.3.23",
-    "@storybook/react-native-server": "^5.3.23",
     "@types/jest": "^26.0.19",
     "@types/ramda": "^0.27.32",
     "@types/react": "~17.0.21",
@@ -103,14 +99,15 @@
   "jest": {
     "preset": "jest-expo",
     "setupFiles": [
-      "<rootDir>/test/setup.ts"
+      "<rootDir>/test/setup.ts",
+      "<rootDir>/test/mock-async-storage.js"
     ],
     "testPathIgnorePatterns": [
       "/node_modules/",
       "/e2e"
     ],
     "transformIgnorePatterns": [
-      "node_modules/(?!(jest-)?react-native|react-clone-referenced-element|@react-native-community|expo(nent)?|@expo(nent)?/.*|react-navigation|@react-navigation/.*|@unimodules/.*|native-base|@storybook)"
+      "node_modules/(?!(jest-)?react-native|react-clone-referenced-element|@react-native-community|expo(nent)?|@expo(nent)?/.*|react-navigation|@react-navigation/.*|@unimodules/.*|native-base)"
     ]
   },
   "prettier": {

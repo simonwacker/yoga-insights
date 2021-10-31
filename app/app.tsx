@@ -10,19 +10,16 @@
  * if you're interested in adding screens and navigators.
  */
 import "react-native-gesture-handler"
-import React, { useEffect, useRef } from "react"
-import { NavigationContainerRef } from "@react-navigation/native"
+import React, { useEffect } from "react"
 import { SafeAreaProvider, initialWindowMetrics } from "react-native-safe-area-context"
 import { initFonts } from "./theme/fonts" // expo
 import {
   useBackButtonHandler,
   RootNavigator,
   canExit,
-  setRootNavigation,
   useNavigationPersistence,
-  RootParamList,
+  navigationRef,
 } from "./navigators"
-import { ToggleStorybook } from "../storybook/toggle-storybook"
 
 // This puts screens in a native ViewController or Activity. If you want fully native
 // stack navigation, use `createNativeStackNavigator` in place of `createStackNavigator`:
@@ -42,13 +39,13 @@ export const NAVIGATION_PERSISTENCE_KEY = "NAVIGATION_STATE"
  */
 function App() {
   const [ready, setReady] = useState(false)
-  const navigationRef = useRef<NavigationContainerRef<RootParamList>>(null)
 
-  setRootNavigation(navigationRef)
-  useBackButtonHandler(navigationRef, canExit)
-  const { initialNavigationState, onNavigationStateChange } = useNavigationPersistence(
-    NAVIGATION_PERSISTENCE_KEY,
-  )
+  useBackButtonHandler(canExit)
+  const {
+    initialNavigationState,
+    onNavigationStateChange,
+    isRestored: isNavigationStateRestored,
+  } = useNavigationPersistence(NAVIGATION_PERSISTENCE_KEY)
 
   // Kick off initial async loading actions, like loading fonts
   useEffect(() => {
@@ -59,20 +56,18 @@ function App() {
     })()
   }, [])
 
-  if (!ready) return null
+  if (!ready || !isNavigationStateRestored) return null
 
   return (
-    <ToggleStorybook>
-      <SafeAreaProvider initialMetrics={initialWindowMetrics}>
-        <TrackDownloadsClientProvider client={new TrackDownloadsClient()}>
-          <RootNavigator
-            ref={navigationRef}
-            initialState={initialNavigationState}
-            onStateChange={onNavigationStateChange}
-          />
-        </TrackDownloadsClientProvider>
-      </SafeAreaProvider>
-    </ToggleStorybook>
+    <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+      <TrackDownloadsClientProvider client={new TrackDownloadsClient()}>
+        <RootNavigator
+          ref={navigationRef}
+          initialState={initialNavigationState}
+          onStateChange={onNavigationStateChange}
+        />
+      </TrackDownloadsClientProvider>
+    </SafeAreaProvider>
   )
 }
 
