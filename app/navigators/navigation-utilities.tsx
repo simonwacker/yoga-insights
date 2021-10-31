@@ -1,38 +1,35 @@
-import React, { useState, useEffect, useRef, useCallback } from "react"
+import { useState, useEffect, useRef } from "react"
 import { BackHandler } from "react-native"
-import { PartialState, NavigationState, NavigationContainerRef } from "@react-navigation/native"
+import {
+  PartialState,
+  NavigationAction,
+  NavigationState,
+  createNavigationContainerRef,
+} from "@react-navigation/native"
 import * as storage from "../utils/storage"
 import { RootParamList } from "./root-navigator"
 
+/* eslint-disable */
 export const RootNavigation = {
-  navigate(name: string) {
-    name // eslint-disable-line no-unused-expressions
-  },
-  goBack() {}, // eslint-disable-line @typescript-eslint/no-empty-function
-  resetRoot(state?: PartialState<NavigationState> | NavigationState) {}, // eslint-disable-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
+  navigate(_name: string, _params?: any) {},
+  goBack() {},
+  resetRoot(_state?: PartialState<NavigationState> | NavigationState) {},
   getRootState(): NavigationState {
     return {} as any
   },
+  dispatch(_action: NavigationAction) {},
 }
+/* eslint-enable */
 
-export const setRootNavigation = (ref: React.RefObject<NavigationContainerRef<RootParamList>>) => {
-  for (const method in RootNavigation) {
-    RootNavigation[method] = (...args: any) => {
-      if (ref.current) {
-        return ref.current[method](...args)
-      }
-    }
-  }
-}
+export const navigationRef = createNavigationContainerRef<RootParamList>()
 
 /**
  * Gets the current screen from any navigation state.
  */
-export function getActiveRouteName(state: NavigationState | PartialState<NavigationState>) {
+export function getActiveRouteName(state: NavigationState | PartialState<NavigationState>): string {
   if (state.index === undefined) {
     throw new Error("expected state.index to exist")
   }
-
   const route = state.routes[state.index]
 
   // Found the active route -- return the name
@@ -46,10 +43,7 @@ export function getActiveRouteName(state: NavigationState | PartialState<Navigat
  * Hook that handles Android back button presses and forwards those on to
  * the navigation or allows exiting the app.
  */
-export function useBackButtonHandler(
-  ref: React.RefObject<NavigationContainerRef<RootParamList>>,
-  canExit: (routeName: string) => boolean,
-) {
+export function useBackButtonHandler(canExit: (routeName: string) => boolean) {
   const canExitRef = useRef(canExit)
 
   useEffect(() => {
@@ -59,14 +53,12 @@ export function useBackButtonHandler(
   useEffect(() => {
     // We'll fire this when the back button is pressed on Android.
     const onBackPress = () => {
-      const navigation = ref.current
-
-      if (navigation == null) {
+      if (!navigationRef.isReady()) {
         return false
       }
 
       // grab the current route
-      const routeName = getActiveRouteName(navigation.getRootState())
+      const routeName = getActiveRouteName(navigationRef.getRootState())
 
       // are we allowed to exit?
       if (canExitRef.current(routeName)) {
@@ -75,9 +67,8 @@ export function useBackButtonHandler(
       }
 
       // we can't exit, so let's turn this into a back action
-      if (navigation.canGoBack()) {
-        navigation.goBack()
-
+      if (navigationRef.canGoBack()) {
+        navigationRef.goBack()
         return true
       }
 
@@ -89,47 +80,76 @@ export function useBackButtonHandler(
 
     // Unsubscribe when we're done
     return () => BackHandler.removeEventListener("hardwareBackPress", onBackPress)
-  }, [ref])
+  }, [])
 }
 
 /**
  * Custom hook for persisting navigation state.
  */
 export function useNavigationPersistence(persistenceKey: string) {
-  const [initialNavigationState, setInitialNavigationState] = useState()
-  const [isRestoringNavigationState, setIsRestoringNavigationState] = useState(true)
+  const [initialNavigationState, setInitialNavigationState] = useState<NavigationState | undefined>(
+    undefined,
+  )
 
-  const routeNameRef = useRef()
-  const onNavigationStateChange = (state) => {
-    const previousRouteName = routeNameRef.current
-    const currentRouteName = getActiveRouteName(state)
+  const [isRestored, setIsRestored] = useState(false)
 
-    if (previousRouteName !== currentRouteName) {
-      // track screens.
-      __DEV__ && console.log(currentRouteName)
+  const routeNameRef = useRef<string | undefined>()
+
+  const onNavigationStateChange = (state: NavigationState | undefined) => {
+    if (state === undefined) {
+      storage.remove(persistenceKey)
+    } else {
+      const previousRouteName = routeNameRef.current
+      const currentRouteName = getActiveRouteName(state)
+
+      if (previousRouteName !== currentRouteName) {
+        // track screens.
+        __DEV__ && console.log(currentRouteName)
+      }
+
+      // Save the current route name for later comparision
+      routeNameRef.current = currentRouteName
+
+      // Persist state to storage
+      storage.save(persistenceKey, state)
     }
-
-    // Save the current route name for later comparision
-    routeNameRef.current = currentRouteName
-
-    // Persist state to storage
-    storage.save(persistenceKey, state)
   }
 
-  // For why we use `useCallback` here see
-  // https://reactjs.org/docs/hooks-faq.html#is-it-safe-to-omit-functions-from-the-list-of-dependencies
-  const restoreState = useCallback(async () => {
+  const restoreState = async () => {
     try {
       const state = await storage.load(persistenceKey)
       if (state) setInitialNavigationState(state)
     } finally {
-      setIsRestoringNavigationState(false)
+      setIsRestored(true)
     }
-  }, [persistenceKey])
+  }
 
   useEffect(() => {
-    if (isRestoringNavigationState) restoreState()
-  }, [isRestoringNavigationState])
+    if (!isRestored) restoreState()
+  }, [isRestored])
 
-  return { onNavigationStateChange, restoreState, initialNavigationState }
+  return { onNavigationStateChange, restoreState, isRestored, initialNavigationState }
+}
+
+/**
+ * use this to navigate to navigate without the navigation
+ * prop. If you have access to the navigation prop, do not use this.
+ * More info: https://reactnavigation.org/docs/navigating-without-navigation-prop/
+ */
+export function navigate(name: any, params?: any) {
+  if (navigationRef.isReady()) {
+    navigationRef.navigate(name as never, params as never)
+  }
+}
+
+export function goBack() {
+  if (navigationRef.isReady() && navigationRef.canGoBack()) {
+    navigationRef.goBack()
+  }
+}
+
+export function resetRoot(params = { index: 0, routes: [] }) {
+  if (navigationRef.isReady()) {
+    navigationRef.resetRoot(params)
+  }
 }

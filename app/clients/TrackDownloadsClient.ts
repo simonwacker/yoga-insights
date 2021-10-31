@@ -99,7 +99,13 @@ export class TrackDownloadsClient {
     const currentState = this.fetchDownloadState(track.trackId)
 
     if (currentState.type === "NOT_DOWNLOADED" || currentState.type === "FAILED_DOWNLOADING") {
-      const callback = ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
+      const callback = ({
+        totalBytesWritten,
+        totalBytesExpectedToWrite,
+      }: {
+        totalBytesWritten: number
+        totalBytesExpectedToWrite: number
+      }) => {
         const state = this.fetchDownloadState(track.trackId)
         if (state.type === "DOWNLOADING" || state.type === "DOWNLOAD_PAUSED") {
           state.progress = totalBytesWritten / totalBytesExpectedToWrite
