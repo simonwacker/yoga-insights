@@ -25,22 +25,29 @@ export function NamePlaylistScreen({ route, navigation }: NamePlaylistScreenProp
     addPlaylist({ name: name, poseIds: poseIds, musicId: musicId })
   }
 
+  const canFinish = name !== ""
+
   const finish = () => {
-    if (name !== "") {
+    if (canFinish) {
       createPlaylist()
       navigation.navigate("tabs", { screen: "playlists" })
     }
   }
 
   return (
-    <Screen style={ROOT} preset="scroll" onAccessibilityEscape={navigation.goBack}>
+    <Screen
+      style={ROOT}
+      preset="scroll"
+      onAccessibilityEscape={navigation.goBack}
+      onMagicTap={finish}
+    >
       <TextField
         accessibilityLabel="Name"
         value={name}
         onChangeText={setName}
         onMagicTap={finish}
       />
-      <Button disabled={name === ""} onPress={finish} title="Playlist erstellen" />
+      <Button disabled={!canFinish} onPress={finish} title="Playlist erstellen" />
     </Screen>
   )
 }

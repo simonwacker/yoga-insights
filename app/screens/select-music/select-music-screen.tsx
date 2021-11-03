@@ -22,8 +22,16 @@ export function SelectMusicScreen({ route, navigation }: SelectMusicScreenProps)
   const getTrack = useTrackStore(useCallback((state) => state.getTrack, []))
   const [selectedMusicId, setSelectedMusicId] = useState<string | null>(null)
 
+  const finish = () =>
+    navigation.navigate("namePlaylist", { poseIds: poseIds, musicId: selectedMusicId })
+
   return (
-    <Screen style={ROOT} preset="fixed" onAccessibilityEscape={navigation.goBack}>
+    <Screen
+      style={ROOT}
+      preset="fixed"
+      onAccessibilityEscape={navigation.goBack}
+      onMagicTap={finish}
+    >
       <SectionList
         getSectionTitle={(section) => section.title}
         sections={musicSections}
@@ -36,12 +44,7 @@ export function SelectMusicScreen({ route, navigation }: SelectMusicScreenProps)
           />
         )}
       />
-      <Button
-        onPress={() =>
-          navigation.navigate("namePlaylist", { poseIds: poseIds, musicId: selectedMusicId })
-        }
-        title="Playlist benennen"
-      />
+      <Button onPress={finish} title="Playlist benennen" />
     </Screen>
   )
 }
