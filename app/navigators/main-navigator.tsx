@@ -166,11 +166,21 @@ export function TabNavigator() {
 
 export function MainNavigator() {
   return (
-    <Stack.Navigator initialRouteName="tabs">
+    <Stack.Navigator
+      initialRouteName="tabs"
+      screenOptions={{
+        headerBackAllowFontScaling: true,
+        headerTruncatedBackTitle: "Zurück",
+      }}
+    >
       <Stack.Screen
         name="tabs"
         component={TabNavigator}
-        options={({ route }) => ({ headerShown: false, title: getTitle(route) })}
+        options={({ route }) => ({
+          headerShown: false,
+          title: getTitle(route),
+          // headerBackAccessibilityLabel: getTitle(route),
+        })}
       />
       <Stack.Screen name="player" component={PlayerScreen} options={{ title: "Player" }} />
       <Stack.Screen
