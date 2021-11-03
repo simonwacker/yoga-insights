@@ -19,7 +19,7 @@ export function ClassesScreen({ navigation }: ClassesScreenProps) {
   const classSections = useTrackStore(useCallback((state) => state.classSections, []))
 
   return (
-    <Screen style={ROOT} preset="fixed">
+    <Screen style={ROOT} preset="fixed" onAccessibilityEscape={navigation.goBack}>
       <TrackSectionList
         sections={classSections}
         onSelectTrack={(initialTrackIndex, trackIds) =>

@@ -33,7 +33,7 @@ export function NamePlaylistScreen({ route, navigation }: NamePlaylistScreenProp
   }
 
   return (
-    <Screen style={ROOT} preset="scroll">
+    <Screen style={ROOT} preset="scroll" onAccessibilityEscape={navigation.goBack}>
       <TextField
         accessibilityLabel="Name"
         value={name}

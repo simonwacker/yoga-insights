@@ -31,7 +31,7 @@ export function SelectPosesScreen({ navigation }: SelectPosesScreenProps) {
   }
 
   return (
-    <Screen style={ROOT} preset="fixed">
+    <Screen style={ROOT} preset="fixed" onAccessibilityEscape={navigation.goBack}>
       <SectionList
         getSectionTitle={(section) => section.title}
         sections={poseSections}

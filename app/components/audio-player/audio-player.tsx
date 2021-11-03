@@ -299,6 +299,7 @@ export function AudioPlayer({
           }
         }
       }}
+      onAccessibilityEscape={previousTrack ? onPlayPreviousTrack : undefined}
     >
       {/* <AutoImage
           source={img_speaker}

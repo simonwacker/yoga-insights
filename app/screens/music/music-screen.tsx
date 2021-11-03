@@ -19,7 +19,7 @@ export function MusicScreen({ navigation }: MusicScreenProps) {
   const musicSections = useTrackStore(useCallback((state) => state.musicSections, []))
 
   return (
-    <Screen style={ROOT} preset="fixed">
+    <Screen style={ROOT} preset="fixed" onAccessibilityEscape={navigation.goBack}>
       <TrackSectionList
         sections={musicSections}
         onSelectTrack={(initialTrackIndex, trackIds) =>

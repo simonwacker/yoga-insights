@@ -19,7 +19,7 @@ export function PlaylistsScreen({ navigation }: PlaylistsScreenProps) {
   const playlists = usePlaylistStore(useCallback((state) => state.playlists, []))
 
   return (
-    <Screen style={ROOT} preset="fixed">
+    <Screen style={ROOT} preset="fixed" onAccessibilityEscape={navigation.goBack}>
       <FlatList
         data={playlists}
         keyExtractor={(item) => item.playlistId.toString()}
