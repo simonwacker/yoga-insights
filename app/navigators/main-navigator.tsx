@@ -123,7 +123,7 @@ const titles: { [key in keyof TabParamList]: string } = {
   settings: "Einstellungen",
 }
 
-function getHeaderTitle(route: TabsScreenRouteProp) {
+function getTitle(route: TabsScreenRouteProp) {
   // If the focused route is not found, we need to assume it's the initial
   // screen This can happen during if there hasn't been any navigation inside
   // the screen
@@ -170,7 +170,7 @@ export function MainNavigator() {
       <Stack.Screen
         name="tabs"
         component={TabNavigator}
-        options={({ route }) => ({ headerShown: false, headerTitle: getHeaderTitle(route) })}
+        options={({ route }) => ({ headerShown: false, title: getTitle(route) })}
       />
       <Stack.Screen name="player" component={PlayerScreen} options={{ title: "Player" }} />
       <Stack.Screen
