@@ -288,7 +288,18 @@ export function AudioPlayer({
     playbackStatus?.isLoaded && playbackStatus.durationMillis ? playbackStatus.durationMillis : 0
 
   return (
-    <View style={ROOT}>
+    <View
+      style={ROOT}
+      onMagicTap={() => {
+        if (playbackStatus?.isLoaded) {
+          if (playbackStatus.shouldPlay) {
+            pause()
+          } else {
+            play()
+          }
+        }
+      }}
+    >
       {/* <AutoImage
           source={img_speaker}
           style={{ width: 150, height: 150, marginBottom: 15, alignSelf: "center" }}
