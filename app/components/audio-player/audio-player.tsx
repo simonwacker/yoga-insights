@@ -31,6 +31,16 @@ const ROW: ViewStyle = {
 }
 const SLIDER_STYLE: ViewStyle = { flex: 1, alignSelf: "center", marginHorizontal: 10 }
 
+// See https://reactnative.dev/docs/accessibility#accessibility-actions
+const standardAccessibilityActions = {
+  magicTap: { name: "magicTap" },
+  escape: { name: "escape" },
+  activate: { name: "activate" },
+  increment: { name: "increment" },
+  decrement: { name: "decrement" },
+  longpress: { name: "longpress" },
+}
+
 const loadAndPlay = async (
   uri: string,
   sound: Audio.Sound,
@@ -274,6 +284,8 @@ export function AudioPlayer({
   }
 
   const playbackPosition = playbackStatus?.isLoaded ? playbackStatus.positionMillis : 0
+  const maximumPlaybackPosition =
+    playbackStatus?.isLoaded && playbackStatus.durationMillis ? playbackStatus.durationMillis : 0
 
   return (
     <View style={ROOT}>
@@ -396,10 +408,27 @@ export function AudioPlayer({
               }%
             `}
           accessibilityHint="prozentuale Spielzeit"
-          accessibilityRole="progressbar"
+          accessibilityRole="adjustable"
+          accessibilityValue={{ min: 0, max: maximumPlaybackPosition, now: playbackPosition }}
+          accessibilityActions={[
+            standardAccessibilityActions.increment,
+            standardAccessibilityActions.decrement,
+          ]}
+          onAccessibilityAction={(event) => {
+            switch (event.nativeEvent.actionName) {
+              case standardAccessibilityActions.increment.name:
+                jumpSeconds(5)
+                break
+              case standardAccessibilityActions.decrement.name:
+                jumpSeconds(-5)
+                break
+              default:
+                console.warn(`Unknown accessibility action '${event.nativeEvent.actionName}'.`)
+            }
+          }}
           value={playbackPosition}
           minimumValue={0}
-          maximumValue={playbackStatus?.isLoaded ? playbackStatus.durationMillis : 0}
+          maximumValue={maximumPlaybackPosition}
           maximumTrackTintColor="gray"
           minimumTrackTintColor={color.text}
           thumbTintColor={color.text}
@@ -410,20 +439,12 @@ export function AudioPlayer({
         />
         <Text
           accessible={true}
-          accessibilityLabel={convertToAudioTimePhrase(
-            playbackStatus?.isLoaded && playbackStatus.durationMillis
-              ? playbackStatus.durationMillis
-              : 0,
-          )}
+          accessibilityLabel={convertToAudioTimePhrase(maximumPlaybackPosition)}
           accessibilityHint="Spieldauer"
           accessibilityRole="text"
           style={TEXT}
         >
-          {convertToAudioTimeString(
-            playbackStatus?.isLoaded && playbackStatus.durationMillis
-              ? playbackStatus.durationMillis
-              : 0,
-          )}
+          {convertToAudioTimeString(maximumPlaybackPosition)}
         </Text>
       </View>
       {backgroundMusic && (
