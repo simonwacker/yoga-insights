@@ -17,7 +17,7 @@ export interface ListButtonItemProps {
 
 export function ListButtonItem({ label, onPress }: ListButtonItemProps) {
   return (
-    <Pressable accessible accessibilityRole="button" onPress={onPress}>
+    <Pressable accessible accessibilityRole="button" onPress={onPress} onMagicTap={onPress}>
       <View style={LIST_CONTAINER}>
         <Text style={LIST_TEXT}>{label}</Text>
       </View>

@@ -41,6 +41,7 @@ export function ListCheckboxItem({ label, checked, onPress }: ListCheckboxItemPr
       accessibilityRole="checkbox"
       accessibilityState={{ checked: checked }}
       onPress={onPress}
+      onMagicTap={onPress}
     >
       <View style={LIST_CONTAINER}>
         <View style={BOX_OUTLINE}>{checked && <View style={BOX_FILL} />}</View>

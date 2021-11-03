@@ -17,6 +17,7 @@ export function Button(props: ButtonProps) {
     style: styleOverride,
     textStyle: textStyleOverride,
     children,
+    onPress,
     ...rest
   } = props
 
@@ -28,7 +29,14 @@ export function Button(props: ButtonProps) {
   const content = children || <Text text={text} style={textStyles} />
 
   return (
-    <Pressable accessible accessibilityRole="button" style={viewStyles} {...rest}>
+    <Pressable
+      accessible
+      accessibilityRole="button"
+      style={viewStyles}
+      onPress={onPress}
+      onMagicTap={onPress}
+      {...rest}
+    >
       {content}
     </Pressable>
   )

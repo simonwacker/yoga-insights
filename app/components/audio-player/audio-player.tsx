@@ -296,6 +296,7 @@ export function AudioPlayer({
           accessibilityLabel={`Vorheriges Stück abspielen ${previousTrack?.name}`}
           accessibilityRole="button"
           onPress={onPlayPreviousTrack}
+          onMagicTap={onPlayPreviousTrack}
           style={HANDLE}
         >
           <AntDesign name="stepbackward" size={30} color={color.text} />
@@ -305,6 +306,7 @@ export function AudioPlayer({
           accessibilityLabel="30 Sekunden zurückspulen"
           accessibilityRole="button"
           onPress={jumpPrev30Seconds}
+          onMagicTap={jumpPrev30Seconds}
           style={HANDLE}
         >
           <AntDesign name="left" size={30} color={color.text} />
@@ -328,6 +330,7 @@ export function AudioPlayer({
             accessibilityLabel="abspielen"
             accessibilityRole="button"
             onPress={play}
+            onMagicTap={play}
             style={HANDLE}
           >
             <AntDesign name="playcircleo" size={30} color={color.text} />
@@ -340,6 +343,7 @@ export function AudioPlayer({
             accessibilityLabel="pausieren"
             accessibilityRole="button"
             onPress={pause}
+            onMagicTap={pause}
             style={HANDLE}
           >
             <AntDesign name="pausecircleo" size={30} color={color.text} />
@@ -351,6 +355,7 @@ export function AudioPlayer({
           accessibilityLabel="30 Sekunden vorspulen"
           accessibilityRole="button"
           onPress={jumpNext30Seconds}
+          onMagicTap={jumpNext30Seconds}
           style={HANDLE}
         >
           {/* <AutoImage source={img_playjumpright} style={{ width: 30, height: 30 }} /> */}
@@ -363,6 +368,7 @@ export function AudioPlayer({
           accessibilityLabel={`Nächstes Stück abspielen ${nextTrack?.name}`}
           accessibilityRole="button"
           onPress={onPlayNextTrack}
+          onMagicTap={onPlayNextTrack}
           style={HANDLE}
         >
           <AntDesign name="stepforward" size={30} color={color.text} />
@@ -427,6 +433,7 @@ export function AudioPlayer({
             accessibilityLabel="Hintergrundmusik leiser machen"
             accessibilityRole="button"
             onPress={decreaseBackgroundMusicVolume}
+            onMagicTap={decreaseBackgroundMusicVolume}
             style={HANDLE}
           >
             <FontAwesome5 name="volume-down" size={30} color={color.text} />
@@ -437,6 +444,7 @@ export function AudioPlayer({
               accessibilityLabel="laut stellen"
               accessibilityRole="button"
               onPress={unmuteBackgroundMusic}
+              onMagicTap={unmuteBackgroundMusic}
               style={HANDLE}
             >
               <FontAwesome5 name="volume-mute" size={30} color={color.text} />
@@ -448,6 +456,7 @@ export function AudioPlayer({
               accessibilityLabel="stumm schalten"
               accessibilityRole="button"
               onPress={muteBackgroundMusic}
+              onMagicTap={muteBackgroundMusic}
               style={HANDLE}
             >
               <FontAwesome5 name="volume-off" size={30} color={color.text} />
@@ -458,6 +467,7 @@ export function AudioPlayer({
             accessibilityLabel="Hintergrundmusik lauter machen"
             accessibilityRole="button"
             onPress={increaseBackgroundMusicVolume}
+            onMagicTap={increaseBackgroundMusicVolume}
             style={HANDLE}
           >
             <FontAwesome5 name="volume-up" size={30} color={color.text} />
