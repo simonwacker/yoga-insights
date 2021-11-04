@@ -31,16 +31,6 @@ const ROW: ViewStyle = {
 }
 const SLIDER_STYLE: ViewStyle = { flex: 1, alignSelf: "center", marginHorizontal: 10 }
 
-// See https://reactnative.dev/docs/accessibility#accessibility-actions
-const standardAccessibilityActions = {
-  magicTap: { name: "magicTap" },
-  escape: { name: "escape" },
-  activate: { name: "activate" },
-  increment: { name: "increment" },
-  decrement: { name: "decrement" },
-  longpress: { name: "longpress" },
-}
-
 const loadAndPlay = async (
   uri: string,
   sound: Audio.Sound,
@@ -422,22 +412,6 @@ export function AudioPlayer({
           accessibilityHint="prozentuale Spielzeit"
           accessibilityRole="adjustable"
           accessibilityValue={{ min: 0, max: maximumPlaybackPosition, now: playbackPosition }}
-          accessibilityActions={[
-            standardAccessibilityActions.increment,
-            standardAccessibilityActions.decrement,
-          ]}
-          onAccessibilityAction={(event) => {
-            switch (event.nativeEvent.actionName) {
-              case standardAccessibilityActions.increment.name:
-                jumpSeconds(5)
-                break
-              case standardAccessibilityActions.decrement.name:
-                jumpSeconds(-5)
-                break
-              default:
-                console.warn(`Unknown accessibility action '${event.nativeEvent.actionName}'.`)
-            }
-          }}
           value={playbackPosition}
           minimumValue={0}
           maximumValue={maximumPlaybackPosition}
