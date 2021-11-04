@@ -193,12 +193,22 @@ export function AudioPlayer({
 
   const slide = async (milliseconds: number) => {
     try {
-      if (sliderState.type === "SLIDING") {
-        setSliderState({
-          type: "SLIDING",
-          initialPlaybackPosition: sliderState.initialPlaybackPosition,
-          slidingPosition: milliseconds,
-        })
+      switch (sliderState.type) {
+        // On Android with TalkBack when using volume buttons to adjust the
+        // slider, the slider's `onSlidingStart` callback is not invoked and we
+        // thus invoke it here if necessary. For the different possibilities to
+        // slide with TalkBack see
+        // https://support.google.com/accessibility/android/answer/6006598?hl=en
+        case "NORMAL":
+          await startSliding(milliseconds)
+          break
+        case "SLIDING":
+          setSliderState({
+            type: "SLIDING",
+            initialPlaybackPosition: sliderState.initialPlaybackPosition,
+            slidingPosition: milliseconds,
+          })
+          break
       }
     } catch (error) {
       console.error(`Failed to slide to ${milliseconds} milliseconds.`, error)
