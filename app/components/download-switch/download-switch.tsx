@@ -81,7 +81,6 @@ export function DownloadSwitch({ tracks }: DownloadSwitchProps) {
         disabled={downloadState.type === "UNKNOWN"}
         value={downloadState.type === "DOWNLOADING" || downloadState.type === "DOWNLOADED"}
         onValueChange={onSwitchValueChange}
-        onMagicTap={onSwitchValueChange}
       />
       {downloadState.type === "DOWNLOADING" && (
         <Text
