@@ -41,6 +41,10 @@ export const color = {
    */
   text: palette.white,
   /**
+   * The color used for button ripple effects.
+   */
+  ripple: palette.white,
+  /**
    * Secondary information.
    */
   dim: palette.lightGrey,
