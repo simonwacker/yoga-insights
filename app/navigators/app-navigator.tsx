@@ -13,7 +13,10 @@ import {
   RouteProp,
   getFocusedRouteNameFromRoute,
 } from "@react-navigation/native"
-import { createStackNavigator, StackNavigationProp } from "@react-navigation/stack"
+import {
+  createNativeStackNavigator,
+  NativeStackNavigationProp,
+} from "@react-navigation/native-stack"
 import { useColorScheme } from "react-native"
 import { navigationRef } from "./navigation-utilities"
 import { BottomTabNavigationProp, createBottomTabNavigator } from "@react-navigation/bottom-tabs"
@@ -74,50 +77,59 @@ export type AppParamList = {
 export type ClassesScreenRouteProp = RouteProp<BottomTabParamList, "classes">
 export type ClassesScreenNavigationProp = CompositeNavigationProp<
   BottomTabNavigationProp<BottomTabParamList, "classes">,
-  StackNavigationProp<MainParamList>
+  NativeStackNavigationProp<MainParamList>
 >
 
 export type PosesScreenRouteProp = RouteProp<BottomTabParamList, "poses">
 export type PosesScreenNavigationProp = CompositeNavigationProp<
   BottomTabNavigationProp<BottomTabParamList, "poses">,
-  StackNavigationProp<MainParamList>
+  NativeStackNavigationProp<MainParamList>
 >
 
 export type MusicScreenRouteProp = RouteProp<BottomTabParamList, "music">
 export type MusicScreenNavigationProp = CompositeNavigationProp<
   BottomTabNavigationProp<BottomTabParamList, "music">,
-  StackNavigationProp<MainParamList>
+  NativeStackNavigationProp<MainParamList>
 >
 
 export type PlaylistsScreenRouteProp = RouteProp<BottomTabParamList, "playlists">
 export type PlaylistsScreenNavigationProp = CompositeNavigationProp<
   BottomTabNavigationProp<BottomTabParamList, "playlists">,
-  StackNavigationProp<MainParamList>
+  NativeStackNavigationProp<MainParamList>
 >
 
 export type SettingsScreenRouteProp = RouteProp<BottomTabParamList, "settings">
 export type SettingsScreenNavigationProp = CompositeNavigationProp<
   BottomTabNavigationProp<BottomTabParamList, "settings">,
-  StackNavigationProp<MainParamList>
+  NativeStackNavigationProp<MainParamList>
 >
 
 export type TabsScreenRouteProp = RouteProp<MainParamList, "tabs">
-export type TabsScreenNavigationProp = StackNavigationProp<MainParamList, "tabs">
+export type TabsScreenNavigationProp = NativeStackNavigationProp<MainParamList, "tabs">
 
 export type PlayerScreenRouteProp = RouteProp<MainParamList, "player">
-export type PlayerScreenNavigationProp = StackNavigationProp<MainParamList, "player">
+export type PlayerScreenNavigationProp = NativeStackNavigationProp<MainParamList, "player">
 
 export type SelectPosesScreenRouteProp = RouteProp<MainParamList, "selectPoses">
-export type SelectPosesScreenNavigationProp = StackNavigationProp<MainParamList, "selectPoses">
+export type SelectPosesScreenNavigationProp = NativeStackNavigationProp<
+  MainParamList,
+  "selectPoses"
+>
 
 export type OrderPosesScreenRouteProp = RouteProp<MainParamList, "orderPoses">
-export type OrderPosesScreenNavigationProp = StackNavigationProp<MainParamList, "orderPoses">
+export type OrderPosesScreenNavigationProp = NativeStackNavigationProp<MainParamList, "orderPoses">
 
 export type SelectMusicScreenRouteProp = RouteProp<MainParamList, "selectMusic">
-export type SelectMusicScreenNavigationProp = StackNavigationProp<MainParamList, "selectMusic">
+export type SelectMusicScreenNavigationProp = NativeStackNavigationProp<
+  MainParamList,
+  "selectMusic"
+>
 
 export type NamePlaylistScreenRouteProp = RouteProp<MainParamList, "namePlaylist">
-export type NamePlaylistScreenNavigationProp = StackNavigationProp<MainParamList, "namePlaylist">
+export type NamePlaylistScreenNavigationProp = NativeStackNavigationProp<
+  MainParamList,
+  "namePlaylist"
+>
 
 const initialBottomTabRouteName: keyof BottomTabParamList = "classes"
 
@@ -141,12 +153,12 @@ function getBottomTabTitle(route: TabsScreenRouteProp) {
   return bottomTabTitles[routeName]
 }
 
-const MainStack = createStackNavigator<MainParamList>()
+const MainStack = createNativeStackNavigator<MainParamList>()
 
 // Documentation: https://reactnavigation.org/docs/tab-based-navigation
 const BottomTab = createBottomTabNavigator<BottomTabParamList>()
 
-const AppStack = createStackNavigator<AppParamList>()
+const AppStack = createNativeStackNavigator<AppParamList>()
 
 export function BottomTabNavigator() {
   return (
@@ -190,13 +202,7 @@ export function BottomTabNavigator() {
 
 export function MainNavigator() {
   return (
-    <MainStack.Navigator
-      initialRouteName="tabs"
-      screenOptions={{
-        headerBackAllowFontScaling: true,
-        headerTruncatedBackTitle: "Zurück",
-      }}
-    >
+    <MainStack.Navigator initialRouteName="tabs">
       <MainStack.Screen
         name="tabs"
         component={BottomTabNavigator}
