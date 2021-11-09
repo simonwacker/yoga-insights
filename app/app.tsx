@@ -20,6 +20,7 @@ import {
   useNavigationPersistence,
   navigationRef,
 } from "./navigators"
+import { ErrorBoundary } from "./components"
 
 // This puts screens in a native ViewController or Activity. If you want fully native
 // stack navigation, use `createNativeStackNavigator` in place of `createStackNavigator`:
@@ -61,11 +62,13 @@ function App() {
   return (
     <SafeAreaProvider initialMetrics={initialWindowMetrics}>
       <TrackDownloadsClientProvider client={new TrackDownloadsClient()}>
-        <RootNavigator
-          ref={navigationRef}
-          initialState={initialNavigationState}
-          onStateChange={onNavigationStateChange}
-        />
+        <ErrorBoundary catchErrors={"always"}>
+          <RootNavigator
+            ref={navigationRef}
+            initialState={initialNavigationState}
+            onStateChange={onNavigationStateChange}
+          />
+        </ErrorBoundary>
       </TrackDownloadsClientProvider>
     </SafeAreaProvider>
   )
