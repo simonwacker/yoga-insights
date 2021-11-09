@@ -7,21 +7,21 @@ import {
   createNavigationContainerRef,
 } from "@react-navigation/native"
 import * as storage from "../utils/storage"
-import { RootParamList } from "./root-navigator"
+import { AppParamList } from "./app-navigator"
 
 /* eslint-disable */
-export const RootNavigation = {
+export const AppNavigation = {
   navigate(_name: string, _params?: any) {},
   goBack() {},
-  resetRoot(_state?: PartialState<NavigationState> | NavigationState) {},
-  getRootState(): NavigationState {
+  resetApp(_state?: PartialState<NavigationState> | NavigationState) {},
+  getAppState(): NavigationState {
     return {} as any
   },
   dispatch(_action: NavigationAction) {},
 }
 /* eslint-enable */
 
-export const navigationRef = createNavigationContainerRef<RootParamList>()
+export const navigationRef = createNavigationContainerRef<AppParamList>()
 
 /**
  * Gets the current screen from any navigation state.
@@ -148,7 +148,7 @@ export function goBack() {
   }
 }
 
-export function resetRoot(params = { index: 0, routes: [] }) {
+export function resetApp(params = { index: 0, routes: [] }) {
   if (navigationRef.isReady()) {
     navigationRef.resetRoot(params)
   }

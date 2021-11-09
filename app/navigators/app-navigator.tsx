@@ -1,11 +1,21 @@
 /**
- * This is the navigator you will modify to display the logged-in screens of your app.
- * You can use RootNavigator to also display an auth flow or other user flows.
- *
- * You'll likely spend most of your time in this file.
+ * The app navigator is used for the primary navigation flows of your app.
+ * Generally speaking, it will contain an auth flow (registration, login, forgot
+ * password) and a "main" flow which the user will use once logged in.
  */
 import React from "react"
+import {
+  DarkTheme,
+  DefaultTheme,
+  NavigationContainer,
+  NavigatorScreenParams,
+  CompositeNavigationProp,
+  RouteProp,
+  getFocusedRouteNameFromRoute,
+} from "@react-navigation/native"
 import { createStackNavigator, StackNavigationProp } from "@react-navigation/stack"
+import { useColorScheme } from "react-native"
+import { navigationRef } from "./navigation-utilities"
 import { BottomTabNavigationProp, createBottomTabNavigator } from "@react-navigation/bottom-tabs"
 import {
   ClassesScreen,
@@ -19,25 +29,17 @@ import {
   SelectPosesScreen,
   SettingsScreen,
 } from "../screens"
-import {
-  CompositeNavigationProp,
-  NavigatorScreenParams,
-  RouteProp,
-  getFocusedRouteNameFromRoute,
-} from "@react-navigation/native"
 import { palette } from "../theme/palette"
 
 /**
  * This type allows TypeScript to know what routes are defined in this navigator
  * as well as what properties (if any) they might take when navigating to them.
  *
- * If no params are allowed, pass through `undefined`.
- *
  * For more information, see this documentation:
  *   https://reactnavigation.org/docs/params/
  *   https://reactnavigation.org/docs/typescript#type-checking-the-navigator
  */
-export type TabParamList = {
+export type BottomTabParamList = {
   classes: undefined
   poses: undefined
   music: undefined
@@ -46,7 +48,7 @@ export type TabParamList = {
 }
 
 export type MainParamList = {
-  tabs: NavigatorScreenParams<TabParamList>
+  tabs: NavigatorScreenParams<BottomTabParamList>
   player: {
     initialTrackIndex: number
     trackIds: readonly string[]
@@ -65,33 +67,37 @@ export type MainParamList = {
   }
 }
 
-export type ClassesScreenRouteProp = RouteProp<TabParamList, "classes">
+export type AppParamList = {
+  main: NavigatorScreenParams<MainParamList>
+}
+
+export type ClassesScreenRouteProp = RouteProp<BottomTabParamList, "classes">
 export type ClassesScreenNavigationProp = CompositeNavigationProp<
-  BottomTabNavigationProp<TabParamList, "classes">,
+  BottomTabNavigationProp<BottomTabParamList, "classes">,
   StackNavigationProp<MainParamList>
 >
 
-export type PosesScreenRouteProp = RouteProp<TabParamList, "poses">
+export type PosesScreenRouteProp = RouteProp<BottomTabParamList, "poses">
 export type PosesScreenNavigationProp = CompositeNavigationProp<
-  BottomTabNavigationProp<TabParamList, "poses">,
+  BottomTabNavigationProp<BottomTabParamList, "poses">,
   StackNavigationProp<MainParamList>
 >
 
-export type MusicScreenRouteProp = RouteProp<TabParamList, "music">
+export type MusicScreenRouteProp = RouteProp<BottomTabParamList, "music">
 export type MusicScreenNavigationProp = CompositeNavigationProp<
-  BottomTabNavigationProp<TabParamList, "music">,
+  BottomTabNavigationProp<BottomTabParamList, "music">,
   StackNavigationProp<MainParamList>
 >
 
-export type PlaylistsScreenRouteProp = RouteProp<TabParamList, "playlists">
+export type PlaylistsScreenRouteProp = RouteProp<BottomTabParamList, "playlists">
 export type PlaylistsScreenNavigationProp = CompositeNavigationProp<
-  BottomTabNavigationProp<TabParamList, "playlists">,
+  BottomTabNavigationProp<BottomTabParamList, "playlists">,
   StackNavigationProp<MainParamList>
 >
 
-export type SettingsScreenRouteProp = RouteProp<TabParamList, "settings">
+export type SettingsScreenRouteProp = RouteProp<BottomTabParamList, "settings">
 export type SettingsScreenNavigationProp = CompositeNavigationProp<
-  BottomTabNavigationProp<TabParamList, "settings">,
+  BottomTabNavigationProp<BottomTabParamList, "settings">,
   StackNavigationProp<MainParamList>
 >
 
@@ -113,9 +119,9 @@ export type SelectMusicScreenNavigationProp = StackNavigationProp<MainParamList,
 export type NamePlaylistScreenRouteProp = RouteProp<MainParamList, "namePlaylist">
 export type NamePlaylistScreenNavigationProp = StackNavigationProp<MainParamList, "namePlaylist">
 
-const initialRouteName: keyof TabParamList = "classes"
+const initialBottomTabRouteName: keyof BottomTabParamList = "classes"
 
-const titles: { [key in keyof TabParamList]: string } = {
+const bottomTabTitles: { [key in keyof BottomTabParamList]: string } = {
   classes: "Stunden",
   poses: "Übungen",
   music: "Musik",
@@ -123,27 +129,29 @@ const titles: { [key in keyof TabParamList]: string } = {
   settings: "Einstellungen",
 }
 
-function getTitle(route: TabsScreenRouteProp) {
+function getBottomTabTitle(route: TabsScreenRouteProp) {
   // If the focused route is not found, we need to assume it's the initial
   // screen This can happen during if there hasn't been any navigation inside
   // the screen
   const maybeRouteName = getFocusedRouteNameFromRoute(route)
   const routeName =
-    maybeRouteName != null && maybeRouteName in titles
-      ? (maybeRouteName as keyof TabParamList)
-      : initialRouteName
-  return titles[routeName]
+    maybeRouteName != null && maybeRouteName in bottomTabTitles
+      ? (maybeRouteName as keyof BottomTabParamList)
+      : initialBottomTabRouteName
+  return bottomTabTitles[routeName]
 }
 
-const Stack = createStackNavigator<MainParamList>()
+const MainStack = createStackNavigator<MainParamList>()
 
 // Documentation: https://reactnavigation.org/docs/tab-based-navigation
-const Tab = createBottomTabNavigator<TabParamList>()
+const BottomTab = createBottomTabNavigator<BottomTabParamList>()
 
-export function TabNavigator() {
+const AppStack = createStackNavigator<AppParamList>()
+
+export function BottomTabNavigator() {
   return (
-    <Tab.Navigator
-      initialRouteName={initialRouteName}
+    <BottomTab.Navigator
+      initialRouteName={initialBottomTabRouteName}
       screenOptions={{
         tabBarActiveTintColor: palette.white,
         tabBarInactiveTintColor: palette.black,
@@ -151,61 +159,101 @@ export function TabNavigator() {
         tabBarInactiveBackgroundColor: palette.white,
       }}
     >
-      <Tab.Screen name="classes" component={ClassesScreen} options={{ title: titles.classes }} />
-      <Tab.Screen name="poses" component={PosesScreen} options={{ title: titles.poses }} />
-      <Tab.Screen name="music" component={MusicScreen} options={{ title: titles.music }} />
-      <Tab.Screen
+      <BottomTab.Screen
+        name="classes"
+        component={ClassesScreen}
+        options={{ title: bottomTabTitles.classes }}
+      />
+      <BottomTab.Screen
+        name="poses"
+        component={PosesScreen}
+        options={{ title: bottomTabTitles.poses }}
+      />
+      <BottomTab.Screen
+        name="music"
+        component={MusicScreen}
+        options={{ title: bottomTabTitles.music }}
+      />
+      <BottomTab.Screen
         name="playlists"
         component={PlaylistsScreen}
-        options={{ title: titles.playlists }}
+        options={{ title: bottomTabTitles.playlists }}
       />
-      <Tab.Screen name="settings" component={SettingsScreen} options={{ title: titles.settings }} />
-    </Tab.Navigator>
+      <BottomTab.Screen
+        name="settings"
+        component={SettingsScreen}
+        options={{ title: bottomTabTitles.settings }}
+      />
+    </BottomTab.Navigator>
   )
 }
 
 export function MainNavigator() {
   return (
-    <Stack.Navigator
+    <MainStack.Navigator
       initialRouteName="tabs"
       screenOptions={{
         headerBackAllowFontScaling: true,
         headerTruncatedBackTitle: "Zurück",
       }}
     >
-      <Stack.Screen
+      <MainStack.Screen
         name="tabs"
-        component={TabNavigator}
+        component={BottomTabNavigator}
         options={({ route }) => ({
           headerShown: false,
-          title: getTitle(route),
+          title: getBottomTabTitle(route),
           // headerBackAccessibilityLabel: getTitle(route),
         })}
       />
-      <Stack.Screen name="player" component={PlayerScreen} options={{ title: "Player" }} />
-      <Stack.Screen
+      <MainStack.Screen name="player" component={PlayerScreen} options={{ title: "Player" }} />
+      <MainStack.Screen
         name="selectPoses"
         component={SelectPosesScreen}
         options={{ title: "Übungen auswählen" }}
       />
-      <Stack.Screen
+      <MainStack.Screen
         name="orderPoses"
         component={OrderPosesScreen}
         options={{ title: "Übungen sortieren" }}
       />
-      <Stack.Screen
+      <MainStack.Screen
         name="selectMusic"
         component={SelectMusicScreen}
         options={{ title: "Hintergrundmusik auswählen" }}
       />
-      <Stack.Screen
+      <MainStack.Screen
         name="namePlaylist"
         component={NamePlaylistScreen}
         options={{ title: "Playlist benennen" }}
       />
-    </Stack.Navigator>
+    </MainStack.Navigator>
   )
 }
+
+interface AppNavigatorProps extends Partial<React.ComponentProps<typeof NavigationContainer>> {}
+
+export const AppNavigator = (props: AppNavigatorProps) => {
+  const colorScheme = useColorScheme()
+  return (
+    <NavigationContainer<AppParamList>
+      theme={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+      {...props}
+      ref={navigationRef}
+    >
+      <AppStack.Navigator
+        screenOptions={{
+          headerShown: false,
+        }}
+        initialRouteName="main"
+      >
+        <AppStack.Screen name="main" component={MainNavigator} />
+      </AppStack.Navigator>
+    </NavigationContainer>
+  )
+}
+
+AppNavigator.displayName = "AppNavigator"
 
 /**
  * A list of routes from which we're allowed to leave the app when
