@@ -4,7 +4,7 @@ import { Section, Track } from "../models"
 const tracks = [
   {
     trackId: "track-volume-1-part-1",
-    name: "Volume 1 - Teil 1 - Grundlegende Einführung",
+    name: "Grundlegende Einführung",
     fileExtension: "mp3",
     md5FileHashValue: "4154d609e7307a3cc31c9ac1e20ea9d0",
     webUri:
@@ -12,7 +12,7 @@ const tracks = [
   },
   {
     trackId: "track-volume-1-part-2",
-    name: "Volume 1 - Teil 2 - Regeneratives entlastendes Abendprogramm",
+    name: "Regeneratives entlastendes Abendprogramm",
     fileExtension: "mp3",
     md5FileHashValue: "?",
     webUri:
@@ -20,7 +20,7 @@ const tracks = [
   },
   {
     trackId: "track-volume-1-part-3",
-    name: "Volume 1 - Teil 3 - Naturklänge zum freien Üben",
+    name: "Naturklänge zum freien Üben",
     fileExtension: "mp3",
     md5FileHashValue: "?",
     webUri:
@@ -28,7 +28,7 @@ const tracks = [
   },
   {
     trackId: "track-volume-1-part-4",
-    name: "Volume 1 - Teil 4 - Langes Yogaprogramm Rückenstärkung und Rückenentlastung",
+    name: "Langes Yogaprogramm Rückenstärkung und Rückenentlastung",
     fileExtension: "mp3",
     md5FileHashValue: "?",
     webUri:
@@ -36,7 +36,7 @@ const tracks = [
   },
   {
     trackId: "track-volume-2-part-1",
-    name: "Volume 2 - Teil 1 - Einführung",
+    name: "Einführung",
     fileExtension: "mp3",
     md5FileHashValue: "?",
     webUri:
@@ -44,7 +44,7 @@ const tracks = [
   },
   {
     trackId: "track-volume-2-part-2",
-    name: "Volume 2 - Teil 2 - Soforthilfe 1 & 2",
+    name: "Soforthilfe 1 & 2",
     fileExtension: "mp3",
     md5FileHashValue: "?",
     webUri:
@@ -52,7 +52,7 @@ const tracks = [
   },
   {
     trackId: "track-volume-2-part-3",
-    name: "Volume 2 - Teil 3 - Musik pur",
+    name: "Musik pur",
     fileExtension: "mp3",
     md5FileHashValue: "?",
     webUri:
@@ -60,7 +60,7 @@ const tracks = [
   },
   {
     trackId: "track-volume-2-part-4",
-    name: "Volume 2 - Teil 4 - Anleitung ohne Musik",
+    name: "Anleitung ohne Musik",
     fileExtension: "mp3",
     md5FileHashValue: "?",
     webUri:
@@ -68,7 +68,7 @@ const tracks = [
   },
   {
     trackId: "track-volume-2-part-5",
-    name: "Volume 2 - Teil 5 - Ausführliches Übungsprogramm",
+    name: "Ausführliches Übungsprogramm",
     fileExtension: "mp3",
     md5FileHashValue: "?",
     webUri:
@@ -76,7 +76,7 @@ const tracks = [
   },
   {
     trackId: "track-volume-2-part-6",
-    name: "Volume 2 - Teil 6 - Naturklänge",
+    name: "Naturklänge",
     fileExtension: "mp3",
     md5FileHashValue: "?",
     webUri:
@@ -134,7 +134,7 @@ const musicSections = [
 
 const fallbackTrack = {
   trackId: "track-volume-1-part-1",
-  name: "Volume 1 - Teil 1 - Grundlegende Einführung",
+  name: "Grundlegende Einführung",
   fileExtension: "mp3",
   md5FileHashValue: "4154d609e7307a3cc31c9ac1e20ea9d0",
   webUri:
