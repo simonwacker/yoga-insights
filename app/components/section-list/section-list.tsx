@@ -7,7 +7,7 @@ import {
   TextStyle,
   ViewStyle,
 } from "react-native"
-import { spacing } from "../../theme"
+import { color, spacing } from "../../theme"
 import { Text } from "../text/text"
 
 const SECTION_LIST: ViewStyle = {
@@ -15,6 +15,7 @@ const SECTION_LIST: ViewStyle = {
 }
 const SECTION_TITLE: TextStyle = {
   marginLeft: 10,
+  color: color.dim,
 }
 
 export interface SectionListProps<ItemT> extends ReactNativeSectionListProps<ItemT> {
