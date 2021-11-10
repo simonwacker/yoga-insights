@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react"
 import { ViewStyle } from "react-native"
-import { Screen, SectionList, ListCheckboxItem, Button } from "../../components"
+import { Screen, SectionList, ListRadioItem, Button } from "../../components"
 import { color } from "../../theme"
 import { useTrackStore } from "../../stores"
 import { SelectMusicScreenNavigationProp, SelectMusicScreenRouteProp } from "../../navigators"
@@ -33,13 +33,14 @@ export function SelectMusicScreen({ route, navigation }: SelectMusicScreenProps)
       onMagicTap={finish}
     >
       <SectionList
+        accessibilityRole="radiogroup"
         getSectionTitle={(section) => section.title}
         sections={musicSections}
         keyExtractor={(item) => item}
         renderItem={({ item }) => (
-          <ListCheckboxItem
+          <ListRadioItem
             label={getTrack(item).name}
-            checked={item === selectedMusicId}
+            selected={item === selectedMusicId}
             onPress={() => setSelectedMusicId(item)}
           />
         )}
