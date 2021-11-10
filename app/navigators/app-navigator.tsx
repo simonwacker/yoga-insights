@@ -202,7 +202,12 @@ export function BottomTabNavigator() {
 
 export function MainNavigator() {
   return (
-    <MainStack.Navigator initialRouteName="tabs">
+    <MainStack.Navigator
+      initialRouteName="tabs"
+      screenOptions={{
+        animation: "none", // slide_from_right
+      }}
+    >
       <MainStack.Screen
         name="tabs"
         component={BottomTabNavigator}
@@ -250,6 +255,7 @@ export const AppNavigator = (props: AppNavigatorProps) => {
       <AppStack.Navigator
         screenOptions={{
           headerShown: false,
+          animation: "none",
         }}
         initialRouteName="main"
       >
