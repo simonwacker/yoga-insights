@@ -4,6 +4,7 @@
  * password) and a "main" flow which the user will use once logged in.
  */
 import React from "react"
+import { FontAwesome5 } from "@expo/vector-icons"
 import {
   DarkTheme,
   DefaultTheme,
@@ -174,27 +175,51 @@ export function BottomTabNavigator() {
       <BottomTab.Screen
         name="classes"
         component={ClassesScreen}
-        options={{ title: bottomTabTitles.classes }}
+        options={{
+          title: bottomTabTitles.classes,
+          tabBarLabel: bottomTabTitles.classes,
+          tabBarIcon: ({ color, size }) => (
+            <FontAwesome5 name="hourglass-start" size={size} color={color} />
+          ),
+        }}
       />
       <BottomTab.Screen
         name="poses"
         component={PosesScreen}
-        options={{ title: bottomTabTitles.poses }}
+        options={{
+          title: bottomTabTitles.poses,
+          tabBarLabel: bottomTabTitles.poses,
+          tabBarIcon: ({ color, size }) => <FontAwesome5 name="child" size={size} color={color} />,
+        }}
       />
       <BottomTab.Screen
         name="music"
         component={MusicScreen}
-        options={{ title: bottomTabTitles.music }}
+        options={{
+          title: bottomTabTitles.music,
+          tabBarLabel: bottomTabTitles.music,
+          tabBarIcon: ({ color, size }) => <FontAwesome5 name="music" size={size} color={color} />,
+        }}
       />
       <BottomTab.Screen
         name="playlists"
         component={PlaylistsScreen}
-        options={{ title: bottomTabTitles.playlists }}
+        options={{
+          title: bottomTabTitles.playlists,
+          tabBarLabel: bottomTabTitles.playlists,
+          tabBarIcon: ({ color, size }) => (
+            <FontAwesome5 name="list-ul" size={size} color={color} />
+          ),
+        }}
       />
       <BottomTab.Screen
         name="settings"
         component={SettingsScreen}
-        options={{ title: bottomTabTitles.settings }}
+        options={{
+          title: bottomTabTitles.settings,
+          tabBarLabel: bottomTabTitles.settings,
+          tabBarIcon: ({ color, size }) => <FontAwesome5 name="tools" size={size} color={color} />,
+        }}
       />
     </BottomTab.Navigator>
   )
