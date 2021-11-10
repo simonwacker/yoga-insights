@@ -52,7 +52,7 @@ export function OrderPosesScreen({ route, navigation }: OrderPosesScreenProps) {
         keyExtractor={(item) => item}
         renderItem={({ item }) => (
           <ListCheckboxItem
-            label={`${getTrack(item).name} (${orderedPoseIds.indexOf(item)})`}
+            label={`${orderedPoseIds.indexOf(item) + 1}. ${getTrack(item).name}`}
             checked={orderedPoseIds.includes(item)}
             onPress={() => pushOrDeletePose(item)}
           />
