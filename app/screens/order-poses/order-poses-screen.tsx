@@ -32,8 +32,21 @@ export function OrderPosesScreen({ route, navigation }: OrderPosesScreenProps) {
     setOrderedPoseIds(copy)
   }
 
+  const canFinish = poseIds.length === orderedPoseIds.length
+
+  const finish = () => {
+    if (canFinish) {
+      navigation.navigate("selectMusic", { poseIds: orderedPoseIds })
+    }
+  }
+
   return (
-    <Screen style={ROOT} preset="fixed">
+    <Screen
+      style={ROOT}
+      preset="fixed"
+      onAccessibilityEscape={navigation.goBack}
+      onMagicTap={finish}
+    >
       <FlatList
         data={poseIds}
         keyExtractor={(item) => item}
@@ -45,11 +58,7 @@ export function OrderPosesScreen({ route, navigation }: OrderPosesScreenProps) {
           />
         )}
       />
-      <Button
-        disabled={poseIds.length !== orderedPoseIds.length}
-        onPress={() => navigation.navigate("selectMusic", { poseIds: orderedPoseIds })}
-        title="Hintergrundmusik auswählen"
-      />
+      <Button disabled={!canFinish} onPress={finish} title="Hintergrundmusik auswählen" />
     </Screen>
   )
 }

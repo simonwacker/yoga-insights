@@ -3,6 +3,7 @@ import { Pressable } from "react-native"
 import { Text } from "../text/text"
 import { viewPresets, textPresets } from "./button.presets"
 import { ButtonProps } from "./button.props"
+import { color } from "../../theme"
 
 /**
  * For your text displaying needs.
@@ -17,6 +18,7 @@ export function Button(props: ButtonProps) {
     style: styleOverride,
     textStyle: textStyleOverride,
     children,
+    onPress,
     ...rest
   } = props
 
@@ -28,7 +30,15 @@ export function Button(props: ButtonProps) {
   const content = children || <Text text={text} style={textStyles} />
 
   return (
-    <Pressable accessible accessibilityRole="button" style={viewStyles} {...rest}>
+    <Pressable
+      accessible
+      accessibilityRole="button"
+      style={viewStyles}
+      onPress={onPress}
+      onMagicTap={onPress}
+      android_ripple={{ color: color.ripple, radius: 10 }}
+      {...rest}
+    >
       {content}
     </Pressable>
   )

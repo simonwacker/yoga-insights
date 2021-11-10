@@ -19,7 +19,7 @@ export function PosesScreen({ navigation }: PosesScreenProps) {
   const poseSections = useTrackStore(useCallback((state) => state.poseSections, []))
 
   return (
-    <Screen style={ROOT} preset="fixed">
+    <Screen style={ROOT} preset="fixed" onAccessibilityEscape={navigation.goBack}>
       <TrackSectionList
         sections={poseSections}
         onSelectTrack={(initialTrackIndex, trackIds) =>

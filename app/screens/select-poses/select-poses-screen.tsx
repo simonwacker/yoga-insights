@@ -30,8 +30,23 @@ export function SelectPosesScreen({ navigation }: SelectPosesScreenProps) {
     setSelectedPoseIds(copy)
   }
 
+  const canFinish = selectedPoseIds.size >= 1
+
+  const finish = () => {
+    if (canFinish) {
+      navigation.navigate("orderPoses", {
+        poseIds: Array.from(selectedPoseIds),
+      })
+    }
+  }
+
   return (
-    <Screen style={ROOT} preset="fixed">
+    <Screen
+      style={ROOT}
+      preset="fixed"
+      onAccessibilityEscape={navigation.goBack}
+      onMagicTap={finish}
+    >
       <SectionList
         getSectionTitle={(section) => section.title}
         sections={poseSections}
@@ -44,15 +59,7 @@ export function SelectPosesScreen({ navigation }: SelectPosesScreenProps) {
           />
         )}
       />
-      <Button
-        disabled={selectedPoseIds.size === 0}
-        onPress={() =>
-          navigation.navigate("orderPoses", {
-            poseIds: Array.from(selectedPoseIds),
-          })
-        }
-        title="Übungen sortieren"
-      />
+      <Button disabled={!canFinish} onPress={finish} title="Übungen sortieren" />
     </Screen>
   )
 }

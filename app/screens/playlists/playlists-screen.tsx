@@ -18,8 +18,15 @@ export type PlaylistsScreenProps = {
 export function PlaylistsScreen({ navigation }: PlaylistsScreenProps) {
   const playlists = usePlaylistStore(useCallback((state) => state.playlists, []))
 
+  const newPlaylist = () => navigation.navigate("selectPoses")
+
   return (
-    <Screen style={ROOT} preset="fixed">
+    <Screen
+      style={ROOT}
+      preset="fixed"
+      onAccessibilityEscape={navigation.goBack}
+      onMagicTap={newPlaylist}
+    >
       <FlatList
         data={playlists}
         keyExtractor={(item) => item.playlistId.toString()}
@@ -36,7 +43,7 @@ export function PlaylistsScreen({ navigation }: PlaylistsScreenProps) {
           />
         )}
       />
-      <Button title="Neue Playlist" onPress={() => navigation.navigate("selectPoses")} />
+      <Button title="Neue Playlist" onPress={newPlaylist} />
     </Screen>
   )
 }

@@ -43,4 +43,8 @@ export interface ScreenProps {
    * Only applies to scroll preset.
    */
   keyboardShouldPersistTaps?: "handled" | "always" | "never"
+
+  onAccessibilityEscape?: (() => void) | undefined
+  onAccessibilityTap?: (() => void) | undefined
+  onMagicTap?: (() => void) | undefined
 }

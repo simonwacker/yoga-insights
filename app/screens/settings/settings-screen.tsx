@@ -22,7 +22,7 @@ function getTracksDirectoryInfo() {
   return FileSystem.getInfoAsync(tracksDirectoryUri)
 }
 
-export function SettingsScreen({}: SettingsScreenProps) {
+export function SettingsScreen({ navigation }: SettingsScreenProps) {
   const [tracksDirectoryInfo, setTracksDirectoryInfo] = useState<FileSystem.FileInfo | null>(null)
   const playlists = usePlaylistStore(useCallback((state) => state.playlists, []))
   const clearPlaylists = usePlaylistStore(useCallback((state) => state.clearPlaylists, []))
@@ -43,7 +43,7 @@ export function SettingsScreen({}: SettingsScreenProps) {
   }
 
   return (
-    <Screen style={ROOT} preset="scroll">
+    <Screen style={ROOT} preset="scroll" onAccessibilityEscape={navigation.goBack}>
       {tracksDirectoryInfo?.exists ? (
         <Text
           text={`Der Speicherbedarf aller Downloads beträgt ${Math.round(

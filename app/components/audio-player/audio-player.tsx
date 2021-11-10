@@ -31,6 +31,14 @@ const ROW: ViewStyle = {
 }
 const SLIDER_STYLE: ViewStyle = { flex: 1, alignSelf: "center", marginHorizontal: 10 }
 
+type SliderState =
+  | { type: "NORMAL" }
+  | {
+      type: "SLIDING"
+      initialPlaybackPosition: number
+      slidingPosition: number
+    }
+
 const loadAndPlay = async (
   uri: string,
   sound: Audio.Sound,
@@ -70,7 +78,13 @@ export function AudioPlayer({
 
   const [sound] = useState<Audio.Sound>(() => new Audio.Sound())
   const [playbackStatus, setPlaybackStatus] = useState<AVPlaybackStatus | null>(null)
-  const [slidingPosition, setSlidingPosition] = useState<number | null>(null)
+  const [sliderState, setSliderState] = useState<SliderState>({ type: "NORMAL" })
+
+  const playbackPosition = playbackStatus?.isLoaded ? playbackStatus.positionMillis : 0
+  const maximumPlaybackPosition =
+    playbackStatus?.isLoaded && playbackStatus.durationMillis ? playbackStatus.durationMillis : 0
+  const sliderPosition =
+    sliderState.type === "NORMAL" ? playbackPosition : sliderState.slidingPosition
 
   const [backgroundSound] = useState<Audio.Sound | null>(() =>
     backgroundMusic === null ? null : new Audio.Sound(),
@@ -168,30 +182,57 @@ export function AudioPlayer({
     }
   }
 
-  const onSlidingStart = async (milliseconds: number) => {
-    setSlidingPosition(milliseconds)
+  const startSliding = async (milliseconds: number) => {
+    setSliderState({
+      type: "SLIDING",
+      initialPlaybackPosition: playbackPosition,
+      slidingPosition: milliseconds,
+    })
     await pause()
   }
 
   const slide = async (milliseconds: number) => {
     try {
-      setSlidingPosition(milliseconds)
+      switch (sliderState.type) {
+        // On Android with TalkBack when using volume buttons to adjust the
+        // slider, the slider's `onSlidingStart` callback is not invoked and we
+        // thus invoke it here if necessary. For the different possibilities to
+        // slide with TalkBack see
+        // https://support.google.com/accessibility/android/answer/6006598?hl=en
+        case "NORMAL":
+          await startSliding(milliseconds)
+          break
+        case "SLIDING":
+          setSliderState({
+            type: "SLIDING",
+            initialPlaybackPosition: sliderState.initialPlaybackPosition,
+            slidingPosition: milliseconds,
+          })
+          break
+      }
     } catch (error) {
       console.error(`Failed to slide to ${milliseconds} milliseconds.`, error)
     }
   }
 
-  const onSlidingComplete = async (milliseconds: number) => {
+  const completeSliding = async (milliseconds: number) => {
     try {
-      if (playbackStatus?.isLoaded) {
-        await sound.setPositionAsync(
-          playbackStatus.durationMillis && milliseconds > playbackStatus.durationMillis
-            ? playbackStatus.durationMillis
-            : milliseconds,
-        )
+      if (sliderState.type === "SLIDING") {
+        setSliderState({
+          type: "SLIDING",
+          initialPlaybackPosition: sliderState.initialPlaybackPosition,
+          slidingPosition: milliseconds,
+        })
+        if (playbackStatus?.isLoaded) {
+          await sound.setPositionAsync(
+            playbackStatus.durationMillis && milliseconds > playbackStatus.durationMillis
+              ? playbackStatus.durationMillis
+              : milliseconds,
+          )
+        }
+        await play()
+        setSliderState({ type: "NORMAL" })
       }
-      setSlidingPosition(null)
-      await play()
     } catch (error) {
       console.error(`Failed to slide to ${milliseconds} milliseconds.`, error)
     }
@@ -273,10 +314,20 @@ export function AudioPlayer({
     return `${hours} Stunden, ${minutes} Minuten und ${seconds} Sekunden`
   }
 
-  const playbackPosition = playbackStatus?.isLoaded ? playbackStatus.positionMillis : 0
-
   return (
-    <View style={ROOT}>
+    <View
+      style={ROOT}
+      onMagicTap={() => {
+        if (playbackStatus?.isLoaded) {
+          if (playbackStatus.shouldPlay) {
+            pause()
+          } else {
+            play()
+          }
+        }
+      }}
+      onAccessibilityEscape={previousTrack ? onPlayPreviousTrack : undefined}
+    >
       {/* <AutoImage
           source={img_speaker}
           style={{ width: 150, height: 150, marginBottom: 15, alignSelf: "center" }}
@@ -296,6 +347,7 @@ export function AudioPlayer({
           accessibilityLabel={`Vorheriges Stück abspielen ${previousTrack?.name}`}
           accessibilityRole="button"
           onPress={onPlayPreviousTrack}
+          onMagicTap={onPlayPreviousTrack}
           style={HANDLE}
         >
           <AntDesign name="stepbackward" size={30} color={color.text} />
@@ -305,6 +357,7 @@ export function AudioPlayer({
           accessibilityLabel="30 Sekunden zurückspulen"
           accessibilityRole="button"
           onPress={jumpPrev30Seconds}
+          onMagicTap={jumpPrev30Seconds}
           style={HANDLE}
         >
           <AntDesign name="left" size={30} color={color.text} />
@@ -328,6 +381,7 @@ export function AudioPlayer({
             accessibilityLabel="abspielen"
             accessibilityRole="button"
             onPress={play}
+            onMagicTap={play}
             style={HANDLE}
           >
             <AntDesign name="playcircleo" size={30} color={color.text} />
@@ -340,6 +394,7 @@ export function AudioPlayer({
             accessibilityLabel="pausieren"
             accessibilityRole="button"
             onPress={pause}
+            onMagicTap={pause}
             style={HANDLE}
           >
             <AntDesign name="pausecircleo" size={30} color={color.text} />
@@ -351,6 +406,7 @@ export function AudioPlayer({
           accessibilityLabel="30 Sekunden vorspulen"
           accessibilityRole="button"
           onPress={jumpNext30Seconds}
+          onMagicTap={jumpNext30Seconds}
           style={HANDLE}
         >
           {/* <AutoImage source={img_playjumpright} style={{ width: 30, height: 30 }} /> */}
@@ -363,6 +419,7 @@ export function AudioPlayer({
           accessibilityLabel={`Nächstes Stück abspielen ${nextTrack?.name}`}
           accessibilityRole="button"
           onPress={onPlayNextTrack}
+          onMagicTap={onPlayNextTrack}
           style={HANDLE}
         >
           <AntDesign name="stepforward" size={30} color={color.text} />
@@ -371,12 +428,12 @@ export function AudioPlayer({
       <View style={ROW}>
         <Text
           accessible={true}
-          accessibilityLabel={convertToAudioTimePhrase(slidingPosition ?? playbackPosition)}
+          accessibilityLabel={convertToAudioTimePhrase(sliderPosition)}
           accessibilityHint="Spielzeit"
           accessibilityRole="text"
           style={TEXT}
         >
-          {convertToAudioTimeString(slidingPosition ?? playbackPosition)}
+          {convertToAudioTimeString(sliderPosition)}
         </Text>
         <Slider
           accessible={true}
@@ -390,34 +447,29 @@ export function AudioPlayer({
               }%
             `}
           accessibilityHint="prozentuale Spielzeit"
-          accessibilityRole="progressbar"
-          value={playbackPosition}
+          accessibilityRole="adjustable"
+          accessibilityValue={{ min: 0, max: maximumPlaybackPosition, now: sliderPosition }}
+          value={
+            sliderState.type === "NORMAL" ? playbackPosition : sliderState.initialPlaybackPosition
+          }
           minimumValue={0}
-          maximumValue={playbackStatus?.isLoaded ? playbackStatus.durationMillis : 0}
+          maximumValue={maximumPlaybackPosition}
           maximumTrackTintColor="gray"
           minimumTrackTintColor={color.text}
           thumbTintColor={color.text}
           style={SLIDER_STYLE}
-          onSlidingStart={onSlidingStart}
+          onSlidingStart={startSliding}
           onValueChange={slide}
-          onSlidingComplete={onSlidingComplete}
+          onSlidingComplete={completeSliding}
         />
         <Text
           accessible={true}
-          accessibilityLabel={convertToAudioTimePhrase(
-            playbackStatus?.isLoaded && playbackStatus.durationMillis
-              ? playbackStatus.durationMillis
-              : 0,
-          )}
+          accessibilityLabel={convertToAudioTimePhrase(maximumPlaybackPosition)}
           accessibilityHint="Spieldauer"
           accessibilityRole="text"
           style={TEXT}
         >
-          {convertToAudioTimeString(
-            playbackStatus?.isLoaded && playbackStatus.durationMillis
-              ? playbackStatus.durationMillis
-              : 0,
-          )}
+          {convertToAudioTimeString(maximumPlaybackPosition)}
         </Text>
       </View>
       {backgroundMusic && (
@@ -427,6 +479,7 @@ export function AudioPlayer({
             accessibilityLabel="Hintergrundmusik leiser machen"
             accessibilityRole="button"
             onPress={decreaseBackgroundMusicVolume}
+            onMagicTap={decreaseBackgroundMusicVolume}
             style={HANDLE}
           >
             <FontAwesome5 name="volume-down" size={30} color={color.text} />
@@ -437,6 +490,7 @@ export function AudioPlayer({
               accessibilityLabel="laut stellen"
               accessibilityRole="button"
               onPress={unmuteBackgroundMusic}
+              onMagicTap={unmuteBackgroundMusic}
               style={HANDLE}
             >
               <FontAwesome5 name="volume-mute" size={30} color={color.text} />
@@ -448,6 +502,7 @@ export function AudioPlayer({
               accessibilityLabel="stumm schalten"
               accessibilityRole="button"
               onPress={muteBackgroundMusic}
+              onMagicTap={muteBackgroundMusic}
               style={HANDLE}
             >
               <FontAwesome5 name="volume-off" size={30} color={color.text} />
@@ -458,6 +513,7 @@ export function AudioPlayer({
             accessibilityLabel="Hintergrundmusik lauter machen"
             accessibilityRole="button"
             onPress={increaseBackgroundMusicVolume}
+            onMagicTap={increaseBackgroundMusicVolume}
             style={HANDLE}
           >
             <FontAwesome5 name="volume-up" size={30} color={color.text} />

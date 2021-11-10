@@ -13,13 +13,8 @@ import "react-native-gesture-handler"
 import React, { useEffect } from "react"
 import { SafeAreaProvider, initialWindowMetrics } from "react-native-safe-area-context"
 import { initFonts } from "./theme/fonts" // expo
-import {
-  useBackButtonHandler,
-  RootNavigator,
-  canExit,
-  useNavigationPersistence,
-  navigationRef,
-} from "./navigators"
+import { useBackButtonHandler, AppNavigator, canExit, useNavigationPersistence } from "./navigators"
+import { ErrorBoundary } from "./components"
 
 // This puts screens in a native ViewController or Activity. If you want fully native
 // stack navigation, use `createNativeStackNavigator` in place of `createStackNavigator`:
@@ -61,11 +56,12 @@ function App() {
   return (
     <SafeAreaProvider initialMetrics={initialWindowMetrics}>
       <TrackDownloadsClientProvider client={new TrackDownloadsClient()}>
-        <RootNavigator
-          ref={navigationRef}
-          initialState={initialNavigationState}
-          onStateChange={onNavigationStateChange}
-        />
+        <ErrorBoundary catchErrors={"always"}>
+          <AppNavigator
+            initialState={initialNavigationState}
+            onStateChange={onNavigationStateChange}
+          />
+        </ErrorBoundary>
       </TrackDownloadsClientProvider>
     </SafeAreaProvider>
   )
