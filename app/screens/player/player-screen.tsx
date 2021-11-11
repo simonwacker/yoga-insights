@@ -1,14 +1,7 @@
 import React, { useState, useCallback } from "react"
-import { ViewStyle } from "react-native"
 import { Screen, AudioPlayer } from "../../components"
-import { color } from "../../theme"
 import { PlayerScreenNavigationProp, PlayerScreenRouteProp } from "../../navigators"
 import { useTrackStore } from "../../stores"
-
-const ROOT: ViewStyle = {
-  backgroundColor: color.background,
-  flex: 1,
-}
 
 export type PlayerScreenProps = {
   route: PlayerScreenRouteProp
@@ -42,7 +35,7 @@ export function PlayerScreen({ route, navigation }: PlayerScreenProps) {
   }
 
   return (
-    <Screen style={ROOT} preset="scroll" onAccessibilityEscape={navigation.goBack}>
+    <Screen preset="scroll" onAccessibilityEscape={navigation.goBack}>
       <AudioPlayer
         track={getTrack(trackIds[trackIndex])}
         backgroundMusic={backgroundMusicId === null ? undefined : getTrack(backgroundMusicId)}

@@ -1,17 +1,10 @@
 import React, { useCallback, useState } from "react"
 import { useEffect } from "react"
-import { ViewStyle } from "react-native"
 import * as FileSystem from "expo-file-system"
 import { Button, Screen, Text } from "../../components"
 import { SettingsScreenNavigationProp, SettingsScreenRouteProp } from "../../navigators"
 import { usePlaylistStore } from "../../stores"
-import { color } from "../../theme"
 import { tracksDirectoryUri } from "../../utils/file"
-
-const ROOT: ViewStyle = {
-  backgroundColor: color.background,
-  flex: 1,
-}
 
 export type SettingsScreenProps = {
   route: SettingsScreenRouteProp
@@ -43,7 +36,7 @@ export function SettingsScreen({ navigation }: SettingsScreenProps) {
   }
 
   return (
-    <Screen style={ROOT} preset="scroll" onAccessibilityEscape={navigation.goBack}>
+    <Screen preset="scroll" onAccessibilityEscape={navigation.goBack}>
       {tracksDirectoryInfo?.exists ? (
         <Text
           text={`Der Speicherbedarf aller Downloads beträgt ${Math.round(

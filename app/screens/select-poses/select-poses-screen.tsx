@@ -1,14 +1,7 @@
 import React, { useCallback, useState } from "react"
-import { ViewStyle } from "react-native"
 import { Screen, SectionList, ListCheckboxItem, Button } from "../../components"
-import { color } from "../../theme"
 import { useTrackStore } from "../../stores"
 import { SelectPosesScreenNavigationProp, SelectPosesScreenRouteProp } from "../../navigators"
-
-const ROOT: ViewStyle = {
-  backgroundColor: color.background,
-  flex: 1,
-}
 
 export type SelectPosesScreenProps = {
   route: SelectPosesScreenRouteProp
@@ -41,16 +34,9 @@ export function SelectPosesScreen({ navigation }: SelectPosesScreenProps) {
   }
 
   return (
-    <Screen
-      style={ROOT}
-      preset="fixed"
-      onAccessibilityEscape={navigation.goBack}
-      onMagicTap={finish}
-    >
+    <Screen preset="fixed" onAccessibilityEscape={navigation.goBack} onMagicTap={finish}>
       <SectionList
-        getSectionTitle={(section) => section.title}
         sections={poseSections}
-        keyExtractor={(item) => item}
         renderItem={({ item }) => (
           <ListCheckboxItem
             label={getTrack(item).name}

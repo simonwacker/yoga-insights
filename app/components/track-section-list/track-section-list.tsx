@@ -20,10 +20,7 @@ export function TrackSectionList({ sections, onSelectTrack, style }: TrackSectio
 
   return (
     <SectionList
-      getSectionTitle={(section) => section.title}
-      style={style}
       sections={sections}
-      keyExtractor={(item) => item}
       renderItem={({ item, index, section }) => (
         <ListButtonItem
           label={getTrack(item).name}

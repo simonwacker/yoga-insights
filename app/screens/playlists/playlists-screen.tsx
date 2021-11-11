@@ -1,14 +1,7 @@
 import React, { useCallback } from "react"
-import { ViewStyle } from "react-native"
 import { Button, Screen, ListButtonItem, FlatList } from "../../components"
-import { color } from "../../theme"
 import { PlaylistsScreenNavigationProp, PlaylistsScreenRouteProp } from "../../navigators"
 import { usePlaylistStore } from "../../stores"
-
-const ROOT: ViewStyle = {
-  backgroundColor: color.background,
-  flex: 1,
-}
 
 export type PlaylistsScreenProps = {
   route: PlaylistsScreenRouteProp
@@ -21,12 +14,7 @@ export function PlaylistsScreen({ navigation }: PlaylistsScreenProps) {
   const newPlaylist = () => navigation.navigate("selectPoses")
 
   return (
-    <Screen
-      style={ROOT}
-      preset="fixed"
-      onAccessibilityEscape={navigation.goBack}
-      onMagicTap={newPlaylist}
-    >
+    <Screen preset="fixed" onAccessibilityEscape={navigation.goBack} onMagicTap={newPlaylist}>
       <FlatList
         data={playlists}
         keyExtractor={(item) => item.playlistId.toString()}

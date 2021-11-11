@@ -15,7 +15,7 @@ import { SafeAreaProvider, initialWindowMetrics } from "react-native-safe-area-c
 import { initFonts } from "./theme/fonts" // expo
 import { useBackButtonHandler, AppNavigator, canExit, useNavigationPersistence } from "./navigators"
 import { ErrorBoundary } from "./components"
-import { DefaultTheme, Provider as PaperProvider } from "react-native-paper"
+import { configureFonts, DefaultTheme, Provider as PaperProvider } from "react-native-paper"
 
 // This puts screens in a native ViewController or Activity. If you want fully native
 // stack navigation, use `createNativeStackNavigator` in place of `createStackNavigator`:
@@ -26,13 +26,33 @@ import * as FileSystem from "expo-file-system"
 import { tracksDirectoryUri } from "./utils/file"
 import { TrackDownloadsClientProvider } from "./contexts/TrackDownloadsClientContext"
 import { TrackDownloadsClient } from "./clients/TrackDownloadsClient"
+import { Theme } from "react-native-paper/lib/typescript/types"
 
 enableScreens()
 
 export const NAVIGATION_PERSISTENCE_KEY = "NAVIGATION_STATE"
 
-const theme = {
+const theme: Theme = {
   ...DefaultTheme,
+  dark: false,
+  roundness: 4,
+  colors: {
+    primary: "#6200ee",
+    accent: "#03dac4",
+    background: "#f6f6f6",
+    surface: "#ffffff",
+    error: "#B00020",
+    text: "#000000",
+    onSurface: "#000000",
+    disabled: "rgba(0, 0, 0, 0.26)",
+    placeholder: "rgba(0, 0, 0, 0.54)",
+    backdrop: "rgba(0, 0, 0, 0.5)",
+    notification: "#f50057",
+  },
+  fonts: configureFonts(),
+  animation: {
+    scale: 1.0,
+  },
 }
 
 /**

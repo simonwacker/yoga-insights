@@ -1,15 +1,10 @@
 import * as React from "react"
-import { Pressable, TextStyle, View, ViewStyle } from "react-native"
-import { spacing } from "../../theme"
-import { Text } from "../text/text"
-import { color } from "../../theme"
+import { TextStyle } from "react-native"
+import { Button } from "react-native-paper"
 
-const LIST_CONTAINER: ViewStyle = {
-  alignItems: "center",
-  flexDirection: "row",
-  padding: spacing.small,
+const CONTENT: TextStyle = {
+  justifyContent: "flex-start",
 }
-const LIST_TEXT: TextStyle = {}
 
 export interface ListButtonItemProps {
   label: string
@@ -18,16 +13,15 @@ export interface ListButtonItemProps {
 
 export function ListButtonItem({ label, onPress }: ListButtonItemProps) {
   return (
-    <Pressable
-      accessible
-      accessibilityRole="button"
+    // TODO Is setting `onMagicTap` necessary?
+    <Button
+      mode="text"
+      uppercase={false}
+      contentStyle={CONTENT}
       onPress={onPress}
       onMagicTap={onPress}
-      android_ripple={{ color: color.ripple, radius: 10 }}
     >
-      <View style={LIST_CONTAINER}>
-        <Text style={LIST_TEXT}>{label}</Text>
-      </View>
-    </Pressable>
+      {label}
+    </Button>
   )
 }
