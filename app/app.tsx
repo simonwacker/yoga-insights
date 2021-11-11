@@ -15,6 +15,7 @@ import { SafeAreaProvider, initialWindowMetrics } from "react-native-safe-area-c
 import { initFonts } from "./theme/fonts" // expo
 import { useBackButtonHandler, AppNavigator, canExit, useNavigationPersistence } from "./navigators"
 import { ErrorBoundary } from "./components"
+import { DefaultTheme, Provider as PaperProvider } from "react-native-paper"
 
 // This puts screens in a native ViewController or Activity. If you want fully native
 // stack navigation, use `createNativeStackNavigator` in place of `createStackNavigator`:
@@ -25,9 +26,14 @@ import * as FileSystem from "expo-file-system"
 import { tracksDirectoryUri } from "./utils/file"
 import { TrackDownloadsClientProvider } from "./contexts/TrackDownloadsClientContext"
 import { TrackDownloadsClient } from "./clients/TrackDownloadsClient"
+
 enableScreens()
 
 export const NAVIGATION_PERSISTENCE_KEY = "NAVIGATION_STATE"
+
+const theme = {
+  ...DefaultTheme,
+}
 
 /**
  * This is the root component of our app.
@@ -56,12 +62,14 @@ function App() {
   return (
     <SafeAreaProvider initialMetrics={initialWindowMetrics}>
       <TrackDownloadsClientProvider client={new TrackDownloadsClient()}>
-        <ErrorBoundary catchErrors={"always"}>
-          <AppNavigator
-            initialState={initialNavigationState}
-            onStateChange={onNavigationStateChange}
-          />
-        </ErrorBoundary>
+        <PaperProvider theme={theme}>
+          <ErrorBoundary catchErrors={"always"}>
+            <AppNavigator
+              initialState={initialNavigationState}
+              onStateChange={onNavigationStateChange}
+            />
+          </ErrorBoundary>
+        </PaperProvider>
       </TrackDownloadsClientProvider>
     </SafeAreaProvider>
   )
