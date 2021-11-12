@@ -219,7 +219,7 @@ export function MainNavigator() {
     <MainStack.Navigator
       initialRouteName="tabs"
       screenOptions={{
-        animation: "none", // slide_from_right
+        animation: "slide_from_right",
       }}
     >
       <MainStack.Screen
@@ -269,7 +269,7 @@ export const AppNavigator = (props: AppNavigatorProps) => {
       <AppStack.Navigator
         screenOptions={{
           headerShown: false,
-          animation: "none",
+          animation: "slide_from_right",
         }}
         initialRouteName="main"
       >
