@@ -34,6 +34,7 @@ export function NamePlaylistScreen({ route, navigation }: NamePlaylistScreenProp
         value={name}
         onChangeText={setName}
         onMagicTap={finish}
+        label="Name"
       />
       <Button disabled={!canFinish} onPress={finish} title="Playlist erstellen" />
     </Screen>

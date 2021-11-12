@@ -1,10 +1,5 @@
 import * as React from "react"
-import { TextStyle } from "react-native"
-import { Button } from "react-native-paper"
-
-const CONTENT: TextStyle = {
-  justifyContent: "flex-start",
-}
+import { List } from "react-native-paper"
 
 export interface ListButtonItemProps {
   label: string
@@ -14,14 +9,11 @@ export interface ListButtonItemProps {
 export function ListButtonItem({ label, onPress }: ListButtonItemProps) {
   return (
     // TODO Is setting `onMagicTap` necessary?
-    <Button
-      mode="text"
-      uppercase={false}
-      contentStyle={CONTENT}
+    <List.Item
+      title={label}
       onPress={onPress}
       onMagicTap={onPress}
-    >
-      {label}
-    </Button>
+      right={(props) => <List.Icon {...props} icon="chevron-right" />}
+    />
   )
 }

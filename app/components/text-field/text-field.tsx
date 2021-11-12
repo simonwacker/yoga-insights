@@ -1,22 +1,7 @@
 import React from "react"
-import { StyleProp, TextInput, TextInputProps, TextStyle, View, ViewStyle } from "react-native"
-import { color, spacing, typography } from "../../theme"
-import { scale } from "../../theme/scale"
-import { Text } from "../text/text"
-
-// the base styling for the container
-const CONTAINER: ViewStyle = {
-  paddingVertical: spacing.small,
-}
-
-// the base styling for the TextInput
-const INPUT: TextStyle = {
-  fontFamily: typography.primary,
-  color: color.background,
-  minHeight: 44,
-  fontSize: scale.medium,
-  backgroundColor: color.text,
-}
+import { StyleProp, TextInputProps, TextStyle, ViewStyle } from "react-native"
+import { TextInput } from "react-native-paper"
+import { color } from "../../theme"
 
 // currently we have no presets, but that changes quickly when you build your app.
 const PRESETS: { [name: string]: ViewStyle } = {
@@ -56,30 +41,16 @@ export interface TextFieldProps extends TextInputProps {
  * A component which has a label and an input together.
  */
 export function TextField(props: TextFieldProps) {
-  const {
-    placeholder,
-    label,
-    preset = "default",
-    style: styleOverride,
-    inputStyle: inputStyleOverride,
-    forwardedRef,
-    ...rest
-  } = props
-
-  const containerStyles = [CONTAINER, PRESETS[preset], styleOverride]
-  const inputStyles = [INPUT, inputStyleOverride]
+  const { placeholder, label, onChangeText, value } = props
 
   return (
-    <View style={containerStyles}>
-      <Text preset="fieldLabel" text={label} />
-      <TextInput
-        placeholder={placeholder}
-        placeholderTextColor={color.dim}
-        underlineColorAndroid={color.transparent}
-        {...rest}
-        style={inputStyles}
-        ref={forwardedRef}
-      />
-    </View>
+    <TextInput
+      label={label}
+      value={value}
+      onChangeText={onChangeText}
+      placeholder={placeholder}
+      placeholderTextColor={color.dim}
+      underlineColorAndroid={color.transparent}
+    />
   )
 }
