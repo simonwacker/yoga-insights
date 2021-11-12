@@ -23,6 +23,7 @@ export function TrackSectionList({ sections, onSelectTrack, style }: TrackSectio
       sections={sections}
       renderItem={({ item, index, section }) => (
         <ListButtonItem
+          key={index}
           label={getTrack(item).name}
           onPress={() => onSelectTrack(index, section.data)}
         />
