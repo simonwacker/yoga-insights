@@ -15,6 +15,7 @@ import {
 } from "@react-navigation/native"
 import {
   createNativeStackNavigator,
+  NativeStackHeaderProps,
   NativeStackNavigationProp,
 } from "@react-navigation/native-stack"
 import { useColorScheme } from "react-native"
@@ -35,6 +36,7 @@ import {
   SelectPosesScreen,
   SettingsScreen,
 } from "../screens"
+import { Appbar } from "react-native-paper"
 
 /**
  * This type allows TypeScript to know what routes are defined in this navigator
@@ -214,12 +216,24 @@ export function BottomTabNavigator() {
   )
 }
 
+function Header({ back, options, navigation }: NativeStackHeaderProps) {
+  return (
+    <Appbar.Header>
+      {back ? (
+        <Appbar.BackAction accessible accessibilityLabel={back.title} onPress={navigation.goBack} />
+      ) : null}
+      <Appbar.Content title={options.headerTitle || options.title} />
+    </Appbar.Header>
+  )
+}
+
 export function MainNavigator() {
   return (
     <MainStack.Navigator
       initialRouteName="tabs"
       screenOptions={{
         animation: "slide_from_right",
+        header: (props) => <Header {...props} />,
       }}
     >
       <MainStack.Screen
