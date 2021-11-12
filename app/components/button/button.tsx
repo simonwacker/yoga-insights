@@ -1,9 +1,6 @@
 import * as React from "react"
-import { Pressable } from "react-native"
-import { Text } from "../text/text"
-import { viewPresets, textPresets } from "./button.presets"
 import { ButtonProps } from "./button.props"
-import { color } from "../../theme"
+import { Button as ElementsButton } from "react-native-elements"
 
 /**
  * For your text displaying needs.
@@ -12,34 +9,15 @@ import { color } from "../../theme"
  */
 export function Button(props: ButtonProps) {
   // grab the props
-  const {
-    preset = "primary",
-    title: text,
-    style: styleOverride,
-    textStyle: textStyleOverride,
-    children,
-    onPress,
-    ...rest
-  } = props
-
-  const viewStyle = viewPresets[preset] || viewPresets.primary
-  const viewStyles = [viewStyle, styleOverride]
-  const textStyle = textPresets[preset] || textPresets.primary
-  const textStyles = [textStyle, textStyleOverride]
-
-  const content = children || <Text text={text} style={textStyles} />
+  const { title, onPress } = props
 
   return (
-    <Pressable
+    <ElementsButton
       accessible
       accessibilityRole="button"
-      style={viewStyles}
       onPress={onPress}
       onMagicTap={onPress}
-      android_ripple={{ color: color.ripple, radius: 10 }}
-      {...rest}
-    >
-      {content}
-    </Pressable>
+      title={title}
+    />
   )
 }

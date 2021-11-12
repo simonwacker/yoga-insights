@@ -2,6 +2,7 @@ import * as React from "react"
 import { Pressable, TextStyle, View, ViewStyle } from "react-native"
 import { color, spacing } from "../../theme"
 import { Text } from "../text/text"
+import { CheckBox } from "react-native-elements"
 
 const LIST_CONTAINER: ViewStyle = {
   alignItems: "center",
@@ -36,18 +37,14 @@ export interface ListCheckboxItemProps {
 
 export function ListCheckboxItem({ label, checked, onPress }: ListCheckboxItemProps) {
   return (
-    <Pressable
+    <CheckBox
       accessible
       accessibilityRole="checkbox"
       accessibilityState={{ checked: checked }}
       onPress={onPress}
       onMagicTap={onPress}
-      android_ripple={{ color: color.ripple, radius: 10 }}
-    >
-      <View style={LIST_CONTAINER}>
-        <View style={BOX_OUTLINE}>{checked && <View style={BOX_FILL} />}</View>
-        <Text style={LIST_TEXT}>{label}</Text>
-      </View>
-    </Pressable>
+      title={label}
+      checked={checked}
+    />
   )
 }
