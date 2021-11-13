@@ -1,12 +1,7 @@
-// import * as Font from "expo-font"
+import * as Font from "expo-font"
+import { MaterialCommunityIcons } from "@expo/vector-icons"
 
+// https://docs.expo.dev/guides/preloading-and-caching-assets/#pre-loading-and-caching-assets
 export const initFonts = async () => {
-  // Refer to ./assets/fonts/custom-fonts.md for instructions.
-  // ...
-  // Welcome back! Just uncomment this and replace/append with your font file names!
-  // ⬇
-  // await Font.loadAsync({
-  //   Montserrat: require("./Montserrat-Regular.ttf"),
-  //   "Montserrat-Regular": require("./Montserrat-Regular.ttf"),
-  // })
+  await Font.loadAsync(MaterialCommunityIcons.font)
 }
