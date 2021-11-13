@@ -1,17 +1,16 @@
 // Inspired by https://rossbulat.medium.com/react-native-how-to-load-and-play-audio-241808f97f61
 
 import React, { useCallback, useEffect, useState } from "react"
-import { Pressable, View, ViewStyle } from "react-native"
+import { View, ViewStyle } from "react-native"
 import { DownloadSwitch } from "../download-switch/download-switch"
 import { Text } from "../text/text"
 import { Audio, AVPlaybackStatus, AVPlaybackStatusToSet } from "expo-av"
 import Slider from "@react-native-community/slider"
-import { AntDesign, FontAwesome5 } from "@expo/vector-icons"
 import { AudioPlayerProps } from "./audio-player.props"
-import { color, spacing } from "../../theme"
+import { spacing } from "../../theme"
 import { TextStyle } from "react-native"
-import { scale } from "../../theme/scale"
 import { useAudioSource } from "../../hooks/useAudioSource"
+import { IconButton, useTheme } from "react-native-paper"
 
 const ROOT: ViewStyle = {
   flex: 1,
@@ -21,8 +20,7 @@ const ROOT: ViewStyle = {
 const TEXT: TextStyle = {
   textAlign: "center",
 }
-const HANDLE: ViewStyle = { marginHorizontal: spacing.medium }
-const HANDLE_TEXT: TextStyle = { fontSize: scale.tiny }
+const HANDLE: ViewStyle = { marginHorizontal: spacing.tiny }
 const ROW: ViewStyle = {
   flexDirection: "row",
   justifyContent: "center",
@@ -79,6 +77,8 @@ export function AudioPlayer({
   const [sound] = useState<Audio.Sound>(() => new Audio.Sound())
   const [playbackStatus, setPlaybackStatus] = useState<AVPlaybackStatus | null>(null)
   const [sliderState, setSliderState] = useState<SliderState>({ type: "NORMAL" })
+
+  const { colors } = useTheme()
 
   const playbackPosition = playbackStatus?.isLoaded ? playbackStatus.positionMillis : 0
   const maximumPlaybackPosition =
@@ -341,89 +341,83 @@ export function AudioPlayer({
         <Text style={TEXT}>{track.name}</Text>
       </View>
       <View style={ROW}>
-        <Pressable
+        <IconButton
+          icon="skip-backward"
           disabled={!previousTrack}
           accessible={true}
           accessibilityLabel={`Vorheriges Stück abspielen ${previousTrack?.name}`}
           accessibilityRole="button"
           onPress={onPlayPreviousTrack}
           onMagicTap={onPlayPreviousTrack}
+          size={30}
           style={HANDLE}
-        >
-          <AntDesign name="stepbackward" size={30} color={color.text} />
-        </Pressable>
-        <Pressable
+        />
+        <IconButton
+          icon="step-backward"
           accessible={true}
           accessibilityLabel="30 Sekunden zurückspulen"
           accessibilityRole="button"
           onPress={jumpPrev30Seconds}
           onMagicTap={jumpPrev30Seconds}
+          size={30}
           style={HANDLE}
-        >
-          <AntDesign name="left" size={30} color={color.text} />
-          {/* <AutoImage source={img_playjumpleft} style={{ width: 30, height: 30 }} /> */}
-          <Text style={HANDLE_TEXT}>30</Text>
-        </Pressable>
+        />
         {!playbackStatus?.isLoaded && (
-          <AntDesign
+          <IconButton
+            disabled={true}
+            icon="clock"
             accessible={true}
             accessibilityLabel="wird geladen"
             accessibilityRole="text"
-            name="loading1"
             size={30}
-            color={color.text}
             style={HANDLE}
           />
         )}
         {playbackStatus?.isLoaded && !playbackStatus.shouldPlay && (
-          <Pressable
+          <IconButton
+            icon="play-circle"
             accessible={true}
             accessibilityLabel="abspielen"
             accessibilityRole="button"
             onPress={play}
             onMagicTap={play}
+            size={30}
             style={HANDLE}
-          >
-            <AntDesign name="playcircleo" size={30} color={color.text} />
-            {/* <AutoImage source={img_play} style={{ width: 30, height: 30 }} /> */}
-          </Pressable>
+          />
         )}
         {playbackStatus?.isLoaded && playbackStatus.shouldPlay && (
-          <Pressable
+          <IconButton
+            icon="pause-circle"
             accessible={true}
             accessibilityLabel="pausieren"
             accessibilityRole="button"
             onPress={pause}
             onMagicTap={pause}
+            size={30}
             style={HANDLE}
-          >
-            <AntDesign name="pausecircleo" size={30} color={color.text} />
-            {/* <AutoImage source={img_pause} style={{ width: 30, height: 30 }} /> */}
-          </Pressable>
+          />
         )}
-        <Pressable
+        <IconButton
+          icon="step-forward"
           accessible={true}
           accessibilityLabel="30 Sekunden vorspulen"
           accessibilityRole="button"
           onPress={jumpNext30Seconds}
           onMagicTap={jumpNext30Seconds}
+          size={30}
           style={HANDLE}
-        >
-          {/* <AutoImage source={img_playjumpright} style={{ width: 30, height: 30 }} /> */}
-          <AntDesign name="right" size={30} color={color.text} />
-          <Text style={HANDLE_TEXT}>30</Text>
-        </Pressable>
-        <Pressable
+        />
+        <IconButton
+          icon="skip-forward"
           disabled={!nextTrack}
           accessible={true}
           accessibilityLabel={`Nächstes Stück abspielen ${nextTrack?.name}`}
           accessibilityRole="button"
           onPress={onPlayNextTrack}
           onMagicTap={onPlayNextTrack}
+          size={30}
           style={HANDLE}
-        >
-          <AntDesign name="stepforward" size={30} color={color.text} />
-        </Pressable>
+        />
       </View>
       <View style={ROW}>
         <Text
@@ -454,9 +448,9 @@ export function AudioPlayer({
           }
           minimumValue={0}
           maximumValue={maximumPlaybackPosition}
-          maximumTrackTintColor="gray"
-          minimumTrackTintColor={color.text}
-          thumbTintColor={color.text}
+          maximumTrackTintColor={colors.disabled}
+          minimumTrackTintColor={colors.text}
+          thumbTintColor={colors.text}
           style={SLIDER_STYLE}
           onSlidingStart={startSliding}
           onValueChange={slide}
@@ -474,50 +468,50 @@ export function AudioPlayer({
       </View>
       {backgroundMusic && (
         <View style={ROW}>
-          <Pressable
+          <IconButton
+            icon="volume-low"
             accessible={true}
             accessibilityLabel="Hintergrundmusik leiser machen"
             accessibilityRole="button"
             onPress={decreaseBackgroundMusicVolume}
             onMagicTap={decreaseBackgroundMusicVolume}
+            size={30}
             style={HANDLE}
-          >
-            <FontAwesome5 name="volume-down" size={30} color={color.text} />
-          </Pressable>
+          />
           {backgroundPlaybackStatus?.isLoaded && backgroundPlaybackStatus.isMuted && (
-            <Pressable
+            <IconButton
+              icon="volume-medium"
               accessible={true}
               accessibilityLabel="laut stellen"
               accessibilityRole="button"
               onPress={unmuteBackgroundMusic}
               onMagicTap={unmuteBackgroundMusic}
+              size={30}
               style={HANDLE}
-            >
-              <FontAwesome5 name="volume-mute" size={30} color={color.text} />
-            </Pressable>
+            />
           )}
           {backgroundPlaybackStatus?.isLoaded && !backgroundPlaybackStatus.isMuted && (
-            <Pressable
+            <IconButton
+              icon="volume-off"
               accessible={true}
               accessibilityLabel="stumm schalten"
               accessibilityRole="button"
               onPress={muteBackgroundMusic}
               onMagicTap={muteBackgroundMusic}
+              size={30}
               style={HANDLE}
-            >
-              <FontAwesome5 name="volume-off" size={30} color={color.text} />
-            </Pressable>
+            />
           )}
-          <Pressable
+          <IconButton
+            icon="volume-high"
             accessible={true}
             accessibilityLabel="Hintergrundmusik lauter machen"
             accessibilityRole="button"
             onPress={increaseBackgroundMusicVolume}
             onMagicTap={increaseBackgroundMusicVolume}
+            size={30}
             style={HANDLE}
-          >
-            <FontAwesome5 name="volume-up" size={30} color={color.text} />
-          </Pressable>
+          />
         </View>
       )}
       <View style={ROW}>
