@@ -5,8 +5,6 @@
  */
 import React from "react"
 import {
-  DarkTheme,
-  DefaultTheme,
   NavigationContainer,
   NavigatorScreenParams,
   CompositeNavigationProp,
@@ -18,7 +16,6 @@ import {
   NativeStackHeaderProps,
   NativeStackNavigationProp,
 } from "@react-navigation/native-stack"
-import { useColorScheme } from "react-native"
 import { navigationRef } from "./navigation-utilities"
 import {
   MaterialBottomTabNavigationProp,
@@ -273,13 +270,8 @@ export function MainNavigator() {
 interface AppNavigatorProps extends Partial<React.ComponentProps<typeof NavigationContainer>> {}
 
 export const AppNavigator = (props: AppNavigatorProps) => {
-  const colorScheme = useColorScheme()
   return (
-    <NavigationContainer<AppParamList>
-      theme={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-      {...props}
-      ref={navigationRef}
-    >
+    <NavigationContainer<AppParamList> {...props} ref={navigationRef}>
       <AppStack.Navigator
         screenOptions={{
           headerShown: false,
