@@ -25,6 +25,7 @@ export function SelectMusicScreen({ route, navigation }: SelectMusicScreenProps)
         sections={musicSections}
         renderItem={({ item }) => (
           <ListRadioItem
+            key={item}
             label={getTrack(item).name}
             value={item}
             selected={item === selectedMusicId}

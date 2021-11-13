@@ -39,6 +39,7 @@ export function SelectPosesScreen({ navigation }: SelectPosesScreenProps) {
         sections={poseSections}
         renderItem={({ item }) => (
           <ListCheckboxItem
+            key={item}
             label={getTrack(item).name}
             checked={selectedPoseIds.has(item)}
             onPress={() => togglePoseSelection(item)}
