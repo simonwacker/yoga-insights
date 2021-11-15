@@ -34,6 +34,7 @@ import {
   SettingsScreen,
 } from "../screens"
 import { Appbar } from "react-native-paper"
+import { MaterialCommunityIcons } from "@expo/vector-icons"
 
 /**
  * This type allows TypeScript to know what routes are defined in this navigator
@@ -170,7 +171,7 @@ export function BottomTabNavigator() {
         options={{
           title: bottomTabTitles.classes,
           tabBarLabel: bottomTabTitles.classes,
-          tabBarIcon: "timer-sand",
+          tabBarIcon: (props) => <MaterialCommunityIcons name="timer-sand" size={24} {...props} />,
         }}
       />
       <BottomTab.Screen
@@ -179,7 +180,7 @@ export function BottomTabNavigator() {
         options={{
           title: bottomTabTitles.poses,
           tabBarLabel: bottomTabTitles.poses,
-          tabBarIcon: "yoga",
+          tabBarIcon: (props) => <MaterialCommunityIcons name="yoga" size={24} {...props} />,
         }}
       />
       <BottomTab.Screen
@@ -188,7 +189,7 @@ export function BottomTabNavigator() {
         options={{
           title: bottomTabTitles.music,
           tabBarLabel: bottomTabTitles.music,
-          tabBarIcon: "music",
+          tabBarIcon: (props) => <MaterialCommunityIcons name="music" size={24} {...props} />,
         }}
       />
       <BottomTab.Screen
@@ -197,7 +198,9 @@ export function BottomTabNavigator() {
         options={{
           title: bottomTabTitles.playlists,
           tabBarLabel: bottomTabTitles.playlists,
-          tabBarIcon: "playlist-star",
+          tabBarIcon: (props) => (
+            <MaterialCommunityIcons name="playlist-star" size={24} {...props} />
+          ),
         }}
       />
       <BottomTab.Screen
@@ -206,7 +209,7 @@ export function BottomTabNavigator() {
         options={{
           title: bottomTabTitles.settings,
           tabBarLabel: bottomTabTitles.settings,
-          tabBarIcon: "cog",
+          tabBarIcon: (props) => <MaterialCommunityIcons name="cog" size={24} {...props} />,
         }}
       />
     </BottomTab.Navigator>

@@ -83,7 +83,7 @@ function Handle({
       accessibilityRole={accessibilityRole}
       accessible={true}
       disabled={disabled}
-      icon={icon}
+      icon={(props) => <MaterialCommunityIcons name={icon} {...props} />}
       onMagicTap={onPress}
       onPress={onPress}
       size={30}
