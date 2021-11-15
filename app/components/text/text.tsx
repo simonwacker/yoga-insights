@@ -1,8 +1,8 @@
 import * as React from "react"
 import { Text as PaperText } from "react-native-paper"
-import { TextProps as TextProperties } from "react-native"
+import { TextProps as NativeTextProps } from "react-native"
 
-export interface TextProps extends TextProperties {
+export interface TextProps extends NativeTextProps {
   /**
    * Children components.
    */
