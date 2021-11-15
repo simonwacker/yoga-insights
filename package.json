@@ -96,7 +96,7 @@
     "react-powerplug": "^1.0.0",
     "sharp-cli": "^1.15.0",
     "solidarity": "^3.0.4",
-    "typescript": "~4.3.5"
+    "typescript": "^4.4.4"
   },
   "jest": {
     "preset": "jest-expo",
