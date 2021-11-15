@@ -6,11 +6,11 @@ import { DownloadSwitch } from "../download-switch/download-switch"
 import { Text } from "../text/text"
 import { Audio, AVPlaybackStatus, AVPlaybackStatusToSet } from "expo-av"
 import Slider from "@react-native-community/slider"
-import { AudioPlayerProps } from "./audio-player.props"
 import { spacing } from "../../theme"
 import { TextStyle } from "react-native"
 import { useAudioSource } from "../../hooks/useAudioSource"
 import { IconButton, useTheme } from "react-native-paper"
+import { Track } from "../../models"
 
 const ROOT: ViewStyle = {
   flex: 1,
@@ -59,6 +59,17 @@ const loadAndPlay = async (
   } catch (error) {
     __DEV__ && console.error("Failed to create, load, and play audio.", error)
   }
+}
+
+export interface AudioPlayerProps {
+  track: Track
+  backgroundMusic?: Track
+  tracksToDownload: Track[]
+  onPlaybackDidJustFinish: () => void
+  previousTrack?: Track
+  onPlayPreviousTrack: () => void
+  nextTrack?: Track
+  onPlayNextTrack: () => void
 }
 
 export function AudioPlayer({

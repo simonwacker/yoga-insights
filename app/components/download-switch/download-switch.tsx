@@ -1,5 +1,5 @@
 import React from "react"
-import { DownloadSwitchProps } from "./download-switch.props"
+import { Track } from "../../models"
 import { Switch, TextStyle, View, ViewStyle } from "react-native"
 import { Text } from "../text/text"
 import { color, spacing } from "../../theme"
@@ -49,6 +49,10 @@ function getSwitchAccessibilityHintAction(status: DownloadState["type"]): string
     case "DOWNLOADED":
       return "löschen"
   }
+}
+
+export interface DownloadSwitchProps {
+  tracks: Track[]
 }
 
 export function DownloadSwitch({ tracks }: DownloadSwitchProps) {

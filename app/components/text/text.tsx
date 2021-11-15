@@ -1,6 +1,18 @@
 import * as React from "react"
 import { Text as PaperText } from "react-native-paper"
-import { TextProps } from "./text.props"
+import { TextProps as TextProperties } from "react-native"
+
+export interface TextProps extends TextProperties {
+  /**
+   * Children components.
+   */
+  children?: React.ReactNode
+
+  /**
+   * The text to display if not using `tx` or nested components.
+   */
+  text?: string
+}
 
 /**
  * For your text displaying needs.
