@@ -1,7 +1,7 @@
 // Inspired by https://rossbulat.medium.com/react-native-how-to-load-and-play-audio-241808f97f61
 
 import React, { useCallback, useEffect, useState } from "react"
-import { View, ViewStyle } from "react-native"
+import { AccessibilityRole, View, ViewStyle } from "react-native"
 import { DownloadSwitch } from "../download-switch/download-switch"
 import { Text } from "../text/text"
 import { Audio, AVPlaybackStatus, AVPlaybackStatusToSet } from "expo-av"
@@ -11,6 +11,7 @@ import { TextStyle } from "react-native"
 import { useAudioSource } from "../../hooks/useAudioSource"
 import { IconButton, useTheme } from "react-native-paper"
 import { Track } from "../../models"
+import { MaterialCommunityIcons } from "@expo/vector-icons"
 
 const ROOT: ViewStyle = {
   flex: 1,
@@ -59,6 +60,36 @@ const loadAndPlay = async (
   } catch (error) {
     __DEV__ && console.error("Failed to create, load, and play audio.", error)
   }
+}
+
+interface HandleProps {
+  accessibilityLabel: string
+  accessibilityRole?: AccessibilityRole
+  disabled?: boolean
+  icon: React.ComponentProps<typeof MaterialCommunityIcons>["name"]
+  onPress: () => void
+}
+
+function Handle({
+  accessibilityLabel,
+  accessibilityRole = "button",
+  disabled = false,
+  icon,
+  onPress,
+}: HandleProps) {
+  return (
+    <IconButton
+      accessibilityLabel={accessibilityLabel}
+      accessibilityRole={accessibilityRole}
+      accessible={true}
+      disabled={disabled}
+      icon={icon}
+      onMagicTap={onPress}
+      onPress={onPress}
+      size={30}
+      style={HANDLE}
+    />
+  )
 }
 
 export interface AudioPlayerProps {
@@ -352,82 +383,42 @@ export function AudioPlayer({
         <Text style={TEXT}>{track.name}</Text>
       </View>
       <View style={ROW}>
-        <IconButton
+        <Handle
           icon="skip-backward"
           disabled={!previousTrack}
-          accessible={true}
           accessibilityLabel={`Vorheriges Stück abspielen ${previousTrack?.name}`}
-          accessibilityRole="button"
           onPress={onPlayPreviousTrack}
-          onMagicTap={onPlayPreviousTrack}
-          size={30}
-          style={HANDLE}
         />
-        <IconButton
+        <Handle
           icon="step-backward"
-          accessible={true}
           accessibilityLabel="30 Sekunden zurückspulen"
-          accessibilityRole="button"
           onPress={jumpPrev30Seconds}
-          onMagicTap={jumpPrev30Seconds}
-          size={30}
-          style={HANDLE}
         />
         {!playbackStatus?.isLoaded && (
-          <IconButton
+          <Handle
             disabled={true}
             icon="clock"
-            accessible={true}
             accessibilityLabel="wird geladen"
             accessibilityRole="text"
-            size={30}
-            style={HANDLE}
+            onPress={() => {}}
           />
         )}
         {playbackStatus?.isLoaded && !playbackStatus.shouldPlay && (
-          <IconButton
-            icon="play-circle"
-            accessible={true}
-            accessibilityLabel="abspielen"
-            accessibilityRole="button"
-            onPress={play}
-            onMagicTap={play}
-            size={30}
-            style={HANDLE}
-          />
+          <Handle icon="play-circle" accessibilityLabel="abspielen" onPress={play} />
         )}
         {playbackStatus?.isLoaded && playbackStatus.shouldPlay && (
-          <IconButton
-            icon="pause-circle"
-            accessible={true}
-            accessibilityLabel="pausieren"
-            accessibilityRole="button"
-            onPress={pause}
-            onMagicTap={pause}
-            size={30}
-            style={HANDLE}
-          />
+          <Handle icon="pause-circle" accessibilityLabel="pausieren" onPress={pause} />
         )}
-        <IconButton
+        <Handle
           icon="step-forward"
-          accessible={true}
           accessibilityLabel="30 Sekunden vorspulen"
-          accessibilityRole="button"
           onPress={jumpNext30Seconds}
-          onMagicTap={jumpNext30Seconds}
-          size={30}
-          style={HANDLE}
         />
-        <IconButton
+        <Handle
           icon="skip-forward"
           disabled={!nextTrack}
-          accessible={true}
           accessibilityLabel={`Nächstes Stück abspielen ${nextTrack?.name}`}
-          accessibilityRole="button"
           onPress={onPlayNextTrack}
-          onMagicTap={onPlayNextTrack}
-          size={30}
-          style={HANDLE}
         />
       </View>
       <View style={ROW}>
@@ -479,49 +470,29 @@ export function AudioPlayer({
       </View>
       {backgroundMusic && (
         <View style={ROW}>
-          <IconButton
+          <Handle
             icon="volume-low"
-            accessible={true}
             accessibilityLabel="Hintergrundmusik leiser machen"
-            accessibilityRole="button"
             onPress={decreaseBackgroundMusicVolume}
-            onMagicTap={decreaseBackgroundMusicVolume}
-            size={30}
-            style={HANDLE}
           />
           {backgroundPlaybackStatus?.isLoaded && backgroundPlaybackStatus.isMuted && (
-            <IconButton
+            <Handle
               icon="volume-medium"
-              accessible={true}
               accessibilityLabel="laut stellen"
-              accessibilityRole="button"
               onPress={unmuteBackgroundMusic}
-              onMagicTap={unmuteBackgroundMusic}
-              size={30}
-              style={HANDLE}
             />
           )}
           {backgroundPlaybackStatus?.isLoaded && !backgroundPlaybackStatus.isMuted && (
-            <IconButton
+            <Handle
               icon="volume-off"
-              accessible={true}
               accessibilityLabel="stumm schalten"
-              accessibilityRole="button"
               onPress={muteBackgroundMusic}
-              onMagicTap={muteBackgroundMusic}
-              size={30}
-              style={HANDLE}
             />
           )}
-          <IconButton
+          <Handle
             icon="volume-high"
-            accessible={true}
             accessibilityLabel="Hintergrundmusik lauter machen"
-            accessibilityRole="button"
             onPress={increaseBackgroundMusicVolume}
-            onMagicTap={increaseBackgroundMusicVolume}
-            size={30}
-            style={HANDLE}
           />
         </View>
       )}
