@@ -1,7 +1,17 @@
+import { MaterialCommunityIcons } from "@expo/vector-icons"
 import React, { useCallback } from "react"
-import { Button, Screen, ListButtonItem, FlatList } from "../../components"
+import { ViewStyle } from "react-native"
+import { FAB } from "react-native-paper"
+import { Screen, ListButtonItem, FlatList } from "../../components"
 import { PlaylistsScreenNavigationProp, PlaylistsScreenRouteProp } from "../../navigators"
 import { usePlaylistStore } from "../../stores"
+
+const FAB_STYLE: ViewStyle = {
+  position: "absolute",
+  margin: 16,
+  right: 0,
+  bottom: 0,
+}
 
 export type PlaylistsScreenProps = {
   route: PlaylistsScreenRouteProp
@@ -31,7 +41,12 @@ export function PlaylistsScreen({ navigation }: PlaylistsScreenProps) {
           />
         )}
       />
-      <Button title="Neue Playlist" onPress={newPlaylist} />
+      <FAB
+        label="Neue Playlist"
+        icon={(props) => <MaterialCommunityIcons name="plus" {...props} />}
+        onPress={newPlaylist}
+        style={FAB_STYLE}
+      />
     </Screen>
   )
 }
