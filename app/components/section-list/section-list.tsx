@@ -7,7 +7,7 @@ type Section<ItemT> = { title: string; data: ItemT[] }
 
 export interface SectionListProps<ItemT> {
   sections: Section<ItemT>[]
-  renderItem: (info: { item: ItemT; index: number; section: Section<ItemT> }) => ReactElement
+  renderItem: (info: { item: ItemT; index: number; section: Section<ItemT> }) => ReactElement // TODO Why can't I use `List.Item` here instead of `ReactElement`?
   accessibilityRole?: AccessibilityRole
 }
 
