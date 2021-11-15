@@ -1,11 +1,12 @@
 import React from "react"
-import { DownloadSwitchProps } from "./download-switch.props"
-import { Switch, TextStyle, View, ViewStyle } from "react-native"
+import { Track } from "../../models"
+import { TextStyle, View, ViewStyle } from "react-native"
 import { Text } from "../text/text"
 import { color, spacing } from "../../theme"
 import { scale } from "../../theme/scale"
 import { DownloadState } from "../../clients/TrackDownloadsClient"
 import { useDownload } from "../../hooks/useDownload"
+import { Switch } from "react-native-paper"
 
 const ROOT: ViewStyle = {
   marginVertical: spacing.medium,
@@ -51,6 +52,10 @@ function getSwitchAccessibilityHintAction(status: DownloadState["type"]): string
   }
 }
 
+export interface DownloadSwitchProps {
+  tracks: Track[]
+}
+
 export function DownloadSwitch({ tracks }: DownloadSwitchProps) {
   const { state: downloadState, start, pause, clear } = useDownload(tracks[0])
 
@@ -71,13 +76,6 @@ export function DownloadSwitch({ tracks }: DownloadSwitchProps) {
         accessibilityLabel={`Zustand: ${getSwitchAccessibilityLabelState(downloadState.type)}`}
         accessibilityHint={`Aktion: ${getSwitchAccessibilityHintAction(downloadState.type)}`}
         accessibilityRole="switch"
-        trackColor={{ false: "#767577", true: "#81b0ff" }}
-        thumbColor={
-          downloadState.type === "DOWNLOADING" || downloadState.type === "DOWNLOADED"
-            ? "#f5dd4b"
-            : "#f4f3f4"
-        }
-        ios_backgroundColor="#3e3e3e"
         disabled={downloadState.type === "UNKNOWN"}
         value={downloadState.type === "DOWNLOADING" || downloadState.type === "DOWNLOADED"}
         onValueChange={onSwitchValueChange}

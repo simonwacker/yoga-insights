@@ -1,44 +1,43 @@
 import * as React from "react"
-import {
-  SectionList as ReactNativeSectionList,
-  SectionListData,
-  SectionListProps as ReactNativeSectionListProps,
-  StyleProp,
-  TextStyle,
-  ViewStyle,
-} from "react-native"
-import { color, spacing } from "../../theme"
-import { Text } from "../text/text"
+import { ReactElement } from "react"
+import { AccessibilityRole, View } from "react-native"
+import { List } from "react-native-paper"
 
-const SECTION_LIST: ViewStyle = {
-  paddingHorizontal: spacing.medium,
-}
-const SECTION_TITLE: TextStyle = {
-  marginLeft: 10,
-  color: color.dim,
+type Section<ItemT> = { title: string; data: ItemT[] }
+
+export interface SectionListProps<ItemT> {
+  sections: Section<ItemT>[]
+  renderItem: (info: { item: ItemT; index: number; section: Section<ItemT> }) => ReactElement // TODO Why can't I use `List.Item` here instead of `ReactElement`?
+  accessibilityRole?: AccessibilityRole
 }
 
-export interface SectionListProps<ItemT> extends ReactNativeSectionListProps<ItemT> {
-  getSectionTitle: (section: SectionListData<ItemT>) => string
-  /**
-   * An optional style override useful for padding & margin.
-   */
-  style?: StyleProp<ViewStyle>
-}
-
-export function SectionList<SectionT>({
-  getSectionTitle,
-  style,
-  ...rest
-}: SectionListProps<SectionT>) {
+export function SectionList<ItemT>({
+  sections,
+  renderItem,
+  accessibilityRole,
+}: SectionListProps<ItemT>) {
   return (
-    <ReactNativeSectionList
-      {...rest}
-      style={style}
-      contentContainerStyle={SECTION_LIST}
-      renderSectionHeader={({ section }) => (
-        <Text style={SECTION_TITLE}>{getSectionTitle(section)}</Text>
-      )}
-    />
+    // <ReactNativeSectionList<ItemT>
+    //   accessibilityRole={accessibilityRole}
+    //   sections={sections}
+    //   renderItem={renderItem}
+    //   renderSectionHeader={({ section }) => (
+    //     <List.Subheader onPressIn={() => {}} onPressOut={() => {}}>
+    //       {/* accessing title like this is unsafe */}
+    //       {section.title}
+    //     </List.Subheader>
+    //   )}
+    // />
+    <View accessibilityRole={accessibilityRole}>
+      {sections.map((section) => (
+        // TODO Use a better `key`
+        <List.Section key={section.title}>
+          <List.Subheader onPressIn={() => {}} onPressOut={() => {}}>
+            {section.title}
+          </List.Subheader>
+          {section.data.map((item, index) => renderItem({ item, index, section }))}
+        </List.Section>
+      ))}
+    </View>
   )
 }

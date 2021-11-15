@@ -1,14 +1,7 @@
 import React, { useCallback, useState } from "react"
-import { ViewStyle } from "react-native"
 import { Button, Screen, FlatList, ListCheckboxItem } from "../../components"
 import { OrderPosesScreenNavigationProp, OrderPosesScreenRouteProp } from "../../navigators"
 import { useTrackStore } from "../../stores"
-import { color } from "../../theme"
-
-const ROOT: ViewStyle = {
-  backgroundColor: color.background,
-  flex: 1,
-}
 
 export type OrderPosesScreenProps = {
   route: OrderPosesScreenRouteProp
@@ -41,12 +34,7 @@ export function OrderPosesScreen({ route, navigation }: OrderPosesScreenProps) {
   }
 
   return (
-    <Screen
-      style={ROOT}
-      preset="fixed"
-      onAccessibilityEscape={navigation.goBack}
-      onMagicTap={finish}
-    >
+    <Screen preset="fixed" onAccessibilityEscape={navigation.goBack} onMagicTap={finish}>
       <FlatList
         data={poseIds}
         keyExtractor={(item) => item}

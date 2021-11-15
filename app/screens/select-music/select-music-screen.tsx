@@ -1,14 +1,7 @@
 import React, { useCallback, useState } from "react"
-import { ViewStyle } from "react-native"
 import { Screen, SectionList, ListRadioItem, Button } from "../../components"
-import { color } from "../../theme"
 import { useTrackStore } from "../../stores"
 import { SelectMusicScreenNavigationProp, SelectMusicScreenRouteProp } from "../../navigators"
-
-const ROOT: ViewStyle = {
-  backgroundColor: color.background,
-  flex: 1,
-}
 
 export type SelectMusicScreenProps = {
   route: SelectMusicScreenRouteProp
@@ -26,20 +19,15 @@ export function SelectMusicScreen({ route, navigation }: SelectMusicScreenProps)
     navigation.navigate("namePlaylist", { poseIds: poseIds, musicId: selectedMusicId })
 
   return (
-    <Screen
-      style={ROOT}
-      preset="fixed"
-      onAccessibilityEscape={navigation.goBack}
-      onMagicTap={finish}
-    >
+    <Screen preset="fixed" onAccessibilityEscape={navigation.goBack} onMagicTap={finish}>
       <SectionList
         accessibilityRole="radiogroup"
-        getSectionTitle={(section) => section.title}
         sections={musicSections}
-        keyExtractor={(item) => item}
         renderItem={({ item }) => (
           <ListRadioItem
+            key={item}
             label={getTrack(item).name}
+            value={item}
             selected={item === selectedMusicId}
             onPress={() => setSelectedMusicId(item)}
           />

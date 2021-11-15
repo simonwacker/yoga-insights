@@ -5,11 +5,8 @@ import {
   StyleProp,
   ViewStyle,
 } from "react-native"
-import { spacing } from "../../theme"
 
-const FLAT_LIST: ViewStyle = {
-  paddingHorizontal: spacing.medium,
-}
+const FLAT_LIST: ViewStyle = {}
 
 export interface FlatListProps<ItemT> extends ReactNativeFlatListProps<ItemT> {
   /**

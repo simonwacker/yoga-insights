@@ -10,7 +10,9 @@ try {
 module.exports = {
   presets: [isExpo ? "babel-preset-expo" : "module:metro-react-native-babel-preset"],
   env: {
-    production: {},
+    production: {
+      plugins: ['react-native-paper/babel'],
+    },
   },
   plugins: [
     [
@@ -20,5 +22,5 @@ module.exports = {
       },
     ],
     ["@babel/plugin-proposal-optional-catch-binding"],
-  ],
+  ]
 }

@@ -11,10 +11,12 @@
  */
 import "react-native-gesture-handler"
 import React, { useEffect } from "react"
+import { useColorScheme } from "react-native"
 import { SafeAreaProvider, initialWindowMetrics } from "react-native-safe-area-context"
 import { initFonts } from "./theme/fonts" // expo
 import { useBackButtonHandler, AppNavigator, canExit, useNavigationPersistence } from "./navigators"
 import { ErrorBoundary } from "./components"
+import { Provider as PaperProvider } from "react-native-paper"
 
 // This puts screens in a native ViewController or Activity. If you want fully native
 // stack navigation, use `createNativeStackNavigator` in place of `createStackNavigator`:
@@ -25,6 +27,9 @@ import * as FileSystem from "expo-file-system"
 import { tracksDirectoryUri } from "./utils/file"
 import { TrackDownloadsClientProvider } from "./contexts/TrackDownloadsClientContext"
 import { TrackDownloadsClient } from "./clients/TrackDownloadsClient"
+import { MaterialCommunityIcons } from "@expo/vector-icons"
+import { navigatorTheme, theme } from "./theme"
+
 enableScreens()
 
 export const NAVIGATION_PERSISTENCE_KEY = "NAVIGATION_STATE"
@@ -34,6 +39,8 @@ export const NAVIGATION_PERSISTENCE_KEY = "NAVIGATION_STATE"
  */
 function App() {
   const [ready, setReady] = useState(false)
+
+  const colorScheme = useColorScheme()
 
   useBackButtonHandler(canExit)
   const {
@@ -56,12 +63,26 @@ function App() {
   return (
     <SafeAreaProvider initialMetrics={initialWindowMetrics}>
       <TrackDownloadsClientProvider client={new TrackDownloadsClient()}>
-        <ErrorBoundary catchErrors={"always"}>
-          <AppNavigator
-            initialState={initialNavigationState}
-            onStateChange={onNavigationStateChange}
-          />
-        </ErrorBoundary>
+        <PaperProvider
+          theme={theme(colorScheme)}
+          settings={{
+            icon: ({ name, ...props }) => (
+              // TODO avoid unsafe cast of name
+              <MaterialCommunityIcons
+                name={name as React.ComponentProps<typeof MaterialCommunityIcons>["name"]}
+                {...props}
+              />
+            ),
+          }}
+        >
+          <ErrorBoundary catchErrors={"always"}>
+            <AppNavigator
+              initialState={initialNavigationState}
+              onStateChange={onNavigationStateChange}
+              theme={navigatorTheme(colorScheme)}
+            />
+          </ErrorBoundary>
+        </PaperProvider>
       </TrackDownloadsClientProvider>
     </SafeAreaProvider>
   )

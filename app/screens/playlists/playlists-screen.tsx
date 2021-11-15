@@ -1,13 +1,16 @@
+import { MaterialCommunityIcons } from "@expo/vector-icons"
 import React, { useCallback } from "react"
 import { ViewStyle } from "react-native"
-import { Button, Screen, ListButtonItem, FlatList } from "../../components"
-import { color } from "../../theme"
+import { FAB } from "react-native-paper"
+import { Screen, ListButtonItem, FlatList } from "../../components"
 import { PlaylistsScreenNavigationProp, PlaylistsScreenRouteProp } from "../../navigators"
 import { usePlaylistStore } from "../../stores"
 
-const ROOT: ViewStyle = {
-  backgroundColor: color.background,
-  flex: 1,
+const FAB_STYLE: ViewStyle = {
+  position: "absolute",
+  margin: 16,
+  right: 0,
+  bottom: 0,
 }
 
 export type PlaylistsScreenProps = {
@@ -21,12 +24,7 @@ export function PlaylistsScreen({ navigation }: PlaylistsScreenProps) {
   const newPlaylist = () => navigation.navigate("selectPoses")
 
   return (
-    <Screen
-      style={ROOT}
-      preset="fixed"
-      onAccessibilityEscape={navigation.goBack}
-      onMagicTap={newPlaylist}
-    >
+    <Screen preset="fixed" onAccessibilityEscape={navigation.goBack} onMagicTap={newPlaylist}>
       <FlatList
         data={playlists}
         keyExtractor={(item) => item.playlistId.toString()}
@@ -43,7 +41,12 @@ export function PlaylistsScreen({ navigation }: PlaylistsScreenProps) {
           />
         )}
       />
-      <Button title="Neue Playlist" onPress={newPlaylist} />
+      <FAB
+        label="Neue Playlist"
+        icon={(props) => <MaterialCommunityIcons name="plus" {...props} />}
+        onPress={newPlaylist}
+        style={FAB_STYLE}
+      />
     </Screen>
   )
 }

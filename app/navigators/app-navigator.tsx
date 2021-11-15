@@ -4,10 +4,7 @@
  * password) and a "main" flow which the user will use once logged in.
  */
 import React from "react"
-import { FontAwesome5 } from "@expo/vector-icons"
 import {
-  DarkTheme,
-  DefaultTheme,
   NavigationContainer,
   NavigatorScreenParams,
   CompositeNavigationProp,
@@ -16,11 +13,14 @@ import {
 } from "@react-navigation/native"
 import {
   createNativeStackNavigator,
+  NativeStackHeaderProps,
   NativeStackNavigationProp,
 } from "@react-navigation/native-stack"
-import { useColorScheme } from "react-native"
 import { navigationRef } from "./navigation-utilities"
-import { BottomTabNavigationProp, createBottomTabNavigator } from "@react-navigation/bottom-tabs"
+import {
+  MaterialBottomTabNavigationProp,
+  createMaterialBottomTabNavigator,
+} from "@react-navigation/material-bottom-tabs"
 import {
   ClassesScreen,
   MusicScreen,
@@ -33,7 +33,8 @@ import {
   SelectPosesScreen,
   SettingsScreen,
 } from "../screens"
-import { palette } from "../theme/palette"
+import { Appbar } from "react-native-paper"
+import { MaterialCommunityIcons } from "@expo/vector-icons"
 
 /**
  * This type allows TypeScript to know what routes are defined in this navigator
@@ -77,31 +78,31 @@ export type AppParamList = {
 
 export type ClassesScreenRouteProp = RouteProp<BottomTabParamList, "classes">
 export type ClassesScreenNavigationProp = CompositeNavigationProp<
-  BottomTabNavigationProp<BottomTabParamList, "classes">,
+  MaterialBottomTabNavigationProp<BottomTabParamList, "classes">,
   NativeStackNavigationProp<MainParamList>
 >
 
 export type PosesScreenRouteProp = RouteProp<BottomTabParamList, "poses">
 export type PosesScreenNavigationProp = CompositeNavigationProp<
-  BottomTabNavigationProp<BottomTabParamList, "poses">,
+  MaterialBottomTabNavigationProp<BottomTabParamList, "poses">,
   NativeStackNavigationProp<MainParamList>
 >
 
 export type MusicScreenRouteProp = RouteProp<BottomTabParamList, "music">
 export type MusicScreenNavigationProp = CompositeNavigationProp<
-  BottomTabNavigationProp<BottomTabParamList, "music">,
+  MaterialBottomTabNavigationProp<BottomTabParamList, "music">,
   NativeStackNavigationProp<MainParamList>
 >
 
 export type PlaylistsScreenRouteProp = RouteProp<BottomTabParamList, "playlists">
 export type PlaylistsScreenNavigationProp = CompositeNavigationProp<
-  BottomTabNavigationProp<BottomTabParamList, "playlists">,
+  MaterialBottomTabNavigationProp<BottomTabParamList, "playlists">,
   NativeStackNavigationProp<MainParamList>
 >
 
 export type SettingsScreenRouteProp = RouteProp<BottomTabParamList, "settings">
 export type SettingsScreenNavigationProp = CompositeNavigationProp<
-  BottomTabNavigationProp<BottomTabParamList, "settings">,
+  MaterialBottomTabNavigationProp<BottomTabParamList, "settings">,
   NativeStackNavigationProp<MainParamList>
 >
 
@@ -157,30 +158,20 @@ function getBottomTabTitle(route: TabsScreenRouteProp) {
 const MainStack = createNativeStackNavigator<MainParamList>()
 
 // Documentation: https://reactnavigation.org/docs/tab-based-navigation
-const BottomTab = createBottomTabNavigator<BottomTabParamList>()
+const BottomTab = createMaterialBottomTabNavigator<BottomTabParamList>()
 
 const AppStack = createNativeStackNavigator<AppParamList>()
 
 export function BottomTabNavigator() {
   return (
-    <BottomTab.Navigator
-      initialRouteName={initialBottomTabRouteName}
-      screenOptions={{
-        tabBarActiveTintColor: palette.white,
-        tabBarInactiveTintColor: palette.black,
-        tabBarActiveBackgroundColor: palette.black,
-        tabBarInactiveBackgroundColor: palette.white,
-      }}
-    >
+    <BottomTab.Navigator initialRouteName={initialBottomTabRouteName}>
       <BottomTab.Screen
         name="classes"
         component={ClassesScreen}
         options={{
           title: bottomTabTitles.classes,
           tabBarLabel: bottomTabTitles.classes,
-          tabBarIcon: ({ color, size }) => (
-            <FontAwesome5 name="hourglass-start" size={size} color={color} />
-          ),
+          tabBarIcon: (props) => <MaterialCommunityIcons name="timer-sand" size={24} {...props} />,
         }}
       />
       <BottomTab.Screen
@@ -189,7 +180,7 @@ export function BottomTabNavigator() {
         options={{
           title: bottomTabTitles.poses,
           tabBarLabel: bottomTabTitles.poses,
-          tabBarIcon: ({ color, size }) => <FontAwesome5 name="child" size={size} color={color} />,
+          tabBarIcon: (props) => <MaterialCommunityIcons name="yoga" size={24} {...props} />,
         }}
       />
       <BottomTab.Screen
@@ -198,7 +189,7 @@ export function BottomTabNavigator() {
         options={{
           title: bottomTabTitles.music,
           tabBarLabel: bottomTabTitles.music,
-          tabBarIcon: ({ color, size }) => <FontAwesome5 name="music" size={size} color={color} />,
+          tabBarIcon: (props) => <MaterialCommunityIcons name="music" size={24} {...props} />,
         }}
       />
       <BottomTab.Screen
@@ -207,8 +198,8 @@ export function BottomTabNavigator() {
         options={{
           title: bottomTabTitles.playlists,
           tabBarLabel: bottomTabTitles.playlists,
-          tabBarIcon: ({ color, size }) => (
-            <FontAwesome5 name="list-ul" size={size} color={color} />
+          tabBarIcon: (props) => (
+            <MaterialCommunityIcons name="playlist-star" size={24} {...props} />
           ),
         }}
       />
@@ -218,10 +209,21 @@ export function BottomTabNavigator() {
         options={{
           title: bottomTabTitles.settings,
           tabBarLabel: bottomTabTitles.settings,
-          tabBarIcon: ({ color, size }) => <FontAwesome5 name="tools" size={size} color={color} />,
+          tabBarIcon: (props) => <MaterialCommunityIcons name="cog" size={24} {...props} />,
         }}
       />
     </BottomTab.Navigator>
+  )
+}
+
+function Header({ back, options, navigation }: NativeStackHeaderProps) {
+  return (
+    <Appbar.Header>
+      {back ? (
+        <Appbar.BackAction accessible accessibilityLabel={back.title} onPress={navigation.goBack} />
+      ) : null}
+      <Appbar.Content title={options.headerTitle || options.title} />
+    </Appbar.Header>
   )
 }
 
@@ -230,7 +232,8 @@ export function MainNavigator() {
     <MainStack.Navigator
       initialRouteName="tabs"
       screenOptions={{
-        animation: "none", // slide_from_right
+        animation: "slide_from_right",
+        header: (props) => <Header {...props} />,
       }}
     >
       <MainStack.Screen
@@ -270,17 +273,12 @@ export function MainNavigator() {
 interface AppNavigatorProps extends Partial<React.ComponentProps<typeof NavigationContainer>> {}
 
 export const AppNavigator = (props: AppNavigatorProps) => {
-  const colorScheme = useColorScheme()
   return (
-    <NavigationContainer<AppParamList>
-      theme={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-      {...props}
-      ref={navigationRef}
-    >
+    <NavigationContainer<AppParamList> {...props} ref={navigationRef}>
       <AppStack.Navigator
         screenOptions={{
           headerShown: false,
-          animation: "none",
+          animation: "slide_from_right",
         }}
         initialRouteName="main"
       >
