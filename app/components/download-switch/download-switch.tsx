@@ -1,9 +1,8 @@
 import React from "react"
 import { Track } from "../../models"
-import { TextStyle, View, ViewStyle } from "react-native"
+import { View, ViewStyle } from "react-native"
 import { Text } from "../text/text"
-import { color, spacing } from "../../theme"
-import { scale } from "../../theme/scale"
+import { spacing } from "../../theme"
 import { DownloadState } from "../../clients/TrackDownloadsClient"
 import { useDownload } from "../../hooks/useDownload"
 import { Switch } from "react-native-paper"
@@ -13,10 +12,6 @@ const ROOT: ViewStyle = {
   marginHorizontal: spacing.medium,
   flexDirection: "row",
   justifyContent: "center",
-}
-const PERCENTAGE: TextStyle = {
-  color: color.text,
-  fontSize: scale.tiny,
 }
 
 function getSwitchAccessibilityLabelState(status: DownloadState["type"]): string {
@@ -86,7 +81,6 @@ export function DownloadSwitch({ tracks }: DownloadSwitchProps) {
           accessibilityLabel={`${Math.round(downloadState.progress * 100)}%`}
           accessibilityHint="prozentualer Herunterladefortschritt"
           accessibilityRole="text"
-          style={PERCENTAGE}
         >
           {Math.round(downloadState.progress * 100)}%
         </Text>
