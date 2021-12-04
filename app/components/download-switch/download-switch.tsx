@@ -26,8 +26,6 @@ function getSwitchAccessibilityLabelState(status: DownloadState["type"]): string
       return "heruntergeladen"
     case "FAILED_DOWNLOADING":
       return "Fehler beim Herunterladen"
-    case "DOWNLOAD_PAUSED":
-      return "pausiert"
   }
 }
 
@@ -40,8 +38,6 @@ function getSwitchAccessibilityHintAction(status: DownloadState["type"]): string
       return "herunterladen"
     case "DOWNLOADING":
       return "abbrechen"
-    case "DOWNLOAD_PAUSED":
-      return "fortsetzen"
     case "DOWNLOADED":
       return "löschen"
   }
@@ -52,13 +48,13 @@ export interface DownloadSwitchProps {
 }
 
 export function DownloadSwitch({ tracks }: DownloadSwitchProps) {
-  const { state: downloadState, start, pause, clear } = useDownload(tracks[0])
+  const { state: downloadState, start, clear } = useDownload(tracks[0])
 
   const onSwitchValueChange = () => {
-    if (downloadState.type === "NOT_DOWNLOADED" || downloadState.type === "DOWNLOAD_PAUSED") {
+    if (downloadState.type === "NOT_DOWNLOADED") {
       start()
     } else if (downloadState.type === "DOWNLOADING") {
-      pause()
+      clear()
     } else if (downloadState.type === "DOWNLOADED") {
       clear()
     }

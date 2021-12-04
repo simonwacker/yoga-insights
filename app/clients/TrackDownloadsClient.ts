@@ -24,14 +24,6 @@ type DownloadStateDownloading = {
   progress: number
   downloadResumable: DownloadResumable
 }
-/** Represents a track which has been partially downloaded and the download has
- * been paused by the user.
- */
-type DownloadStatePaused = {
-  type: "DOWNLOAD_PAUSED"
-  progress: number
-  downloadResumable: DownloadResumable
-}
 /** Represents a failed download attempt.
  */
 type DownloadStateFailed = { type: "FAILED_DOWNLOADING"; error: string }
@@ -43,7 +35,6 @@ export type DownloadState =
   | DownloadStateUnknown
   | DownloadStateDownloaded
   | DownloadStateDownloading
-  | DownloadStatePaused
   | DownloadStateFailed
   | DownloadStateNotDownloaded
 
@@ -95,7 +86,7 @@ export class TrackDownloadsClient {
     }
   }
 
-  startOrResumeDownload(track: Track): void {
+  startDownload(track: Track): void {
     const currentState = this.fetchDownloadState(track.trackId)
 
     if (currentState.type === "NOT_DOWNLOADED" || currentState.type === "FAILED_DOWNLOADING") {
@@ -107,7 +98,7 @@ export class TrackDownloadsClient {
         totalBytesExpectedToWrite: number
       }) => {
         const state = this.fetchDownloadState(track.trackId)
-        if (state.type === "DOWNLOADING" || state.type === "DOWNLOAD_PAUSED") {
+        if (state.type === "DOWNLOADING") {
           state.progress = totalBytesWritten / totalBytesExpectedToWrite
         }
         this.notify(track.trackId)
@@ -135,45 +126,26 @@ export class TrackDownloadsClient {
         downloadResumable,
       })
       this.notify(track.trackId)
-    } else if (currentState.type === "DOWNLOAD_PAUSED") {
-      currentState.downloadResumable.resumeAsync().then(
-        (r) => {
-          this.handleDownloaded(track, r)
-        },
-        (e) => {
-          this.handleDownloadFailed(track.trackId, e)
-        },
-      )
-
-      this.cachedDownloadState.set(track.trackId, {
-        type: "DOWNLOADING",
-        progress: currentState.progress,
-        downloadResumable: currentState.downloadResumable,
-      })
-      this.notify(track.trackId)
-    }
-  }
-
-  pauseDownload(trackId: string): void {
-    const currentState = this.fetchDownloadState(trackId)
-    if (currentState.type === "DOWNLOADING") {
-      currentState.downloadResumable.pauseAsync().then(
-        () => {
-          this.cachedDownloadState.set(trackId, {
-            type: "DOWNLOAD_PAUSED",
-            progress: currentState.progress,
-            downloadResumable: currentState.downloadResumable,
-          })
-          this.notify(trackId)
-        },
-        // TODO: Handle this case.
-        (e) => console.log("pause failed", e),
-      )
     }
   }
 
   clearDownload(track: Track): void {
-    FileSystem.deleteAsync(getTrackFileUri(track)).then(
+    const currentState = this.fetchDownloadState(track.trackId)
+
+    if (currentState.type === "DOWNLOADING") {
+      currentState.downloadResumable.cancelAsync().then(
+        () => {},
+        (error) => {
+          console.error(`Failed to cancel download of track ${track.trackId}`, error)
+        },
+      )
+    }
+
+    FileSystem.deleteAsync(
+      currentState.type === "DOWNLOADING" || currentState.type === "FAILED_DOWNLOADING"
+        ? getTemporaryFileUri(track)
+        : getTrackFileUri(track),
+    ).then(
       () => {
         this.cachedDownloadState.set(track.trackId, {
           type: "NOT_DOWNLOADED",
@@ -181,7 +153,10 @@ export class TrackDownloadsClient {
         this.notify(track.trackId)
       },
       (error) => {
-        console.error(`Failed to delete temporary file of track ${track.trackId}`, error)
+        console.error(
+          `Failed to delete temporary or persistent file of track ${track.trackId}`,
+          error,
+        )
       },
     )
   }

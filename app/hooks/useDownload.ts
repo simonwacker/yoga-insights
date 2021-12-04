@@ -7,7 +7,6 @@ type UseDownloadResult = {
   state: DownloadState
   start: () => void
   clear: () => void
-  pause: () => void
 }
 
 export function useDownload(track: Track): UseDownloadResult {
@@ -35,13 +34,10 @@ export function useDownload(track: Track): UseDownloadResult {
   return {
     state: currentState,
     start: () => {
-      trackDownloadsClient.startOrResumeDownload(track)
+      trackDownloadsClient.startDownload(track)
     },
     clear: () => {
       trackDownloadsClient.clearDownload(track)
-    },
-    pause: () => {
-      trackDownloadsClient.pauseDownload(track.trackId)
     },
   }
 }
