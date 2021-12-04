@@ -113,11 +113,11 @@ export class TrackDownloadsClient {
         callback,
       )
       downloadResumable.downloadAsync().then(
-        (r) => {
-          this.handleDownloaded(track, r)
+        (result) => {
+          this.handleDownloaded(track, result)
         },
-        (e) => {
-          this.handleDownloadFailed(track.trackId, e)
+        (error) => {
+          this.handleDownloadFailed(track.trackId, error)
         },
       )
       this.cachedDownloadState.set(track.trackId, {
