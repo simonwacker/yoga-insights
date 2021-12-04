@@ -50,6 +50,7 @@ export function TextField(props: TextFieldProps) {
       onChangeText={onChangeText}
       placeholder={placeholder}
       placeholderTextColor={color.dim}
+      autoComplete="off"
       underlineColorAndroid={color.transparent}
     />
   )
