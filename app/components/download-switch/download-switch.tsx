@@ -1,9 +1,8 @@
 import React from "react"
 import { Track } from "../../models"
-import { TextStyle, View, ViewStyle } from "react-native"
+import { View, ViewStyle } from "react-native"
 import { Text } from "../text/text"
-import { color, spacing } from "../../theme"
-import { scale } from "../../theme/scale"
+import { spacing } from "../../theme"
 import { DownloadState } from "../../clients/TrackDownloadsClient"
 import { useDownload } from "../../hooks/useDownload"
 import { Switch } from "react-native-paper"
@@ -13,10 +12,6 @@ const ROOT: ViewStyle = {
   marginHorizontal: spacing.medium,
   flexDirection: "row",
   justifyContent: "center",
-}
-const PERCENTAGE: TextStyle = {
-  color: color.text,
-  fontSize: scale.tiny,
 }
 
 function getSwitchAccessibilityLabelState(status: DownloadState["type"]): string {
@@ -31,22 +26,24 @@ function getSwitchAccessibilityLabelState(status: DownloadState["type"]): string
       return "heruntergeladen"
     case "FAILED_DOWNLOADING":
       return "Fehler beim Herunterladen"
-    case "DOWNLOAD_PAUSED":
-      return "pausiert"
+    case "CANCELLING":
+      return "beim Abbrechen"
+    case "CLEARING":
+      return "beim Löschen"
   }
 }
 
 function getSwitchAccessibilityHintAction(status: DownloadState["type"]): string {
   switch (status) {
     case "UNKNOWN":
+    case "CANCELLING":
+    case "CLEARING":
       return ""
     case "FAILED_DOWNLOADING":
     case "NOT_DOWNLOADED":
       return "herunterladen"
     case "DOWNLOADING":
       return "abbrechen"
-    case "DOWNLOAD_PAUSED":
-      return "fortsetzen"
     case "DOWNLOADED":
       return "löschen"
   }
@@ -57,15 +54,30 @@ export interface DownloadSwitchProps {
 }
 
 export function DownloadSwitch({ tracks }: DownloadSwitchProps) {
-  const { state: downloadState, start, pause, clear } = useDownload(tracks[0])
+  const { state: downloadState, start, cancel, clear } = useDownload(tracks[0])
+
+  const disabled =
+    downloadState.type === "UNKNOWN" ||
+    downloadState.type === "CANCELLING" ||
+    downloadState.type === "CLEARING"
 
   const onSwitchValueChange = () => {
-    if (downloadState.type === "NOT_DOWNLOADED" || downloadState.type === "DOWNLOAD_PAUSED") {
-      start()
-    } else if (downloadState.type === "DOWNLOADING") {
-      pause()
-    } else if (downloadState.type === "DOWNLOADED") {
-      clear()
+    if (disabled) {
+      __DEV__ && console.error("Magic! How did you do that? You managed to turn a disabled switch!")
+    }
+    switch (downloadState.type) {
+      case "NOT_DOWNLOADED":
+      case "FAILED_DOWNLOADING":
+        return start()
+      case "DOWNLOADING":
+        return cancel()
+      case "DOWNLOADED":
+        return clear()
+      default:
+        __DEV__ &&
+          console.error(
+            `Oh, shoot, we forgot about download state ${downloadState.type}. What action should be taken?`,
+          )
     }
   }
 
@@ -76,7 +88,7 @@ export function DownloadSwitch({ tracks }: DownloadSwitchProps) {
         accessibilityLabel={`Zustand: ${getSwitchAccessibilityLabelState(downloadState.type)}`}
         accessibilityHint={`Aktion: ${getSwitchAccessibilityHintAction(downloadState.type)}`}
         accessibilityRole="switch"
-        disabled={downloadState.type === "UNKNOWN"}
+        disabled={disabled}
         value={downloadState.type === "DOWNLOADING" || downloadState.type === "DOWNLOADED"}
         onValueChange={onSwitchValueChange}
       />
@@ -86,7 +98,6 @@ export function DownloadSwitch({ tracks }: DownloadSwitchProps) {
           accessibilityLabel={`${Math.round(downloadState.progress * 100)}%`}
           accessibilityHint="prozentualer Herunterladefortschritt"
           accessibilityRole="text"
-          style={PERCENTAGE}
         >
           {Math.round(downloadState.progress * 100)}%
         </Text>
