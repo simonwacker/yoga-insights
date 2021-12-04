@@ -56,13 +56,28 @@ export interface DownloadSwitchProps {
 export function DownloadSwitch({ tracks }: DownloadSwitchProps) {
   const { state: downloadState, start, cancel, clear } = useDownload(tracks[0])
 
+  const disabled =
+    downloadState.type === "UNKNOWN" ||
+    downloadState.type === "CANCELLING" ||
+    downloadState.type === "CLEARING"
+
   const onSwitchValueChange = () => {
-    if (downloadState.type === "NOT_DOWNLOADED" || downloadState.type === "FAILED_DOWNLOADING") {
-      start()
-    } else if (downloadState.type === "DOWNLOADING") {
-      cancel()
-    } else if (downloadState.type === "DOWNLOADED") {
-      clear()
+    if (disabled) {
+      __DEV__ && console.error("Magic! How did you do that? You managed to turn a disabled switch!")
+    }
+    switch (downloadState.type) {
+      case "NOT_DOWNLOADED":
+      case "FAILED_DOWNLOADING":
+        return start()
+      case "DOWNLOADING":
+        return cancel()
+      case "DOWNLOADED":
+        return clear()
+      default:
+        __DEV__ &&
+          console.error(
+            `Oh, shoot, we forgot about download state ${downloadState.type}. What action should be taken?`,
+          )
     }
   }
 
@@ -73,11 +88,7 @@ export function DownloadSwitch({ tracks }: DownloadSwitchProps) {
         accessibilityLabel={`Zustand: ${getSwitchAccessibilityLabelState(downloadState.type)}`}
         accessibilityHint={`Aktion: ${getSwitchAccessibilityHintAction(downloadState.type)}`}
         accessibilityRole="switch"
-        disabled={
-          downloadState.type === "UNKNOWN" ||
-          downloadState.type === "CANCELLING" ||
-          downloadState.type === "CLEARING"
-        }
+        disabled={disabled}
         value={downloadState.type === "DOWNLOADING" || downloadState.type === "DOWNLOADED"}
         onValueChange={onSwitchValueChange}
       />
