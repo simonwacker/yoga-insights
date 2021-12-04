@@ -126,6 +126,8 @@ export class TrackDownloadsClient {
         downloadResumable,
       })
       this.notify(track.trackId)
+    } else {
+      __DEV__ && console.log(`Already downloaded track ${track.trackId}`)
     }
   }
 
