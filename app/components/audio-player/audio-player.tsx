@@ -12,6 +12,7 @@ import { useAudioSource } from "../../hooks/useAudioSource"
 import { IconButton, useTheme } from "react-native-paper"
 import { Track } from "../../models"
 import { MaterialCommunityIcons } from "@expo/vector-icons"
+import { DownloadsSwitch } from "../downloads-switch"
 
 const ROOT: ViewStyle = {
   flex: 1,
@@ -500,7 +501,7 @@ export function AudioPlayer({
         <Text>Diese Stunde/Übung/Musik herunterladen oder löschen:</Text>
       </View>
       <View style={ROW}>
-        <DownloadSwitch tracks={[track]} />
+        <DownloadSwitch track={track} />
       </View>
       {tracksToDownload.length >= 2 && (
         <>
@@ -510,8 +511,13 @@ export function AudioPlayer({
             </Text>
           </View>
           <View style={ROW}>
-            <DownloadSwitch tracks={tracksToDownload} />
+            <DownloadsSwitch tracks={tracksToDownload} />
           </View>
+          {tracksToDownload.map((trackToDownload) => (
+            <View style={ROW}>
+              <DownloadSwitch track={trackToDownload} />
+            </View>
+          ))}
         </>
       )}
     </View>
