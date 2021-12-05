@@ -7,7 +7,7 @@ type UseDownloadResult = {
   state: DownloadState
   start: () => void
   cancel: () => void
-  delete: () => void
+  deletex: () => void
 }
 
 export function useDownload(track: Track): UseDownloadResult {
@@ -40,7 +40,7 @@ export function useDownload(track: Track): UseDownloadResult {
     cancel: () => {
       trackDownloadsClient.cancelDownload(track)
     },
-    delete: () => {
+    deletex: () => {
       trackDownloadsClient.deleteDownload(track)
     },
   }

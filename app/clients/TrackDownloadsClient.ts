@@ -24,10 +24,17 @@ type DownloadStateDownloading = {
   progress: number
   downloadResumable: DownloadResumable
 }
+/** Represents the process of finalizing a downloading process.
+ */
+type DownloadStateFinalizing = { type: "FINALIZING"; downloadResumable: DownloadResumable }
 /** Represents a failed download attempt.
  */
 type DownloadStateFailed = { type: "FAILED_DOWNLOADING"; error: string }
+/** Represents the process of cancelling an active downloading process.
+ */
 type DownloadStateCancelling = { type: "CANCELLING" }
+/** Represents the process of deleting a downloaded track.
+ */
 type DownloadStateDeleting = { type: "DELETING" }
 /** Represents a track which hasn't been downloaded yet.
  */
@@ -37,6 +44,7 @@ export type DownloadState =
   | DownloadStateUnknown
   | DownloadStateDownloaded
   | DownloadStateDownloading
+  | DownloadStateFinalizing
   | DownloadStateFailed
   | DownloadStateCancelling
   | DownloadStateDeleting
@@ -251,6 +259,11 @@ export class TrackDownloadsClient {
             this.handleDownloadFailed(track, error)
           },
         )
+        this.cachedDownloadState.set(track.trackId, {
+          type: "FINALIZING",
+          downloadResumable: currentState.downloadResumable,
+        })
+        this.notify(track.trackId)
       }
     }
   }
@@ -258,7 +271,7 @@ export class TrackDownloadsClient {
   private handleDownloadFailed(track: Track, error: Error): void {
     __DEV__ && console.log(`Handling failed download of track ${track.trackId}`, error)
     const currentState = this.fetchDownloadState(track.trackId)
-    if (currentState.type === "DOWNLOADING") {
+    if (currentState.type === "DOWNLOADING" || currentState.type === "FINALIZING") {
       __DEV__ && console.log(`Deleting temporary file of track ${track.trackId}`)
       const afterDeletionAttempt = () => {
         cleanupDownloadResumable(currentState.downloadResumable)
