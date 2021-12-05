@@ -55,10 +55,8 @@ export function DownloadSwitch({ track }: DownloadSwitchProps) {
   const startable =
     downloadState.type === "NOT_DOWNLOADED" || downloadState.type === "FAILED_DOWNLOADING"
 
-  const disabled = transition === null
-
   const onSwitchValueChange = () => {
-    if (disabled) {
+    if (transition === null) {
       __DEV__ && console.error("Magic! How did you do that? You managed to turn a disabled switch!")
     } else {
       transition.transit()
@@ -76,7 +74,7 @@ export function DownloadSwitch({ track }: DownloadSwitchProps) {
             : `Aktion: ${getSwitchAccessibilityHintAction(transition.action)}`
         }
         accessibilityRole="switch"
-        disabled={disabled}
+        disabled={transition === null}
         value={!startable}
         onValueChange={onSwitchValueChange}
       />
