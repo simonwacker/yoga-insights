@@ -73,7 +73,7 @@ export class TrackDownloadsClient {
         }
       },
       (error) => {
-        console.error(`Failed to determine download status of track ${track.trackId}.`, error)
+        console.error(`Failed to determine download state of track ${track.trackId}.`, error)
       },
     )
   }
