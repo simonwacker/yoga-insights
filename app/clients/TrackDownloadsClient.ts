@@ -223,10 +223,10 @@ export class TrackDownloadsClient {
     entries.forEach((callback) => callback())
   }
 
-  private async handleDownloadComplete(
+  private handleDownloadComplete(
     track: Track,
     result: FileSystemDownloadResult | null | undefined,
-  ): Promise<void> {
+  ): void {
     __DEV__ && console.log(`Handling downloaded track ${track.trackId}`, result)
     // NOTE: The resolved promise is `null` on iOS if the download was paused or
     // cancelled despite the type signature of `downloadAsync` only allowing for
@@ -239,18 +239,26 @@ export class TrackDownloadsClient {
       __DEV__ &&
         console.log(`Moving temporary file of track ${track.trackId} to persistent location`)
       const destination = getTrackFileUri(track)
-      await FileSystem.moveAsync({ from: result.uri, to: destination })
-
-      cleanupDownloadResumable(currentState.downloadResumable)
-      this.cachedDownloadState.set(track.trackId, {
-        type: "DOWNLOADED",
-        uri: destination,
-        // NOTE: The md5 field always exists since we set the { md5: true }
-        // option above, therefore it's safe to assert `md5 !== undefined` here.
-        md5: assertNotUndefined(result.md5),
-      })
-
-      this.notify(track.trackId)
+      FileSystem.moveAsync({ from: result.uri, to: destination }).then(
+        () => {
+          cleanupDownloadResumable(currentState.downloadResumable)
+          this.cachedDownloadState.set(track.trackId, {
+            type: "DOWNLOADED",
+            uri: destination,
+            // NOTE: The md5 field always exists since we set the { md5: true }
+            // option above, therefore it's safe to assert `md5 !== undefined` here.
+            md5: assertNotUndefined(result.md5),
+          })
+          this.notify(track.trackId)
+        },
+        (error) => {
+          console.error(
+            `Failed to move file of track ${track.trackId} to persistent location`,
+            error,
+          )
+          this.handleDownloadFailed(track, error)
+        },
+      )
     }
   }
 
