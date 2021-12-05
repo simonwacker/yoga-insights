@@ -217,40 +217,41 @@ export class TrackDownloadsClient {
 
   private handleDownloadComplete(
     track: Track,
-    result: FileSystemDownloadResult | null | undefined,
-  ): void {
-    __DEV__ && console.log(`Handling downloaded track ${track.trackId}`, result)
     // NOTE: The resolved promise is `null` on iOS if the download was paused or
     // cancelled despite the type signature of `downloadAsync` only allowing for
     // `undefined`.
-    if (result === undefined || result === null) {
-      return
-    }
+    result: FileSystemDownloadResult | null | undefined,
+  ): void {
+    __DEV__ && console.log(`Handling downloaded track ${track.trackId}`, result)
     const currentState = this.fetchDownloadState(track.trackId)
     if (currentState.type === "DOWNLOADING") {
-      __DEV__ &&
-        console.log(`Moving temporary file of track ${track.trackId} to persistent location`)
-      const destination = getTrackFileUri(track)
-      FileSystem.moveAsync({ from: result.uri, to: destination }).then(
-        () => {
-          cleanupDownloadResumable(currentState.downloadResumable)
-          this.cachedDownloadState.set(track.trackId, {
-            type: "DOWNLOADED",
-            uri: destination,
-            // NOTE: The md5 field always exists since we set the { md5: true }
-            // option above, therefore it's safe to assert `md5 !== undefined` here.
-            md5: assertNotUndefined(result.md5),
-          })
-          this.notify(track.trackId)
-        },
-        (error) => {
-          console.error(
-            `Failed to move file of track ${track.trackId} to persistent location`,
-            error,
-          )
-          this.handleDownloadFailed(track, error)
-        },
-      )
+      if (result === undefined || result === null) {
+        this.handleDownloadFailed(track, new Error("Download result is `null` or `undefined`"))
+      } else {
+        __DEV__ &&
+          console.log(`Moving temporary file of track ${track.trackId} to persistent location`)
+        const destination = getTrackFileUri(track)
+        FileSystem.moveAsync({ from: result.uri, to: destination }).then(
+          () => {
+            cleanupDownloadResumable(currentState.downloadResumable)
+            this.cachedDownloadState.set(track.trackId, {
+              type: "DOWNLOADED",
+              uri: destination,
+              // NOTE: The md5 field always exists since we set the { md5: true }
+              // option above, therefore it's safe to assert `md5 !== undefined` here.
+              md5: assertNotUndefined(result.md5),
+            })
+            this.notify(track.trackId)
+          },
+          (error) => {
+            console.error(
+              `Failed to move file of track ${track.trackId} to persistent location`,
+              error,
+            )
+            this.handleDownloadFailed(track, error)
+          },
+        )
+      }
     }
   }
 
