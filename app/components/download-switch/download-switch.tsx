@@ -4,7 +4,7 @@ import { View, ViewStyle } from "react-native"
 import { Text } from "../text/text"
 import { spacing } from "../../theme"
 import { DownloadState } from "../../clients/TrackDownloadsClient"
-import { useDownload } from "../../hooks/useDownload"
+import { TransitionAction, useDownload } from "../../hooks/useDownload"
 import { Switch } from "react-native-paper"
 
 const ROOT: ViewStyle = {
@@ -34,19 +34,13 @@ function getSwitchAccessibilityLabelState(status: DownloadState["type"]): string
   }
 }
 
-function getSwitchAccessibilityHintAction(status: DownloadState["type"]): string {
-  switch (status) {
-    case "UNKNOWN":
-    case "FINALIZING":
-    case "CANCELLING":
-    case "DELETING":
-      return ""
-    case "FAILED_DOWNLOADING":
-    case "NOT_DOWNLOADED":
+function getSwitchAccessibilityHintAction(action: TransitionAction): string {
+  switch (action) {
+    case TransitionAction.Start:
       return "herunterladen"
-    case "DOWNLOADING":
+    case TransitionAction.Cancel:
       return "abbrechen"
-    case "DOWNLOADED":
+    case TransitionAction.Delete:
       return "löschen"
   }
 }
@@ -56,34 +50,18 @@ export interface DownloadSwitchProps {
 }
 
 export function DownloadSwitch({ tracks }: DownloadSwitchProps) {
-  const { state: downloadState, start, cancel, deletex } = useDownload(tracks[0])
-
-  const disabled =
-    downloadState.type === "UNKNOWN" ||
-    downloadState.type === "FINALIZING" ||
-    downloadState.type === "CANCELLING" ||
-    downloadState.type === "DELETING"
+  const { state: downloadState, transition } = useDownload(tracks[0])
 
   const startable =
     downloadState.type === "NOT_DOWNLOADED" || downloadState.type === "FAILED_DOWNLOADING"
 
+  const disabled = transition === null
+
   const onSwitchValueChange = () => {
     if (disabled) {
       __DEV__ && console.error("Magic! How did you do that? You managed to turn a disabled switch!")
-    }
-    switch (downloadState.type) {
-      case "NOT_DOWNLOADED":
-      case "FAILED_DOWNLOADING":
-        return start()
-      case "DOWNLOADING":
-        return cancel()
-      case "DOWNLOADED":
-        return deletex()
-      default:
-        __DEV__ &&
-          console.error(
-            `Oh, shoot, we forgot about download state ${downloadState.type}. What action should be taken?`,
-          )
+    } else {
+      transition.transit()
     }
   }
 
@@ -92,7 +70,11 @@ export function DownloadSwitch({ tracks }: DownloadSwitchProps) {
       <Switch
         accessible={true}
         accessibilityLabel={`Zustand: ${getSwitchAccessibilityLabelState(downloadState.type)}`}
-        accessibilityHint={`Aktion: ${getSwitchAccessibilityHintAction(downloadState.type)}`}
+        accessibilityHint={
+          transition === null
+            ? undefined
+            : `Aktion: ${getSwitchAccessibilityHintAction(transition.action)}`
+        }
         accessibilityRole="switch"
         disabled={disabled}
         value={!startable}

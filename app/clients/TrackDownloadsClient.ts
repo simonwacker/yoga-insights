@@ -26,13 +26,17 @@ type DownloadStateDownloading = {
 }
 /** Represents the process of finalizing a downloading process.
  */
-type DownloadStateFinalizing = { type: "FINALIZING"; downloadResumable: DownloadResumable }
+type DownloadStateFinalizing = {
+  type: "FINALIZING"
+  progress: 1
+  downloadResumable: DownloadResumable
+}
 /** Represents a failed download attempt.
  */
 type DownloadStateFailed = { type: "FAILED_DOWNLOADING"; error: string }
 /** Represents the process of cancelling an active downloading process.
  */
-type DownloadStateCancelling = { type: "CANCELLING" }
+type DownloadStateCancelling = { type: "CANCELLING"; progress: number }
 /** Represents the process of deleting a downloaded track.
  */
 type DownloadStateDeleting = { type: "DELETING" }
@@ -172,6 +176,7 @@ export class TrackDownloadsClient {
       )
       this.cachedDownloadState.set(track.trackId, {
         type: "CANCELLING",
+        progress: currentState.progress,
       })
       this.notify(track.trackId)
     }
@@ -261,6 +266,7 @@ export class TrackDownloadsClient {
         )
         this.cachedDownloadState.set(track.trackId, {
           type: "FINALIZING",
+          progress: 1,
           downloadResumable: currentState.downloadResumable,
         })
         this.notify(track.trackId)

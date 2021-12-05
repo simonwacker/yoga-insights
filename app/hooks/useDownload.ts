@@ -3,11 +3,20 @@ import { DownloadState } from "../clients/TrackDownloadsClient"
 import { useTrackDownloadsClient } from "../contexts/TrackDownloadsClientContext"
 import { Track } from "../models"
 
+export enum TransitionAction {
+  Start = "START",
+  Cancel = "CANCEL",
+  Delete = "DELETE",
+}
+
+export type Transition = {
+  transit: () => void
+  action: TransitionAction
+}
+
 type UseDownloadResult = {
   state: DownloadState
-  start: () => void
-  cancel: () => void
-  deletex: () => void
+  transition: Transition | null
 }
 
 export function useDownload(track: Track): UseDownloadResult {
@@ -34,14 +43,31 @@ export function useDownload(track: Track): UseDownloadResult {
 
   return {
     state: currentState,
-    start: () => {
-      trackDownloadsClient.startDownload(track)
-    },
-    cancel: () => {
-      trackDownloadsClient.cancelDownload(track)
-    },
-    deletex: () => {
-      trackDownloadsClient.deleteDownload(track)
-    },
+    transition:
+      currentState.type === "UNKNOWN" ||
+      currentState.type === "FINALIZING" ||
+      currentState.type === "CANCELLING" ||
+      currentState.type === "DELETING"
+        ? null
+        : (() => {
+            switch (currentState.type) {
+              case "NOT_DOWNLOADED":
+              case "FAILED_DOWNLOADING":
+                return {
+                  transit: () => trackDownloadsClient.startDownload(track),
+                  action: TransitionAction.Start,
+                }
+              case "DOWNLOADING":
+                return {
+                  transit: () => trackDownloadsClient.cancelDownload(track),
+                  action: TransitionAction.Cancel,
+                }
+              case "DOWNLOADED":
+                return {
+                  transit: () => trackDownloadsClient.deleteDownload(track),
+                  action: TransitionAction.Delete,
+                }
+            }
+          })(),
   }
 }
