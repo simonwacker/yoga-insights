@@ -53,11 +53,9 @@ export class TrackDownloadsClient {
 
   setCachedDownloadStateFromStateInLocalFileSystemIfItIsUnknown(track: Track) {
     const entry = this.fetchDownloadState(track.trackId)
-
     if (entry.type !== "UNKNOWN") {
       return
     }
-
     FileSystem.getInfoAsync(getTrackFileUri(track), { md5: true }).then(
       (fileInfo) => {
         if (fileInfo.exists) {
@@ -90,7 +88,6 @@ export class TrackDownloadsClient {
 
   startDownload(track: Track): void {
     const currentState = this.fetchDownloadState(track.trackId)
-
     if (currentState.type === "NOT_DOWNLOADED" || currentState.type === "FAILED_DOWNLOADING") {
       __DEV__ && console.log(`Starting download of track ${track.trackId}`)
       var downloadResumable: DownloadResumable | null = null
@@ -198,28 +195,23 @@ export class TrackDownloadsClient {
 
   subscribe(trackId: string, callback: () => void): () => void {
     const entry = this.listeners.get(trackId)
-
     if (entry) {
       entry.push(callback)
     } else {
       this.listeners.set(trackId, [callback])
     }
-
     const unsubscribe = () => {
       const entries = this.listeners.get(trackId) ?? []
-
       this.listeners.set(
         trackId,
         entries.filter((e) => e !== callback),
       )
     }
-
     return unsubscribe
   }
 
   protected notify(trackId: string) {
     const entries = this.listeners.get(trackId) ?? []
-
     entries.forEach((callback) => callback())
   }
 
