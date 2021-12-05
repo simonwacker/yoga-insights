@@ -24,11 +24,22 @@ type DownloadStateDownloading = {
   progress: number
   downloadResumable: DownloadResumable
 }
+/** Represents the process of finalizing a downloading process.
+ */
+type DownloadStateFinalizing = {
+  type: "FINALIZING"
+  progress: 1
+  downloadResumable: DownloadResumable
+}
 /** Represents a failed download attempt.
  */
 type DownloadStateFailed = { type: "FAILED_DOWNLOADING"; error: string }
-type DownloadStateCancelling = { type: "CANCELLING" }
-type DownloadStateClearing = { type: "CLEARING" }
+/** Represents the process of cancelling an active downloading process.
+ */
+type DownloadStateCancelling = { type: "CANCELLING"; progress: number }
+/** Represents the process of deleting a downloaded track.
+ */
+type DownloadStateDeleting = { type: "DELETING" }
 /** Represents a track which hasn't been downloaded yet.
  */
 type DownloadStateNotDownloaded = { type: "NOT_DOWNLOADED" }
@@ -37,9 +48,10 @@ export type DownloadState =
   | DownloadStateUnknown
   | DownloadStateDownloaded
   | DownloadStateDownloading
+  | DownloadStateFinalizing
   | DownloadStateFailed
   | DownloadStateCancelling
-  | DownloadStateClearing
+  | DownloadStateDeleting
   | DownloadStateNotDownloaded
 
 export class TrackDownloadsClient {
@@ -53,11 +65,9 @@ export class TrackDownloadsClient {
 
   setCachedDownloadStateFromStateInLocalFileSystemIfItIsUnknown(track: Track) {
     const entry = this.fetchDownloadState(track.trackId)
-
     if (entry.type !== "UNKNOWN") {
       return
     }
-
     FileSystem.getInfoAsync(getTrackFileUri(track), { md5: true }).then(
       (fileInfo) => {
         if (fileInfo.exists) {
@@ -75,24 +85,21 @@ export class TrackDownloadsClient {
         }
       },
       (error) => {
-        console.error(`Failed to determine download status of track ${track.trackId}.`, error)
+        console.error(`Failed to determine download state of track ${track.trackId}.`, error)
       },
     )
   }
 
   fetchDownloadState(trackId: string): DownloadState {
     const downloadState = this.cachedDownloadState.get(trackId)
-
     if (downloadState === undefined) {
       return { type: "UNKNOWN" }
-    } else {
-      return downloadState
     }
+    return downloadState
   }
 
   startDownload(track: Track): void {
     const currentState = this.fetchDownloadState(track.trackId)
-
     if (currentState.type === "NOT_DOWNLOADED" || currentState.type === "FAILED_DOWNLOADING") {
       __DEV__ && console.log(`Starting download of track ${track.trackId}`)
       var downloadResumable: DownloadResumable | null = null
@@ -144,41 +151,39 @@ export class TrackDownloadsClient {
 
   cancelDownload(track: Track): void {
     __DEV__ && console.log(`Cancelling download of track ${track.trackId}`)
-    var currentState = this.fetchDownloadState(track.trackId)
+    const currentState = this.fetchDownloadState(track.trackId)
     if (currentState.type === "DOWNLOADING") {
       currentState.downloadResumable.cancelAsync().then(
         () => {
           __DEV__ && console.log(`Deleting temporary file of track ${track.trackId}`)
-          FileSystem.deleteAsync(getTemporaryFileUri(track)).then(
-            () => {
-              // TODO: At this point we drop the DownloadResumable which _should_ also
-              // lead to the callback/subscription stuff being collected by the GC. Do
-              // we need to clean up manually? I used to do this with
-              // `resumableDownload._callback = undefined` and
-              // `resumableDownload._removeSubscription()` which is not type-safe.
-              this.cachedDownloadState.set(track.trackId, {
-                type: "NOT_DOWNLOADED",
-              })
-              this.notify(track.trackId)
-            },
-            (error) => {
-              console.error(`Failed to delete temporary file of track ${track.trackId}`, error)
-            },
-          )
+          const afterDeletionAttempt = () => {
+            cleanupDownloadResumable(currentState.downloadResumable)
+            this.cachedDownloadState.set(track.trackId, {
+              type: "NOT_DOWNLOADED",
+            })
+            this.notify(track.trackId)
+          }
+          FileSystem.deleteAsync(getTemporaryFileUri(track)).then(afterDeletionAttempt, (error) => {
+            console.error(`Failed to delete temporary file of track ${track.trackId}`, error)
+            afterDeletionAttempt()
+          })
         },
         (error) => {
           console.error(`Failed to cancel download of track ${track.trackId}`, error)
+          this.cachedDownloadState.set(track.trackId, currentState)
+          this.notify(track.trackId)
         },
       )
       this.cachedDownloadState.set(track.trackId, {
         type: "CANCELLING",
+        progress: currentState.progress,
       })
       this.notify(track.trackId)
     }
   }
 
-  clearDownload(track: Track): void {
-    __DEV__ && console.log(`Clearing track ${track.trackId}`)
+  deleteDownload(track: Track): void {
+    __DEV__ && console.log(`Deleting track ${track.trackId}`)
     var currentState = this.fetchDownloadState(track.trackId)
     if (currentState.type === "DOWNLOADED") {
       FileSystem.deleteAsync(getTrackFileUri(track)).then(
@@ -190,10 +195,12 @@ export class TrackDownloadsClient {
         },
         (error) => {
           console.error(`Failed to delete file of track ${track.trackId}`, error)
+          this.cachedDownloadState.set(track.trackId, currentState)
+          this.notify(track.trackId)
         },
       )
       this.cachedDownloadState.set(track.trackId, {
-        type: "CLEARING",
+        type: "DELETING",
       })
       this.notify(track.trackId)
     }
@@ -201,90 +208,98 @@ export class TrackDownloadsClient {
 
   subscribe(trackId: string, callback: () => void): () => void {
     const entry = this.listeners.get(trackId)
-
     if (entry) {
       entry.push(callback)
     } else {
       this.listeners.set(trackId, [callback])
     }
-
     const unsubscribe = () => {
       const entries = this.listeners.get(trackId) ?? []
-
       this.listeners.set(
         trackId,
         entries.filter((e) => e !== callback),
       )
     }
-
     return unsubscribe
   }
 
   protected notify(trackId: string) {
     const entries = this.listeners.get(trackId) ?? []
-
     entries.forEach((callback) => callback())
   }
 
-  private async handleDownloadComplete(
+  private handleDownloadComplete(
     track: Track,
-    result: FileSystemDownloadResult | null | undefined,
-  ): Promise<void> {
-    __DEV__ && console.log(`Handling downloaded track ${track.trackId}`, result)
     // NOTE: The resolved promise is `null` on iOS if the download was paused or
     // cancelled despite the type signature of `downloadAsync` only allowing for
     // `undefined`.
-    if (result === undefined || result === null) {
-      return
-    }
+    result: FileSystemDownloadResult | null | undefined,
+  ): void {
+    __DEV__ && console.log(`Handling downloaded track ${track.trackId}`, result)
     const currentState = this.fetchDownloadState(track.trackId)
     if (currentState.type === "DOWNLOADING") {
-      __DEV__ &&
-        console.log(`Moving temporary file of track ${track.trackId} to persistent location`)
-      const destination = getTrackFileUri(track)
-      await FileSystem.moveAsync({ from: result.uri, to: destination })
-
-      // TODO: At this point we drop the DownloadResumable which _should_ also
-      // lead to the callback/subscription stuff being collected by the GC. Do
-      // we need to clean up manually? I used to do this with
-      // `resumableDownload._callback = undefined` and
-      // `resumableDownload._removeSubscription()` which is not type-safe.
-      this.cachedDownloadState.set(track.trackId, {
-        type: "DOWNLOADED",
-        uri: destination,
-        // NOTE: The md5 field always exists since we set the { md5: true }
-        // option above, therefore it's safe to assert `md5 !== undefined` here.
-        md5: assertNotUndefined(result.md5),
-      })
-
-      this.notify(track.trackId)
+      if (result === undefined || result === null) {
+        this.handleDownloadFailed(track, new Error("Download result is `null` or `undefined`"))
+      } else {
+        __DEV__ &&
+          console.log(`Moving temporary file of track ${track.trackId} to persistent location`)
+        const destination = getTrackFileUri(track)
+        FileSystem.moveAsync({ from: result.uri, to: destination }).then(
+          () => {
+            cleanupDownloadResumable(currentState.downloadResumable)
+            this.cachedDownloadState.set(track.trackId, {
+              type: "DOWNLOADED",
+              uri: destination,
+              // NOTE: The md5 field always exists since we set the { md5: true }
+              // option above, therefore it's safe to assert `md5 !== undefined` here.
+              md5: assertNotUndefined(result.md5),
+            })
+            this.notify(track.trackId)
+          },
+          (error) => {
+            console.error(
+              `Failed to move file of track ${track.trackId} to persistent location`,
+              error,
+            )
+            this.handleDownloadFailed(track, error)
+          },
+        )
+        this.cachedDownloadState.set(track.trackId, {
+          type: "FINALIZING",
+          progress: 1,
+          downloadResumable: currentState.downloadResumable,
+        })
+        this.notify(track.trackId)
+      }
     }
   }
 
   private handleDownloadFailed(track: Track, error: Error): void {
     __DEV__ && console.log(`Handling failed download of track ${track.trackId}`, error)
     const currentState = this.fetchDownloadState(track.trackId)
-    if (currentState.type === "DOWNLOADING") {
+    if (currentState.type === "DOWNLOADING" || currentState.type === "FINALIZING") {
       __DEV__ && console.log(`Deleting temporary file of track ${track.trackId}`)
-      FileSystem.deleteAsync(getTemporaryFileUri(track)).then(
-        () => {
-          // TODO: At this point we drop the DownloadResumable which _should_ also
-          // lead to the callback/subscription stuff being collected by the GC. Do
-          // we need to clean up manually? I used to do this with
-          // `resumableDownload._callback = undefined` and
-          // `resumableDownload._removeSubscription()` which is not type-safe.
-          this.cachedDownloadState.set(track.trackId, {
-            type: "FAILED_DOWNLOADING",
-            error: error.toString(),
-          })
-          this.notify(track.trackId)
-        },
-        (error) => {
-          console.error(`Failed to delete temporary file of track ${track.trackId}`, error)
-        },
-      )
+      const afterDeletionAttempt = () => {
+        cleanupDownloadResumable(currentState.downloadResumable)
+        this.cachedDownloadState.set(track.trackId, {
+          type: "FAILED_DOWNLOADING",
+          error: error.toString(),
+        })
+        this.notify(track.trackId)
+      }
+      FileSystem.deleteAsync(getTemporaryFileUri(track)).then(afterDeletionAttempt, (error) => {
+        console.error(`Failed to delete temporary file of track ${track.trackId}`, error)
+        afterDeletionAttempt()
+      })
     }
   }
+}
+
+function cleanupDownloadResumable(downloadResumable: DownloadResumable): void {
+  // TODO Instead of hoping that callbacks and subscriptions are being collected
+  // by the garbage collector, we should clean up manually. I used to do this
+  // with `resumableDownload._callback = undefined` and
+  // `resumableDownload._removeSubscription()` which is not type-safe though.
 }
 
 function getTemporaryFileUri(track: Track) {

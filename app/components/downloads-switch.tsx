@@ -1,10 +1,13 @@
 import React from "react"
-import { Track } from "../../models"
+import { Track } from "../models"
 import { View, ViewStyle } from "react-native"
-import { Text } from "../text/text"
-import { spacing } from "../../theme"
-import { DownloadState } from "../../clients/TrackDownloadsClient"
-import { TransitionAction, useDownload } from "../../hooks/useDownload"
+import { Text } from "./text/text"
+import { spacing } from "../theme"
+import {
+  AccumulatedDownloadState,
+  AccumulatedTransitionAction,
+  useDownloads,
+} from "../hooks/useDownloads"
 import { Switch } from "react-native-paper"
 
 const ROOT: ViewStyle = {
@@ -14,7 +17,7 @@ const ROOT: ViewStyle = {
   justifyContent: "center",
 }
 
-function getSwitchAccessibilityLabelState(status: DownloadState["type"]): string {
+function getSwitchAccessibilityLabelState(status: AccumulatedDownloadState["type"]): string {
   switch (status) {
     case "UNKNOWN":
       return "unbekannter Herunterladzustand"
@@ -31,26 +34,28 @@ function getSwitchAccessibilityLabelState(status: DownloadState["type"]): string
       return "beim Abbrechen"
     case "DELETING":
       return "beim Löschen"
+    case "FINALIZING_OR_CANCELLING_OR_DELETING":
+      return "beim Herunterladen, Abbrechen oder Löschen"
   }
 }
 
-function getSwitchAccessibilityHintAction(action: TransitionAction): string {
+function getSwitchAccessibilityHintAction(action: AccumulatedTransitionAction): string {
   switch (action) {
-    case TransitionAction.Start:
+    case AccumulatedTransitionAction.Start:
       return "herunterladen"
-    case TransitionAction.Cancel:
+    case AccumulatedTransitionAction.Cancel:
       return "abbrechen"
-    case TransitionAction.Delete:
+    case AccumulatedTransitionAction.Delete:
       return "löschen"
   }
 }
 
-export interface DownloadSwitchProps {
-  track: Track
+export interface DownloadsSwitchProps {
+  tracks: Track[]
 }
 
-export function DownloadSwitch({ track }: DownloadSwitchProps) {
-  const { state: downloadState, transition } = useDownload(track)
+export function DownloadsSwitch({ tracks }: DownloadsSwitchProps) {
+  const { state: downloadState, transition } = useDownloads(tracks)
 
   const startable =
     downloadState.type === "NOT_DOWNLOADED" || downloadState.type === "FAILED_DOWNLOADING"
