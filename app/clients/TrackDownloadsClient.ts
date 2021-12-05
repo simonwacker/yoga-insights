@@ -142,30 +142,27 @@ export class TrackDownloadsClient {
 
   cancelDownload(track: Track): void {
     __DEV__ && console.log(`Cancelling download of track ${track.trackId}`)
-    var currentState = this.fetchDownloadState(track.trackId)
+    const currentState = this.fetchDownloadState(track.trackId)
     if (currentState.type === "DOWNLOADING") {
       currentState.downloadResumable.cancelAsync().then(
         () => {
           __DEV__ && console.log(`Deleting temporary file of track ${track.trackId}`)
-          FileSystem.deleteAsync(getTemporaryFileUri(track)).then(
-            () => {
-              // TODO: At this point we drop the DownloadResumable which _should_ also
-              // lead to the callback/subscription stuff being collected by the GC. Do
-              // we need to clean up manually? I used to do this with
-              // `resumableDownload._callback = undefined` and
-              // `resumableDownload._removeSubscription()` which is not type-safe.
-              this.cachedDownloadState.set(track.trackId, {
-                type: "NOT_DOWNLOADED",
-              })
-              this.notify(track.trackId)
-            },
-            (error) => {
-              console.error(`Failed to delete temporary file of track ${track.trackId}`, error)
-            },
-          )
+          const afterDeletionAttempt = () => {
+            cleanupDownloadResumable(currentState.downloadResumable)
+            this.cachedDownloadState.set(track.trackId, {
+              type: "NOT_DOWNLOADED",
+            })
+            this.notify(track.trackId)
+          }
+          FileSystem.deleteAsync(getTemporaryFileUri(track)).then(afterDeletionAttempt, (error) => {
+            console.error(`Failed to delete temporary file of track ${track.trackId}`, error)
+            afterDeletionAttempt()
+          })
         },
         (error) => {
           console.error(`Failed to cancel download of track ${track.trackId}`, error)
+          this.cachedDownloadState.set(track.trackId, currentState)
+          this.notify(track.trackId)
         },
       )
       this.cachedDownloadState.set(track.trackId, {
@@ -188,6 +185,8 @@ export class TrackDownloadsClient {
         },
         (error) => {
           console.error(`Failed to delete file of track ${track.trackId}`, error)
+          this.cachedDownloadState.set(track.trackId, currentState)
+          this.notify(track.trackId)
         },
       )
       this.cachedDownloadState.set(track.trackId, {
@@ -242,11 +241,7 @@ export class TrackDownloadsClient {
       const destination = getTrackFileUri(track)
       await FileSystem.moveAsync({ from: result.uri, to: destination })
 
-      // TODO: At this point we drop the DownloadResumable which _should_ also
-      // lead to the callback/subscription stuff being collected by the GC. Do
-      // we need to clean up manually? I used to do this with
-      // `resumableDownload._callback = undefined` and
-      // `resumableDownload._removeSubscription()` which is not type-safe.
+      cleanupDownloadResumable(currentState.downloadResumable)
       this.cachedDownloadState.set(track.trackId, {
         type: "DOWNLOADED",
         uri: destination,
@@ -264,25 +259,27 @@ export class TrackDownloadsClient {
     const currentState = this.fetchDownloadState(track.trackId)
     if (currentState.type === "DOWNLOADING") {
       __DEV__ && console.log(`Deleting temporary file of track ${track.trackId}`)
-      FileSystem.deleteAsync(getTemporaryFileUri(track)).then(
-        () => {
-          // TODO: At this point we drop the DownloadResumable which _should_ also
-          // lead to the callback/subscription stuff being collected by the GC. Do
-          // we need to clean up manually? I used to do this with
-          // `resumableDownload._callback = undefined` and
-          // `resumableDownload._removeSubscription()` which is not type-safe.
-          this.cachedDownloadState.set(track.trackId, {
-            type: "FAILED_DOWNLOADING",
-            error: error.toString(),
-          })
-          this.notify(track.trackId)
-        },
-        (error) => {
-          console.error(`Failed to delete temporary file of track ${track.trackId}`, error)
-        },
-      )
+      const afterDeletionAttempt = () => {
+        cleanupDownloadResumable(currentState.downloadResumable)
+        this.cachedDownloadState.set(track.trackId, {
+          type: "FAILED_DOWNLOADING",
+          error: error.toString(),
+        })
+        this.notify(track.trackId)
+      }
+      FileSystem.deleteAsync(getTemporaryFileUri(track)).then(afterDeletionAttempt, (error) => {
+        console.error(`Failed to delete temporary file of track ${track.trackId}`, error)
+        afterDeletionAttempt()
+      })
     }
   }
+}
+
+function cleanupDownloadResumable(downloadResumable: DownloadResumable): void {
+  // TODO Instead of hoping that callbacks and subscriptions are being collected
+  // by the garbage collector, we should clean up manually. I used to do this
+  // with `resumableDownload._callback = undefined` and
+  // `resumableDownload._removeSubscription()` which is not type-safe though.
 }
 
 function getTemporaryFileUri(track: Track) {
