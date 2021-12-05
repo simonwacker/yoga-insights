@@ -82,12 +82,10 @@ export class TrackDownloadsClient {
 
   fetchDownloadState(trackId: string): DownloadState {
     const downloadState = this.cachedDownloadState.get(trackId)
-
     if (downloadState === undefined) {
       return { type: "UNKNOWN" }
-    } else {
-      return downloadState
     }
+    return downloadState
   }
 
   startDownload(track: Track): void {
