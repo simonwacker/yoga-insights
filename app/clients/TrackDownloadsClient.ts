@@ -28,7 +28,7 @@ type DownloadStateDownloading = {
  */
 type DownloadStateFailed = { type: "FAILED_DOWNLOADING"; error: string }
 type DownloadStateCancelling = { type: "CANCELLING" }
-type DownloadStateClearing = { type: "CLEARING" }
+type DownloadStateDeleting = { type: "DELETING" }
 /** Represents a track which hasn't been downloaded yet.
  */
 type DownloadStateNotDownloaded = { type: "NOT_DOWNLOADED" }
@@ -39,7 +39,7 @@ export type DownloadState =
   | DownloadStateDownloading
   | DownloadStateFailed
   | DownloadStateCancelling
-  | DownloadStateClearing
+  | DownloadStateDeleting
   | DownloadStateNotDownloaded
 
 export class TrackDownloadsClient {
@@ -169,8 +169,8 @@ export class TrackDownloadsClient {
     }
   }
 
-  clearDownload(track: Track): void {
-    __DEV__ && console.log(`Clearing track ${track.trackId}`)
+  deleteDownload(track: Track): void {
+    __DEV__ && console.log(`Deleting track ${track.trackId}`)
     var currentState = this.fetchDownloadState(track.trackId)
     if (currentState.type === "DOWNLOADED") {
       FileSystem.deleteAsync(getTrackFileUri(track)).then(
@@ -187,7 +187,7 @@ export class TrackDownloadsClient {
         },
       )
       this.cachedDownloadState.set(track.trackId, {
-        type: "CLEARING",
+        type: "DELETING",
       })
       this.notify(track.trackId)
     }
