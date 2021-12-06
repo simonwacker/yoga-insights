@@ -28,13 +28,32 @@ function getState(states: DownloadState[]): AccumulatedDownloadState {
   if (states.some((state) => state.type === "UNKNOWN")) {
     return { type: "UNKNOWN" }
   }
-  if (states.every((state) => state.type === "FINALIZING")) {
+  if (
+    states.some((state) => state.type === "FINALIZING") &&
+    states.every((state) => state.type === "FINALIZING" || state.type === "DOWNLOADED")
+  ) {
     return { type: "FINALIZING", progress: 1 }
   }
-  if (states.every((state) => state.type === "CANCELLING")) {
+  if (
+    states.some((state) => state.type === "CANCELLING") &&
+    states.every(
+      (state) =>
+        state.type === "CANCELLING" ||
+        state.type === "FAILED_DOWNLOADING" ||
+        state.type === "NOT_DOWNLOADED",
+    )
+  ) {
     return { type: "CANCELLING", progress: computeProgressPercentage(states) }
   }
-  if (states.every((state) => state.type === "DELETING")) {
+  if (
+    states.some((state) => state.type === "DELETING") &&
+    states.every(
+      (state) =>
+        state.type === "DELETING" ||
+        state.type === "FAILED_DOWNLOADING" ||
+        state.type === "NOT_DOWNLOADED",
+    )
+  ) {
     return { type: "DELETING" }
   }
   if (
