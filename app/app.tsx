@@ -29,6 +29,7 @@ import { TrackDownloadsClientProvider } from "./contexts/TrackDownloadsClientCon
 import { TrackDownloadsClient } from "./clients/TrackDownloadsClient"
 import { MaterialCommunityIcons } from "@expo/vector-icons"
 import { navigatorTheme, theme } from "./theme"
+import { GestureHandlerRootView } from "react-native-gesture-handler"
 
 enableScreens()
 
@@ -61,30 +62,32 @@ function App() {
   if (!ready || !isNavigationStateRestored) return null
 
   return (
-    <SafeAreaProvider initialMetrics={initialWindowMetrics}>
-      <TrackDownloadsClientProvider client={new TrackDownloadsClient()}>
-        <PaperProvider
-          theme={theme(colorScheme)}
-          settings={{
-            icon: ({ name, ...props }) => (
-              // TODO avoid unsafe cast of name
-              <MaterialCommunityIcons
-                name={name as React.ComponentProps<typeof MaterialCommunityIcons>["name"]}
-                {...props}
+    <GestureHandlerRootView>
+      <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+        <TrackDownloadsClientProvider client={new TrackDownloadsClient()}>
+          <PaperProvider
+            theme={theme(colorScheme)}
+            settings={{
+              icon: ({ name, ...props }) => (
+                // TODO avoid unsafe cast of name
+                <MaterialCommunityIcons
+                  name={name as React.ComponentProps<typeof MaterialCommunityIcons>["name"]}
+                  {...props}
+                />
+              ),
+            }}
+          >
+            <ErrorBoundary catchErrors={"always"}>
+              <AppNavigator
+                initialState={initialNavigationState}
+                onStateChange={onNavigationStateChange}
+                theme={navigatorTheme(colorScheme)}
               />
-            ),
-          }}
-        >
-          <ErrorBoundary catchErrors={"always"}>
-            <AppNavigator
-              initialState={initialNavigationState}
-              onStateChange={onNavigationStateChange}
-              theme={navigatorTheme(colorScheme)}
-            />
-          </ErrorBoundary>
-        </PaperProvider>
-      </TrackDownloadsClientProvider>
-    </SafeAreaProvider>
+            </ErrorBoundary>
+          </PaperProvider>
+        </TrackDownloadsClientProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   )
 }
 
