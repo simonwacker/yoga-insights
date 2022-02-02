@@ -62,7 +62,7 @@ function App() {
   if (!ready || !isNavigationStateRestored) return null
 
   return (
-    <GestureHandlerRootView>
+    <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider initialMetrics={initialWindowMetrics}>
         <TrackDownloadsClientProvider client={new TrackDownloadsClient()}>
           <PaperProvider
