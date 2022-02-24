@@ -126,20 +126,19 @@ export function useDownloads(tracks: Track[]): UseDownloadsResult {
   return {
     state: currentState,
     transition:
-      currentState.type === "UNKNOWN" ||
-      currentState.type === "FINALIZING" ||
-      currentState.type === "CANCELLING" ||
-      currentState.type === "DELETING" ||
-      currentState.type === "FINALIZING_OR_CANCELLING_OR_DELETING"
+      currentState.type === "UNKNOWN"
         ? null
         : (() => {
             const transitions = useDownloadResults.map((r) => r.transition).filter(notEmpty)
             switch (currentState.type) {
               case "NOT_DOWNLOADED":
+              case "CANCELLING":
+              case "DELETING":
+              case "FINALIZING_OR_CANCELLING_OR_DELETING":
               case "FAILED_DOWNLOADING":
                 return {
                   transit: () => {
-                    for (const { transit, action } of transitions) {
+                    for (const { perform: transit, action } of transitions) {
                       if (action === TransitionAction.Start) {
                         transit()
                       }
@@ -148,9 +147,10 @@ export function useDownloads(tracks: Track[]): UseDownloadsResult {
                   action: AccumulatedTransitionAction.Start,
                 }
               case "DOWNLOADING":
+              case "FINALIZING":
                 return {
                   transit: () => {
-                    for (const { transit, action } of transitions) {
+                    for (const { perform: transit, action } of transitions) {
                       if (
                         action === TransitionAction.Cancel ||
                         action === TransitionAction.Delete
@@ -164,7 +164,7 @@ export function useDownloads(tracks: Track[]): UseDownloadsResult {
               case "DOWNLOADED":
                 return {
                   transit: () => {
-                    for (const { transit, action } of transitions) {
+                    for (const { perform: transit, action } of transitions) {
                       if (action === TransitionAction.Delete) {
                         transit()
                       }

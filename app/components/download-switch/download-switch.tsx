@@ -59,7 +59,7 @@ export function DownloadSwitch({ track }: DownloadSwitchProps) {
     if (transition === null) {
       __DEV__ && console.error("Magic! How did you do that? You managed to turn a disabled switch!")
     } else {
-      transition.transit()
+      transition.perform()
     }
   }
 
@@ -89,6 +89,7 @@ export function DownloadSwitch({ track }: DownloadSwitchProps) {
         </Text>
       )}
       <Text>{downloadState.type}</Text>
+      {transition !== null && <Text>{transition.action}</Text>}
     </View>
   )
 }

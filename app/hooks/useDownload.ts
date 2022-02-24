@@ -10,7 +10,7 @@ export enum TransitionAction {
 }
 
 export type Transition = {
-  transit: () => void
+  perform: () => void
   action: TransitionAction
 }
 
@@ -39,32 +39,32 @@ export function useDownload(track: Track): UseDownloadResult {
     }
   }, [])
 
-  const currentState = trackDownloadsClient.fetchDownloadState(track.trackId)
+  const currentState = trackDownloadsClient.getDownloadState(track.trackId)
 
   return {
     state: currentState,
     transition:
-      currentState.type === "UNKNOWN" ||
-      currentState.type === "FINALIZING" ||
-      currentState.type === "CANCELLING" ||
-      currentState.type === "DELETING"
+      currentState.type === "UNKNOWN"
         ? null
         : (() => {
             switch (currentState.type) {
               case "NOT_DOWNLOADED":
+              case "CANCELLING":
+              case "DELETING":
               case "FAILED_DOWNLOADING":
                 return {
-                  transit: () => trackDownloadsClient.startDownload(track),
+                  perform: () => trackDownloadsClient.transition(track, "DOWNLOADED"),
                   action: TransitionAction.Start,
                 }
               case "DOWNLOADING":
+              case "FINALIZING":
                 return {
-                  transit: () => trackDownloadsClient.cancelDownload(track),
+                  perform: () => trackDownloadsClient.transition(track, "NOT_DOWNLOADED"),
                   action: TransitionAction.Cancel,
                 }
               case "DOWNLOADED":
                 return {
-                  transit: () => trackDownloadsClient.deleteDownload(track),
+                  perform: () => trackDownloadsClient.transition(track, "NOT_DOWNLOADED"),
                   action: TransitionAction.Delete,
                 }
             }
