@@ -23,9 +23,15 @@ const TEXT: TextStyle = {
   textAlign: "center",
 }
 const HANDLE: ViewStyle = { marginHorizontal: spacing.tiny }
-const ROW: ViewStyle = {
+const CENTER_ROW: ViewStyle = {
   flexDirection: "row",
   justifyContent: "center",
+  marginVertical: spacing.medium,
+  marginHorizontal: spacing.medium,
+}
+const LEFT_ROW: ViewStyle = {
+  flexDirection: "row",
+  justifyContent: "flex-start",
   marginVertical: spacing.medium,
   marginHorizontal: spacing.medium,
 }
@@ -376,14 +382,14 @@ export function AudioPlayer({
           style={{ width: 150, height: 150, marginBottom: 15, alignSelf: "center" }}
         /> */}
       {!playbackStatus?.isLoaded && playbackStatus?.error && (
-        <View style={ROW}>
+        <View style={CENTER_ROW}>
           <Text style={TEXT}>Error: {playbackStatus.error}</Text>
         </View>
       )}
-      <View style={ROW}>
+      <View style={CENTER_ROW}>
         <Text style={TEXT}>{track.name}</Text>
       </View>
-      <View style={ROW}>
+      <View style={CENTER_ROW}>
         <Handle
           icon="skip-backward"
           disabled={!previousTrack}
@@ -422,7 +428,7 @@ export function AudioPlayer({
           onPress={onPlayNextTrack}
         />
       </View>
-      <View style={ROW}>
+      <View style={CENTER_ROW}>
         <Text
           accessible={true}
           accessibilityLabel={convertToAudioTimePhrase(sliderPosition)}
@@ -470,7 +476,7 @@ export function AudioPlayer({
         </Text>
       </View>
       {backgroundMusic && (
-        <View style={ROW}>
+        <View style={CENTER_ROW}>
           <Handle
             icon="volume-low"
             accessibilityLabel="Hintergrundmusik leiser machen"
@@ -497,24 +503,24 @@ export function AudioPlayer({
           />
         </View>
       )}
-      <View style={ROW}>
+      <View style={LEFT_ROW}>
         <Text>Diese Stunde/Übung/Musik herunterladen oder löschen:</Text>
       </View>
-      <View style={ROW}>
+      <View style={LEFT_ROW}>
         <DownloadSwitch track={track} />
       </View>
       {tracksToDownload.length >= 2 && (
         <>
-          <View style={ROW}>
+          <View style={LEFT_ROW}>
             <Text>
               Jede Stunde/Übung/Musik dieses/dieser Abschnitts/Playlist herunterladen oder löschen:
             </Text>
           </View>
-          <View style={ROW}>
+          <View style={LEFT_ROW}>
             <DownloadsSwitch tracks={tracksToDownload} />
           </View>
           {tracksToDownload.map((trackToDownload) => (
-            <View style={ROW}>
+            <View style={LEFT_ROW}>
               <DownloadSwitch track={trackToDownload} />
             </View>
           ))}

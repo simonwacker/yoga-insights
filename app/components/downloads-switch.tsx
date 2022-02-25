@@ -2,34 +2,31 @@ import React from "react"
 import { Track } from "../models"
 import { View, ViewStyle } from "react-native"
 import { Text } from "./text/text"
-import { spacing } from "../theme"
 import {
   AccumulatedDownloadState,
   AccumulatedTransitionAction,
   useDownloads,
 } from "../hooks/useDownloads"
 import { Switch } from "react-native-paper"
+import { useTheme } from "react-native-paper"
 
 const ROOT: ViewStyle = {
-  marginVertical: spacing.medium,
-  marginHorizontal: spacing.medium,
   flexDirection: "row",
-  justifyContent: "center",
+  justifyContent: "flex-start",
+  alignItems: "center",
 }
 
-function getSwitchAccessibilityLabelState(status: AccumulatedDownloadState["type"]): string {
-  switch (status) {
+function getSwitchAccessibilityLabelState(state: AccumulatedDownloadState): string {
+  switch (state.type) {
     case "UNKNOWN":
       return "unbekannter Herunterladzustand"
     case "NOT_DOWNLOADED":
       return "nicht heruntergeladen"
     case "DOWNLOADING":
     case "FINALIZING":
-      return "beim Herunterladen"
+      return `beim Herunterladen: ${Math.round(state.progress * 100)}%`
     case "DOWNLOADED":
       return "heruntergeladen"
-    case "FAILED_DOWNLOADING":
-      return "Fehler beim Herunterladen"
     case "CANCELLING":
       return "beim Abbrechen"
     case "DELETING":
@@ -41,6 +38,8 @@ function getSwitchAccessibilityLabelState(status: AccumulatedDownloadState["type
 
 function getSwitchAccessibilityHintAction(action: AccumulatedTransitionAction): string {
   switch (action) {
+    case AccumulatedTransitionAction.None:
+      return "keine"
     case AccumulatedTransitionAction.Start:
       return "herunterladen"
     case AccumulatedTransitionAction.Cancel:
@@ -55,45 +54,50 @@ export interface DownloadsSwitchProps {
 }
 
 export function DownloadsSwitch({ tracks }: DownloadsSwitchProps) {
-  const { state: downloadState, transition } = useDownloads(tracks)
+  const {
+    state: downloadState,
+    requestedState: requestedDownloadState,
+    failed: failedToSatisfyDownloadRequest,
+    transition,
+  } = useDownloads(tracks)
 
-  const startable =
-    downloadState.type === "NOT_DOWNLOADED" || downloadState.type === "FAILED_DOWNLOADING"
+  const { colors } = useTheme()
 
-  const onSwitchValueChange = () => {
-    if (transition === null) {
-      __DEV__ && console.error("Magic! How did you do that? You managed to turn a disabled switch!")
-    } else {
-      transition.transit()
-    }
-  }
+  const colorProps = failedToSatisfyDownloadRequest
+    ? {
+        trackColor: { false: colors.error, true: colors.error },
+        ios_backgroundColor: colors.error,
+      }
+    : {}
 
   return (
     <View style={ROOT}>
       <Switch
         accessible={true}
-        accessibilityLabel={`Zustand: ${getSwitchAccessibilityLabelState(downloadState.type)}`}
+        accessibilityLabel={`Zustand: ${getSwitchAccessibilityLabelState(downloadState)}`}
         accessibilityHint={
-          transition === null
+          transition.action === AccumulatedTransitionAction.None
             ? undefined
             : `Aktion: ${getSwitchAccessibilityHintAction(transition.action)}`
         }
         accessibilityRole="switch"
-        disabled={transition === null}
-        value={!startable}
-        onValueChange={onSwitchValueChange}
+        disabled={transition.action === AccumulatedTransitionAction.None}
+        value={
+          requestedDownloadState === "NONE"
+            ? downloadState.type === "DOWNLOADED"
+            : requestedDownloadState === "DOWNLOADED"
+        }
+        onValueChange={() => transition?.perform()}
+        {...colorProps}
       />
-      {downloadState.type === "DOWNLOADING" && (
-        <Text
-          accessible={true}
-          accessibilityLabel={`${Math.round(downloadState.progress * 100)}%`}
-          accessibilityHint="prozentualer Herunterladefortschritt"
-          accessibilityRole="text"
-        >
-          {Math.round(downloadState.progress * 100)}%
+      <Text accessibilityElementsHidden={true} importantForAccessibility="no-hide-descendants">
+        {getSwitchAccessibilityLabelState(downloadState)}
+      </Text>
+      {__DEV__ && (
+        <Text accessibilityElementsHidden={true} importantForAccessibility="no-hide-descendants">
+          {getSwitchAccessibilityHintAction(transition.action)}
         </Text>
       )}
-      <Text>{downloadState.type}</Text>
     </View>
   )
 }

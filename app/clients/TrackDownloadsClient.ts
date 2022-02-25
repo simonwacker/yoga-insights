@@ -6,6 +6,13 @@ import { assertNotUndefined } from "../utils/types"
 
 export type RequestedDownloadState = "NONE" | "DOWNLOADED" | "NOT_DOWNLOADED"
 
+export enum TransitionAction {
+  None = "NONE",
+  Start = "START",
+  Cancel = "CANCEL",
+  Delete = "DELETE",
+}
+
 /** Represents the initial state where we're unsure whether the track has been
  * downloaded yet or not. We first have to look at the local file system which
  * is an async operation.
@@ -33,9 +40,6 @@ type DownloadStateFinalizing = {
   progress: 1
   downloadResumable: DownloadResumable
 }
-/** Represents a failed download attempt.
- */
-type DownloadStateFailed = { type: "FAILED_DOWNLOADING"; error: string }
 /** Represents the process of cancelling an active downloading process.
  */
 type DownloadStateCancelling = { type: "CANCELLING"; progress: number }
@@ -51,7 +55,6 @@ export type DownloadState =
   | DownloadStateDownloaded
   | DownloadStateDownloading
   | DownloadStateFinalizing
-  | DownloadStateFailed
   | DownloadStateCancelling
   | DownloadStateDeleting
   | DownloadStateNotDownloaded
@@ -110,6 +113,51 @@ export class TrackDownloadsClient {
     return state
   }
 
+  getStateToRequestNextAndCorrespondingAction(
+    trackId: string,
+  ): [RequestedDownloadState, TransitionAction] {
+    const currentState = this.getDownloadState(trackId)
+    switch (currentState.type) {
+      case "UNKNOWN":
+        __DEV__ &&
+          console.warn(
+            `Asked for state to request next and corresponding action for track ${trackId} in unknown state`,
+          )
+        return ["NONE", TransitionAction.None]
+      case "DOWNLOADED":
+        return ["NOT_DOWNLOADED", TransitionAction.Delete]
+      case "DOWNLOADING":
+      case "FINALIZING":
+        return ["NOT_DOWNLOADED", TransitionAction.Cancel]
+      case "NOT_DOWNLOADED":
+      case "CANCELLING":
+      case "DELETING":
+        return ["DOWNLOADED", TransitionAction.Start]
+    }
+  }
+
+  hasFailedToSatisfyRequest(trackId: string): boolean {
+    const requestedState = this.getRequestedDownloadState(trackId)
+    const currentState = this.getDownloadState(trackId)
+    switch (currentState.type) {
+      case "UNKNOWN":
+        __DEV__ &&
+          console.warn(
+            `Asked for state to request next and corresponding action for track ${trackId} in unknown state`,
+          )
+        return requestedState === "NONE"
+      case "DOWNLOADED":
+        return requestedState === "NOT_DOWNLOADED"
+      case "NOT_DOWNLOADED":
+        return requestedState === "DOWNLOADED"
+      case "DOWNLOADING":
+      case "FINALIZING":
+      case "CANCELLING":
+      case "DELETING":
+        return false
+    }
+  }
+
   transition(track: Track, requestedState: RequestedDownloadState): void {
     this.requestedDownloadStates.set(track.trackId, requestedState)
     const currentState = this.getDownloadState(track.trackId)
@@ -126,7 +174,6 @@ export class TrackDownloadsClient {
         }
         break
       case "NOT_DOWNLOADED":
-      case "FAILED_DOWNLOADING":
         if (requestedState === "DOWNLOADED") {
           this.startDownload(track)
         }
@@ -162,7 +209,7 @@ export class TrackDownloadsClient {
 
   private startDownload(track: Track): void {
     const currentState = this.getDownloadState(track.trackId)
-    if (currentState.type === "NOT_DOWNLOADED" || currentState.type === "FAILED_DOWNLOADING") {
+    if (currentState.type === "NOT_DOWNLOADED") {
       __DEV__ && console.log(`Starting download of track ${track.trackId}`)
       var downloadResumable: DownloadResumable | null = null
       const callback = ({
@@ -331,15 +378,14 @@ export class TrackDownloadsClient {
   }
 
   private handleDownloadFailed(track: Track, error: Error): void {
-    __DEV__ && console.log(`Handling failed download of track ${track.trackId}`, error)
+    __DEV__ && console.error(`Failed to download track ${track.trackId}`, error)
     const currentState = this.getDownloadState(track.trackId)
     if (currentState.type === "DOWNLOADING" || currentState.type === "FINALIZING") {
       __DEV__ && console.log(`Deleting temporary file of track ${track.trackId}`)
       const afterDeletionAttempt = () => {
         cleanupDownloadResumable(currentState.downloadResumable)
         this.cachedDownloadStates.set(track.trackId, {
-          type: "FAILED_DOWNLOADING",
-          error: error.toString(),
+          type: "NOT_DOWNLOADED",
         })
         this.notify(track.trackId)
         const requestedState = this.getRequestedDownloadState(track.trackId)

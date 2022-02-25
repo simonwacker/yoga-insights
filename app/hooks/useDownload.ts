@@ -1,13 +1,11 @@
 import { useEffect, useRef, useState } from "react"
-import { DownloadState } from "../clients/TrackDownloadsClient"
+import {
+  DownloadState,
+  RequestedDownloadState,
+  TransitionAction,
+} from "../clients/TrackDownloadsClient"
 import { useTrackDownloadsClient } from "../contexts/TrackDownloadsClientContext"
 import { Track } from "../models"
-
-export enum TransitionAction {
-  Start = "START",
-  Cancel = "CANCEL",
-  Delete = "DELETE",
-}
 
 export type Transition = {
   perform: () => void
@@ -16,7 +14,9 @@ export type Transition = {
 
 type UseDownloadResult = {
   state: DownloadState
-  transition: Transition | null
+  requestedState: RequestedDownloadState
+  failed: boolean
+  transition: Transition
 }
 
 export function useDownload(track: Track): UseDownloadResult {
@@ -40,34 +40,17 @@ export function useDownload(track: Track): UseDownloadResult {
   }, [])
 
   const currentState = trackDownloadsClient.getDownloadState(track.trackId)
+  const requestedState = trackDownloadsClient.getRequestedDownloadState(track.trackId)
+  const [stateToRequestNext, actionToTakeNext] =
+    trackDownloadsClient.getStateToRequestNextAndCorrespondingAction(track.trackId)
 
   return {
     state: currentState,
-    transition:
-      currentState.type === "UNKNOWN"
-        ? null
-        : (() => {
-            switch (currentState.type) {
-              case "NOT_DOWNLOADED":
-              case "CANCELLING":
-              case "DELETING":
-              case "FAILED_DOWNLOADING":
-                return {
-                  perform: () => trackDownloadsClient.transition(track, "DOWNLOADED"),
-                  action: TransitionAction.Start,
-                }
-              case "DOWNLOADING":
-              case "FINALIZING":
-                return {
-                  perform: () => trackDownloadsClient.transition(track, "NOT_DOWNLOADED"),
-                  action: TransitionAction.Cancel,
-                }
-              case "DOWNLOADED":
-                return {
-                  perform: () => trackDownloadsClient.transition(track, "NOT_DOWNLOADED"),
-                  action: TransitionAction.Delete,
-                }
-            }
-          })(),
+    requestedState: requestedState,
+    failed: trackDownloadsClient.hasFailedToSatisfyRequest(track.trackId),
+    transition: {
+      perform: () => trackDownloadsClient.transition(track, stateToRequestNext),
+      action: actionToTakeNext,
+    },
   }
 }
