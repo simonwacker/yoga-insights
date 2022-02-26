@@ -255,7 +255,7 @@ export class TrackDownloadsClient {
     __DEV__ && console.log(`Cancelling download of track ${track.trackId}`)
     const currentState = this.getDownloadState(track.trackId)
     if (currentState.type === "DOWNLOADING") {
-      currentState.downloadResumable.cancelAsync().then(
+      currentState.downloadResumable.pauseAsync().then(
         () => {
           __DEV__ && console.log(`Deleting temporary file of track ${track.trackId}`)
           const afterDeletionAttempt = () => {
