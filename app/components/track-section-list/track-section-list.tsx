@@ -7,7 +7,7 @@ import { SectionList } from "../section-list/section-list"
 
 export interface TrackSectionListProps {
   sections: Section[]
-  onSelectTrack: (initialTrackIndex: number, trackIds: readonly string[]) => void
+  onSelectTrack: (initialTrackIndex: number, section: Section) => void
 }
 
 export function TrackSectionList({ sections, onSelectTrack }: TrackSectionListProps) {
@@ -20,7 +20,7 @@ export function TrackSectionList({ sections, onSelectTrack }: TrackSectionListPr
         <ListButtonItem
           key={index}
           label={getTrack(item).name}
-          onPress={() => onSelectTrack(index, section.data)}
+          onPress={() => onSelectTrack(index, section as Section)}
         />
       )}
     />

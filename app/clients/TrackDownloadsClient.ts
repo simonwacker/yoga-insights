@@ -4,6 +4,15 @@ import { Track } from "../models"
 import { getTrackFileUri } from "../utils/file"
 import { assertNotUndefined } from "../utils/types"
 
+export type RequestedDownloadState = "NONE" | "DOWNLOADED" | "NOT_DOWNLOADED"
+
+export enum TransitionAction {
+  None = "NONE",
+  Start = "START",
+  Cancel = "CANCEL",
+  Delete = "DELETE",
+}
+
 /** Represents the initial state where we're unsure whether the track has been
  * downloaded yet or not. We first have to look at the local file system which
  * is an async operation.
@@ -31,9 +40,6 @@ type DownloadStateFinalizing = {
   progress: 1
   downloadResumable: DownloadResumable
 }
-/** Represents a failed download attempt.
- */
-type DownloadStateFailed = { type: "FAILED_DOWNLOADING"; error: string }
 /** Represents the process of cancelling an active downloading process.
  */
 type DownloadStateCancelling = { type: "CANCELLING"; progress: number }
@@ -49,36 +55,37 @@ export type DownloadState =
   | DownloadStateDownloaded
   | DownloadStateDownloading
   | DownloadStateFinalizing
-  | DownloadStateFailed
   | DownloadStateCancelling
   | DownloadStateDeleting
   | DownloadStateNotDownloaded
 
 export class TrackDownloadsClient {
-  private cachedDownloadState: Map<string, DownloadState>
+  private requestedDownloadStates: Map<string, RequestedDownloadState>
+  private cachedDownloadStates: Map<string, DownloadState>
   private listeners: Map<string, (() => void)[]>
 
   constructor() {
-    this.cachedDownloadState = new Map()
+    this.requestedDownloadStates = new Map()
+    this.cachedDownloadStates = new Map()
     this.listeners = new Map()
   }
 
   setCachedDownloadStateFromStateInLocalFileSystemIfItIsUnknown(track: Track) {
-    const entry = this.fetchDownloadState(track.trackId)
+    const entry = this.getDownloadState(track.trackId)
     if (entry.type !== "UNKNOWN") {
       return
     }
     FileSystem.getInfoAsync(getTrackFileUri(track), { md5: true }).then(
       (fileInfo) => {
         if (fileInfo.exists) {
-          this.cachedDownloadState.set(track.trackId, {
+          this.cachedDownloadStates.set(track.trackId, {
             type: "DOWNLOADED",
             uri: fileInfo.uri,
             md5: fileInfo.md5!,
           })
           this.notify(track.trackId)
         } else {
-          this.cachedDownloadState.set(track.trackId, {
+          this.cachedDownloadStates.set(track.trackId, {
             type: "NOT_DOWNLOADED",
           })
           this.notify(track.trackId)
@@ -90,17 +97,112 @@ export class TrackDownloadsClient {
     )
   }
 
-  fetchDownloadState(trackId: string): DownloadState {
-    const downloadState = this.cachedDownloadState.get(trackId)
-    if (downloadState === undefined) {
-      return { type: "UNKNOWN" }
+  getRequestedDownloadState(trackId: string): RequestedDownloadState {
+    const state = this.requestedDownloadStates.get(trackId)
+    if (state === undefined) {
+      return "NONE"
     }
-    return downloadState
+    return state
   }
 
-  startDownload(track: Track): void {
-    const currentState = this.fetchDownloadState(track.trackId)
-    if (currentState.type === "NOT_DOWNLOADED" || currentState.type === "FAILED_DOWNLOADING") {
+  getDownloadState(trackId: string): DownloadState {
+    const state = this.cachedDownloadStates.get(trackId)
+    if (state === undefined) {
+      return { type: "UNKNOWN" }
+    }
+    return state
+  }
+
+  getStateToRequestNextAndCorrespondingAction(
+    trackId: string,
+  ): [RequestedDownloadState, TransitionAction] {
+    const currentState = this.getDownloadState(trackId)
+    switch (currentState.type) {
+      case "UNKNOWN":
+        return ["NONE", TransitionAction.None]
+      case "DOWNLOADED":
+        return ["NOT_DOWNLOADED", TransitionAction.Delete]
+      case "DOWNLOADING":
+      case "FINALIZING":
+        return ["NOT_DOWNLOADED", TransitionAction.Cancel]
+      case "NOT_DOWNLOADED":
+      case "CANCELLING":
+      case "DELETING":
+        return ["DOWNLOADED", TransitionAction.Start]
+    }
+  }
+
+  hasFailedToSatisfyRequest(trackId: string): boolean {
+    const requestedState = this.getRequestedDownloadState(trackId)
+    const currentState = this.getDownloadState(trackId)
+    switch (currentState.type) {
+      case "UNKNOWN":
+        return requestedState !== "NONE"
+      case "DOWNLOADED":
+        return requestedState === "NOT_DOWNLOADED"
+      case "NOT_DOWNLOADED":
+        return requestedState === "DOWNLOADED"
+      case "DOWNLOADING":
+      case "FINALIZING":
+      case "CANCELLING":
+      case "DELETING":
+        return false
+    }
+  }
+
+  transition(track: Track, requestedState: RequestedDownloadState): void {
+    this.requestedDownloadStates.set(track.trackId, requestedState)
+    const currentState = this.getDownloadState(track.trackId)
+    switch (currentState.type) {
+      case "UNKNOWN":
+        __DEV__ &&
+          console.warn(
+            `Requested transition to state ${requestedState} for track ${track.trackId} in unknown state`,
+          )
+        break
+      case "DOWNLOADED":
+        if (requestedState === "NOT_DOWNLOADED") {
+          this.deleteDownload(track)
+        }
+        break
+      case "NOT_DOWNLOADED":
+        if (requestedState === "DOWNLOADED") {
+          this.startDownload(track)
+        }
+        break
+      case "DOWNLOADING":
+        if (requestedState === "NOT_DOWNLOADED") {
+          this.cancelDownload(track)
+        }
+        break
+      case "FINALIZING":
+      case "CANCELLING":
+      case "DELETING":
+        break
+    }
+    this.notify(track.trackId)
+  }
+
+  subscribe(trackId: string, callback: () => void): () => void {
+    const entry = this.listeners.get(trackId)
+    if (entry) {
+      entry.push(callback)
+    } else {
+      this.listeners.set(trackId, [callback])
+    }
+    const unsubscribe = () => {
+      const entries = this.listeners.get(trackId) ?? []
+      this.listeners.set(
+        trackId,
+        entries.filter((e) => e !== callback),
+      )
+    }
+    return unsubscribe
+  }
+
+  private startDownload(track: Track): void {
+    const currentState = this.getDownloadState(track.trackId)
+    if (currentState.type === "NOT_DOWNLOADED") {
       __DEV__ && console.log(`Starting download of track ${track.trackId}`)
       var downloadResumable: DownloadResumable | null = null
       const callback = ({
@@ -110,7 +212,7 @@ export class TrackDownloadsClient {
         totalBytesWritten: number
         totalBytesExpectedToWrite: number
       }) => {
-        const state = this.fetchDownloadState(track.trackId)
+        const state = this.getDownloadState(track.trackId)
         // The callback is only meant for active downloads and only for the
         // latest download attempt. Because callbacks cannot be unsubscribed
         // from resumable downloads, we check whether this callback was meant
@@ -138,7 +240,7 @@ export class TrackDownloadsClient {
           this.handleDownloadFailed(track, error)
         },
       )
-      this.cachedDownloadState.set(track.trackId, {
+      this.cachedDownloadStates.set(track.trackId, {
         type: "DOWNLOADING",
         progress: 0,
         downloadResumable,
@@ -149,19 +251,20 @@ export class TrackDownloadsClient {
     }
   }
 
-  cancelDownload(track: Track): void {
+  private cancelDownload(track: Track): void {
     __DEV__ && console.log(`Cancelling download of track ${track.trackId}`)
-    const currentState = this.fetchDownloadState(track.trackId)
+    const currentState = this.getDownloadState(track.trackId)
     if (currentState.type === "DOWNLOADING") {
-      currentState.downloadResumable.cancelAsync().then(
+      currentState.downloadResumable.pauseAsync().then(
         () => {
           __DEV__ && console.log(`Deleting temporary file of track ${track.trackId}`)
           const afterDeletionAttempt = () => {
             cleanupDownloadResumable(currentState.downloadResumable)
-            this.cachedDownloadState.set(track.trackId, {
+            this.cachedDownloadStates.set(track.trackId, {
               type: "NOT_DOWNLOADED",
             })
             this.notify(track.trackId)
+            this.transition(track, this.getRequestedDownloadState(track.trackId))
           }
           FileSystem.deleteAsync(getTemporaryFileUri(track)).then(afterDeletionAttempt, (error) => {
             console.error(`Failed to delete temporary file of track ${track.trackId}`, error)
@@ -170,11 +273,16 @@ export class TrackDownloadsClient {
         },
         (error) => {
           console.error(`Failed to cancel download of track ${track.trackId}`, error)
-          this.cachedDownloadState.set(track.trackId, currentState)
+          this.cachedDownloadStates.set(track.trackId, currentState)
           this.notify(track.trackId)
+          const requestedState = this.getRequestedDownloadState(track.trackId)
+          if (requestedState !== "NOT_DOWNLOADED") {
+            this.transition(track, requestedState)
+          }
         },
       )
-      this.cachedDownloadState.set(track.trackId, {
+      __DEV__ && console.log(`Setting state to cencelling and notifying subscribers.`)
+      this.cachedDownloadStates.set(track.trackId, {
         type: "CANCELLING",
         progress: currentState.progress,
       })
@@ -182,45 +290,33 @@ export class TrackDownloadsClient {
     }
   }
 
-  deleteDownload(track: Track): void {
+  private deleteDownload(track: Track): void {
     __DEV__ && console.log(`Deleting track ${track.trackId}`)
-    var currentState = this.fetchDownloadState(track.trackId)
+    const currentState = this.getDownloadState(track.trackId)
     if (currentState.type === "DOWNLOADED") {
       FileSystem.deleteAsync(getTrackFileUri(track)).then(
         () => {
-          this.cachedDownloadState.set(track.trackId, {
+          this.cachedDownloadStates.set(track.trackId, {
             type: "NOT_DOWNLOADED",
           })
           this.notify(track.trackId)
+          this.transition(track, this.getRequestedDownloadState(track.trackId))
         },
         (error) => {
           console.error(`Failed to delete file of track ${track.trackId}`, error)
-          this.cachedDownloadState.set(track.trackId, currentState)
+          this.cachedDownloadStates.set(track.trackId, currentState)
           this.notify(track.trackId)
+          const requestedState = this.getRequestedDownloadState(track.trackId)
+          if (requestedState !== "NOT_DOWNLOADED") {
+            this.transition(track, requestedState)
+          }
         },
       )
-      this.cachedDownloadState.set(track.trackId, {
+      this.cachedDownloadStates.set(track.trackId, {
         type: "DELETING",
       })
       this.notify(track.trackId)
     }
-  }
-
-  subscribe(trackId: string, callback: () => void): () => void {
-    const entry = this.listeners.get(trackId)
-    if (entry) {
-      entry.push(callback)
-    } else {
-      this.listeners.set(trackId, [callback])
-    }
-    const unsubscribe = () => {
-      const entries = this.listeners.get(trackId) ?? []
-      this.listeners.set(
-        trackId,
-        entries.filter((e) => e !== callback),
-      )
-    }
-    return unsubscribe
   }
 
   protected notify(trackId: string) {
@@ -236,7 +332,7 @@ export class TrackDownloadsClient {
     result: FileSystemDownloadResult | null | undefined,
   ): void {
     __DEV__ && console.log(`Handling downloaded track ${track.trackId}`, result)
-    const currentState = this.fetchDownloadState(track.trackId)
+    const currentState = this.getDownloadState(track.trackId)
     if (currentState.type === "DOWNLOADING") {
       if (result === undefined || result === null) {
         this.handleDownloadFailed(track, new Error("Download result is `null` or `undefined`"))
@@ -247,7 +343,7 @@ export class TrackDownloadsClient {
         FileSystem.moveAsync({ from: result.uri, to: destination }).then(
           () => {
             cleanupDownloadResumable(currentState.downloadResumable)
-            this.cachedDownloadState.set(track.trackId, {
+            this.cachedDownloadStates.set(track.trackId, {
               type: "DOWNLOADED",
               uri: destination,
               // NOTE: The md5 field always exists since we set the { md5: true }
@@ -255,6 +351,7 @@ export class TrackDownloadsClient {
               md5: assertNotUndefined(result.md5),
             })
             this.notify(track.trackId)
+            this.transition(track, this.getRequestedDownloadState(track.trackId))
           },
           (error) => {
             console.error(
@@ -264,7 +361,7 @@ export class TrackDownloadsClient {
             this.handleDownloadFailed(track, error)
           },
         )
-        this.cachedDownloadState.set(track.trackId, {
+        this.cachedDownloadStates.set(track.trackId, {
           type: "FINALIZING",
           progress: 1,
           downloadResumable: currentState.downloadResumable,
@@ -275,17 +372,20 @@ export class TrackDownloadsClient {
   }
 
   private handleDownloadFailed(track: Track, error: Error): void {
-    __DEV__ && console.log(`Handling failed download of track ${track.trackId}`, error)
-    const currentState = this.fetchDownloadState(track.trackId)
+    __DEV__ && console.error(`Failed to download track ${track.trackId}`, error)
+    const currentState = this.getDownloadState(track.trackId)
     if (currentState.type === "DOWNLOADING" || currentState.type === "FINALIZING") {
       __DEV__ && console.log(`Deleting temporary file of track ${track.trackId}`)
       const afterDeletionAttempt = () => {
         cleanupDownloadResumable(currentState.downloadResumable)
-        this.cachedDownloadState.set(track.trackId, {
-          type: "FAILED_DOWNLOADING",
-          error: error.toString(),
+        this.cachedDownloadStates.set(track.trackId, {
+          type: "NOT_DOWNLOADED",
         })
         this.notify(track.trackId)
+        const requestedState = this.getRequestedDownloadState(track.trackId)
+        if (requestedState !== "DOWNLOADED") {
+          this.transition(track, requestedState)
+        }
       }
       FileSystem.deleteAsync(getTemporaryFileUri(track)).then(afterDeletionAttempt, (error) => {
         console.error(`Failed to delete temporary file of track ${track.trackId}`, error)

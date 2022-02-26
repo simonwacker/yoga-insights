@@ -1,15 +1,20 @@
-import { DownloadState } from "../clients/TrackDownloadsClient"
+import {
+  TransitionAction,
+  DownloadState,
+  RequestedDownloadState,
+} from "../clients/TrackDownloadsClient"
 import { Track } from "../models"
-import { TransitionAction, useDownload } from "./useDownload"
+import { useDownload } from "./useDownload"
 
 export enum AccumulatedTransitionAction {
+  None = "NONE",
   Start = "START",
   Cancel = "CANCEL",
   Delete = "DELETE",
 }
 
 export type AccumulatedTransition = {
-  transit: () => void
+  perform: () => void
   action: AccumulatedTransitionAction
 }
 
@@ -19,7 +24,6 @@ export type AccumulatedDownloadState =
   | { type: "CANCELLING"; progress: number }
   | { type: "DELETING" }
   | { type: "FINALIZING_OR_CANCELLING_OR_DELETING"; progress: number }
-  | { type: "FAILED_DOWNLOADING"; progress: number }
   | { type: "NOT_DOWNLOADED"; progress: number }
   | { type: "DOWNLOADING"; progress: number }
   | { type: "DOWNLOADED" }
@@ -28,13 +32,22 @@ function getState(states: DownloadState[]): AccumulatedDownloadState {
   if (states.some((state) => state.type === "UNKNOWN")) {
     return { type: "UNKNOWN" }
   }
-  if (states.every((state) => state.type === "FINALIZING")) {
+  if (
+    states.some((state) => state.type === "FINALIZING") &&
+    states.every((state) => state.type === "FINALIZING" || state.type === "DOWNLOADED")
+  ) {
     return { type: "FINALIZING", progress: 1 }
   }
-  if (states.every((state) => state.type === "CANCELLING")) {
+  if (
+    states.some((state) => state.type === "CANCELLING") &&
+    states.every((state) => state.type === "CANCELLING" || state.type === "NOT_DOWNLOADED")
+  ) {
     return { type: "CANCELLING", progress: computeProgressPercentage(states) }
   }
-  if (states.every((state) => state.type === "DELETING")) {
+  if (
+    states.some((state) => state.type === "DELETING") &&
+    states.every((state) => state.type === "DELETING" || state.type === "NOT_DOWNLOADED")
+  ) {
     return { type: "DELETING" }
   }
   if (
@@ -48,9 +61,6 @@ function getState(states: DownloadState[]): AccumulatedDownloadState {
       progress: computeProgressPercentage(states),
     }
   }
-  if (states.some((state) => state.type === "FAILED_DOWNLOADING")) {
-    return { type: "FAILED_DOWNLOADING", progress: computeProgressPercentage(states) }
-  }
   if (states.some((state) => state.type === "NOT_DOWNLOADED")) {
     return { type: "NOT_DOWNLOADED", progress: computeProgressPercentage(states) }
   }
@@ -61,6 +71,16 @@ function getState(states: DownloadState[]): AccumulatedDownloadState {
     }
   }
   return { type: "DOWNLOADED" }
+}
+
+function getRequestedState(states: RequestedDownloadState[]): RequestedDownloadState {
+  if (states.every((state) => state === "DOWNLOADED")) {
+    return "DOWNLOADED"
+  }
+  if (states.every((state) => state === "NOT_DOWNLOADED")) {
+    return "NOT_DOWNLOADED"
+  }
+  return "NONE"
 }
 
 function computeProgressPercentage(states: DownloadState[]) {
@@ -83,16 +103,11 @@ function computeProgressPercentage(states: DownloadState[]) {
   return states.length === 0 ? 1 : sum / states.length
 }
 
-// Taken from https://stackoverflow.com/questions/43118692/typescript-filter-out-nulls-from-an-array/46700791#46700791
-// Another option would be https://stackoverflow.com/questions/43118692/typescript-filter-out-nulls-from-an-array/59726888#59726888
-// See also https://github.com/microsoft/TypeScript/issues/16069
-function notEmpty<TValue>(value: TValue | null | undefined): value is TValue {
-  return value !== null && value !== undefined
-}
-
 type UseDownloadsResult = {
   state: AccumulatedDownloadState
-  transition: AccumulatedTransition | null
+  requestedState: RequestedDownloadState
+  failed: boolean
+  transition: AccumulatedTransition
 }
 
 export function useDownloads(tracks: Track[]): UseDownloadsResult {
@@ -103,57 +118,59 @@ export function useDownloads(tracks: Track[]): UseDownloadsResult {
   const useDownloadResults = tracks.map((track) => useDownload(track))
 
   const currentState = getState(useDownloadResults.map((r) => r.state))
+  const requestedState = getRequestedState(useDownloadResults.map((r) => r.requestedState))
+  const failed = useDownloadResults.some((r) => r.failed)
 
   return {
     state: currentState,
-    transition:
-      currentState.type === "UNKNOWN" ||
-      currentState.type === "FINALIZING" ||
-      currentState.type === "CANCELLING" ||
-      currentState.type === "DELETING" ||
-      currentState.type === "FINALIZING_OR_CANCELLING_OR_DELETING"
-        ? null
-        : (() => {
-            const transitions = useDownloadResults.map((r) => r.transition).filter(notEmpty)
-            switch (currentState.type) {
-              case "NOT_DOWNLOADED":
-              case "FAILED_DOWNLOADING":
-                return {
-                  transit: () => {
-                    for (const { transit, action } of transitions) {
-                      if (action === TransitionAction.Start) {
-                        transit()
-                      }
-                    }
-                  },
-                  action: AccumulatedTransitionAction.Start,
+    requestedState: requestedState,
+    failed: failed,
+    transition: (() => {
+      const transitions = useDownloadResults.map((r) => r.transition)
+      switch (currentState.type) {
+        case "UNKNOWN":
+          return {
+            perform: () => {},
+            action: AccumulatedTransitionAction.None,
+          }
+        case "NOT_DOWNLOADED":
+        case "CANCELLING":
+        case "DELETING":
+        case "FINALIZING_OR_CANCELLING_OR_DELETING":
+          return {
+            perform: () => {
+              for (const { perform, action } of transitions) {
+                if (action === TransitionAction.Start) {
+                  perform()
                 }
-              case "DOWNLOADING":
-                return {
-                  transit: () => {
-                    for (const { transit, action } of transitions) {
-                      if (
-                        action === TransitionAction.Cancel ||
-                        action === TransitionAction.Delete
-                      ) {
-                        transit()
-                      }
-                    }
-                  },
-                  action: AccumulatedTransitionAction.Cancel,
+              }
+            },
+            action: AccumulatedTransitionAction.Start,
+          }
+        case "DOWNLOADING":
+        case "FINALIZING":
+          return {
+            perform: () => {
+              for (const { perform, action } of transitions) {
+                if (action === TransitionAction.Cancel || action === TransitionAction.Delete) {
+                  perform()
                 }
-              case "DOWNLOADED":
-                return {
-                  transit: () => {
-                    for (const { transit, action } of transitions) {
-                      if (action === TransitionAction.Delete) {
-                        transit()
-                      }
-                    }
-                  },
-                  action: AccumulatedTransitionAction.Delete,
+              }
+            },
+            action: AccumulatedTransitionAction.Cancel,
+          }
+        case "DOWNLOADED":
+          return {
+            perform: () => {
+              for (const { perform, action } of transitions) {
+                if (action === TransitionAction.Delete) {
+                  perform()
                 }
-            }
-          })(),
+              }
+            },
+            action: AccumulatedTransitionAction.Delete,
+          }
+      }
+    })(),
   }
 }

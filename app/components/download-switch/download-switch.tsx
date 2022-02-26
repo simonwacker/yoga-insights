@@ -1,94 +1,93 @@
 import React from "react"
 import { Track } from "../../models"
-import { View, ViewStyle } from "react-native"
-import { Text } from "../text/text"
-import { spacing } from "../../theme"
-import { DownloadState } from "../../clients/TrackDownloadsClient"
-import { TransitionAction, useDownload } from "../../hooks/useDownload"
-import { Switch } from "react-native-paper"
+import { SwitchProps } from "react-native"
+import { TransitionAction, DownloadState } from "../../clients/TrackDownloadsClient"
+import { useDownload } from "../../hooks/useDownload"
+import { List, Switch } from "react-native-paper"
+import { useTheme } from "react-native-paper"
 
-const ROOT: ViewStyle = {
-  marginVertical: spacing.medium,
-  marginHorizontal: spacing.medium,
-  flexDirection: "row",
-  justifyContent: "center",
-}
-
-function getSwitchAccessibilityLabelState(status: DownloadState["type"]): string {
-  switch (status) {
+function convertDownloadStateToPhrase(state: DownloadState): string {
+  switch (state.type) {
     case "UNKNOWN":
-      return "unbekannter Herunterladzustand"
+      return "Unbekannter Herunterladzustand"
     case "NOT_DOWNLOADED":
-      return "nicht heruntergeladen"
+      return "Nicht heruntergeladen"
     case "DOWNLOADING":
     case "FINALIZING":
-      return "beim Herunterladen"
+      return `Beim Herunterladen: ${Math.round(state.progress * 100)}%`
     case "DOWNLOADED":
-      return "heruntergeladen"
-    case "FAILED_DOWNLOADING":
-      return "Fehler beim Herunterladen"
+      return "Heruntergeladen"
     case "CANCELLING":
-      return "beim Abbrechen"
+      return "Beim Abbrechen"
     case "DELETING":
-      return "beim Löschen"
+      return "Beim Löschen"
   }
 }
 
-function getSwitchAccessibilityHintAction(action: TransitionAction): string {
+function convertTransitionActionToPhrase(action: TransitionAction): string {
   switch (action) {
+    case TransitionAction.None:
+      return "Keine"
     case TransitionAction.Start:
-      return "herunterladen"
+      return "Herunterladen"
     case TransitionAction.Cancel:
-      return "abbrechen"
+      return "Abbrechen"
     case TransitionAction.Delete:
-      return "löschen"
+      return "Löschen"
   }
 }
 
 export interface DownloadSwitchProps {
+  title: string
   track: Track
 }
 
-export function DownloadSwitch({ track }: DownloadSwitchProps) {
-  const { state: downloadState, transition } = useDownload(track)
+export function DownloadSwitch({ title, track }: DownloadSwitchProps) {
+  const {
+    state: downloadState,
+    requestedState: requestedDownloadState,
+    failed: failedToSatisfyDownloadRequest,
+    transition,
+  } = useDownload(track)
 
-  const startable =
-    downloadState.type === "NOT_DOWNLOADED" || downloadState.type === "FAILED_DOWNLOADING"
+  const { colors } = useTheme()
 
-  const onSwitchValueChange = () => {
-    if (transition === null) {
-      __DEV__ && console.error("Magic! How did you do that? You managed to turn a disabled switch!")
-    } else {
-      transition.transit()
-    }
-  }
+  const colorProps: Pick<SwitchProps, "trackColor" | "ios_backgroundColor"> =
+    failedToSatisfyDownloadRequest
+      ? {
+          trackColor: { false: colors.error, true: colors.error },
+          ios_backgroundColor: colors.error,
+        }
+      : {}
 
   return (
-    <View style={ROOT}>
-      <Switch
-        accessible={true}
-        accessibilityLabel={`Zustand: ${getSwitchAccessibilityLabelState(downloadState.type)}`}
-        accessibilityHint={
-          transition === null
-            ? undefined
-            : `Aktion: ${getSwitchAccessibilityHintAction(transition.action)}`
-        }
-        accessibilityRole="switch"
-        disabled={transition === null}
-        value={!startable}
-        onValueChange={onSwitchValueChange}
-      />
-      {downloadState.type === "DOWNLOADING" && (
-        <Text
+    <List.Item
+      title={title}
+      description={
+        `Zustand: ${convertDownloadStateToPhrase(downloadState)}` +
+        (__DEV__
+          ? `, Aktion: ${convertTransitionActionToPhrase(
+              transition.action,
+            )}, Wunsch: ${requestedDownloadState}, Versagt: ${failedToSatisfyDownloadRequest}`
+          : "")
+      }
+      right={(props) => (
+        <Switch
+          {...props}
           accessible={true}
-          accessibilityLabel={`${Math.round(downloadState.progress * 100)}%`}
-          accessibilityHint="prozentualer Herunterladefortschritt"
-          accessibilityRole="text"
-        >
-          {Math.round(downloadState.progress * 100)}%
-        </Text>
+          accessibilityLabel={`Aktion: ${convertTransitionActionToPhrase(transition.action)}`}
+          accessibilityRole="switch"
+          disabled={transition.action === TransitionAction.None}
+          value={
+            requestedDownloadState === "NONE"
+              ? transition.action !== TransitionAction.None &&
+                transition.action !== TransitionAction.Start
+              : requestedDownloadState === "DOWNLOADED"
+          }
+          onValueChange={() => transition.perform()}
+          {...colorProps}
+        />
       )}
-      <Text>{downloadState.type}</Text>
-    </View>
+    />
   )
 }

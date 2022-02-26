@@ -15,10 +15,10 @@ export function ClassesScreen({ navigation }: ClassesScreenProps) {
     <Screen preset="fixed" onAccessibilityEscape={navigation.goBack}>
       <TrackSectionList
         sections={classSections}
-        onSelectTrack={(initialTrackIndex, trackIds) =>
+        onSelectTrack={(initialTrackIndex, section) =>
           navigation.navigate("player", {
+            section: section,
             initialTrackIndex: initialTrackIndex,
-            trackIds: trackIds,
             backgroundMusicId: null,
           })
         }

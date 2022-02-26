@@ -3,6 +3,7 @@ import React, { useCallback } from "react"
 import { ViewStyle } from "react-native"
 import { FAB } from "react-native-paper"
 import { Screen, ListButtonItem, FlatList } from "../../components"
+import { SectionKind, TrackKind } from "../../models"
 import { PlaylistsScreenNavigationProp, PlaylistsScreenRouteProp } from "../../navigators"
 import { usePlaylistStore } from "../../stores"
 
@@ -33,8 +34,13 @@ export function PlaylistsScreen({ navigation }: PlaylistsScreenProps) {
             label={item.name}
             onPress={() =>
               navigation.navigate("player", {
+                section: {
+                  title: item.name,
+                  kind: SectionKind.Playlist,
+                  trackKind: TrackKind.Pose,
+                  data: [...item.poseIds],
+                },
                 initialTrackIndex: 0,
-                trackIds: item.poseIds,
                 backgroundMusicId: item.musicId,
               })
             }

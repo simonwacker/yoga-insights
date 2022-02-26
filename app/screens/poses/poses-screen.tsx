@@ -15,10 +15,10 @@ export function PosesScreen({ navigation }: PosesScreenProps) {
     <Screen preset="fixed" onAccessibilityEscape={navigation.goBack}>
       <TrackSectionList
         sections={poseSections}
-        onSelectTrack={(initialTrackIndex, trackIds) =>
+        onSelectTrack={(initialTrackIndex, section) =>
           navigation.navigate("player", {
+            section: section,
             initialTrackIndex: initialTrackIndex,
-            trackIds: trackIds,
             backgroundMusicId: null,
           })
         }
