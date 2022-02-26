@@ -541,7 +541,11 @@ export function AudioPlayer({
           />
           <Divider />
           {tracksToDownload.map((trackToDownload) => (
-            <DownloadSwitch title={trackToDownload.name} track={trackToDownload} />
+            <DownloadSwitch
+              key={trackToDownload.trackId}
+              title={trackToDownload.name}
+              track={trackToDownload}
+            />
           ))}
         </>
       )}
