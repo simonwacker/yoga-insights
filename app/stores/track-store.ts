@@ -1,5 +1,5 @@
 import create from "zustand"
-import { Section, Track, TrackKind } from "../models"
+import { Section, SectionKind, Track, TrackKind } from "../models"
 
 const tracks = [
   {
@@ -194,10 +194,14 @@ const indexedTracks = tracks.reduce((map, track) => {
 const classSections = [
   {
     title: "Rückenstärkung und Entlastung",
+    kind: SectionKind.General,
+    trackKind: TrackKind.Class,
     data: ["track-volume-1-part-1", "track-volume-1-part-2", "track-volume-1-part-4"],
   },
   {
     title: "Spannungsausgleich und Migräneprophylaxe",
+    kind: SectionKind.General,
+    trackKind: TrackKind.Class,
     data: [
       "track-volume-2-part-1",
       "track-volume-2-part-2",
@@ -210,10 +214,14 @@ const classSections = [
 const poseSections = [
   {
     title: "Rückenstärkung und Entlastung",
+    kind: SectionKind.General,
+    trackKind: TrackKind.Pose,
     data: ["track-volume-1-part-1", "track-volume-1-part-2", "track-volume-1-part-4"],
   },
   {
     title: "Spannungsausgleich und Migräneprophylaxe",
+    kind: SectionKind.General,
+    trackKind: TrackKind.Pose,
     data: [
       "track-volume-2-part-1",
       "track-volume-2-part-2",
@@ -226,10 +234,14 @@ const poseSections = [
 const musicSections = [
   {
     title: "Rückenstärkung und Entlastung",
+    kind: SectionKind.General,
+    trackKind: TrackKind.Music,
     data: ["track-volume-1-part-3"],
   },
   {
     title: "Spannungsausgleich und Migräneprophylaxe",
+    kind: SectionKind.General,
+    trackKind: TrackKind.Music,
     data: ["track-volume-2-part-3", "track-volume-2-part-6"],
   },
 ]

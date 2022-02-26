@@ -1,59 +1,53 @@
 import React from "react"
 import { Track } from "../models"
-import { SwitchProps, View, ViewStyle } from "react-native"
-import { Text } from "./text/text"
+import { SwitchProps } from "react-native"
 import {
   AccumulatedDownloadState,
   AccumulatedTransitionAction,
   useDownloads,
 } from "../hooks/useDownloads"
-import { Switch } from "react-native-paper"
+import { List, Switch } from "react-native-paper"
 import { useTheme } from "react-native-paper"
-
-const ROOT: ViewStyle = {
-  flexDirection: "row",
-  justifyContent: "flex-start",
-  alignItems: "center",
-}
 
 function convertDownloadStateToPhrase(state: AccumulatedDownloadState): string {
   switch (state.type) {
     case "UNKNOWN":
-      return "unbekannter Herunterladzustand"
+      return "Unbekannter Herunterladzustand"
     case "NOT_DOWNLOADED":
-      return "nicht heruntergeladen"
+      return "Nicht heruntergeladen"
     case "DOWNLOADING":
     case "FINALIZING":
-      return `beim Herunterladen: ${Math.round(state.progress * 100)}%`
+      return `Beim Herunterladen: ${Math.round(state.progress * 100)}%`
     case "DOWNLOADED":
-      return "heruntergeladen"
+      return "Heruntergeladen"
     case "CANCELLING":
-      return "beim Abbrechen"
+      return "Beim Abbrechen"
     case "DELETING":
-      return "beim Löschen"
+      return "Beim Löschen"
     case "FINALIZING_OR_CANCELLING_OR_DELETING":
-      return "beim Herunterladen, Abbrechen oder Löschen"
+      return "Beim Herunterladen, Abbrechen oder Löschen"
   }
 }
 
 function convertTransitionActionToPhrase(action: AccumulatedTransitionAction): string {
   switch (action) {
     case AccumulatedTransitionAction.None:
-      return "keine"
+      return "Keine"
     case AccumulatedTransitionAction.Start:
-      return "herunterladen"
+      return "Herunterladen"
     case AccumulatedTransitionAction.Cancel:
-      return "abbrechen"
+      return "Abbrechen"
     case AccumulatedTransitionAction.Delete:
-      return "löschen"
+      return "Löschen"
   }
 }
 
 export interface DownloadsSwitchProps {
+  title: string
   tracks: Track[]
 }
 
-export function DownloadsSwitch({ tracks }: DownloadsSwitchProps) {
+export function DownloadsSwitch({ title, tracks }: DownloadsSwitchProps) {
   const {
     state: downloadState,
     requestedState: requestedDownloadState,
@@ -72,34 +66,26 @@ export function DownloadsSwitch({ tracks }: DownloadsSwitchProps) {
       : {}
 
   return (
-    <View style={ROOT}>
-      <Switch
-        accessible={true}
-        accessibilityLabel={`Zustand: ${convertDownloadStateToPhrase(downloadState)}`}
-        accessibilityHint={
-          transition.action === AccumulatedTransitionAction.None
-            ? undefined
-            : `Aktion: ${convertTransitionActionToPhrase(transition.action)}`
-        }
-        accessibilityRole="switch"
-        disabled={transition.action === AccumulatedTransitionAction.None}
-        value={
-          requestedDownloadState === "NONE"
-            ? transition.action !== AccumulatedTransitionAction.None &&
-              transition.action !== AccumulatedTransitionAction.Start
-            : requestedDownloadState === "DOWNLOADED"
-        }
-        onValueChange={() => transition?.perform()}
-        {...colorProps}
-      />
-      <Text accessibilityElementsHidden={true} importantForAccessibility="no-hide-descendants">
-        {convertDownloadStateToPhrase(downloadState)}
-      </Text>
-      {__DEV__ && (
-        <Text accessibilityElementsHidden={true} importantForAccessibility="no-hide-descendants">
-          {convertTransitionActionToPhrase(transition.action)}
-        </Text>
+    <List.Item
+      title={title}
+      description={`Zustand: ${convertDownloadStateToPhrase(downloadState)}`}
+      right={(props) => (
+        <Switch
+          {...props}
+          accessible={true}
+          accessibilityLabel={`Aktion: ${convertTransitionActionToPhrase(transition.action)}`}
+          accessibilityRole="switch"
+          disabled={transition.action === AccumulatedTransitionAction.None}
+          value={
+            requestedDownloadState === "NONE"
+              ? transition.action !== AccumulatedTransitionAction.None &&
+                transition.action !== AccumulatedTransitionAction.Start
+              : requestedDownloadState === "DOWNLOADED"
+          }
+          onValueChange={() => transition?.perform()}
+          {...colorProps}
+        />
       )}
-    </View>
+    />
   )
 }

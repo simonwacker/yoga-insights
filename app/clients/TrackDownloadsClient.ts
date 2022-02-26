@@ -119,10 +119,6 @@ export class TrackDownloadsClient {
     const currentState = this.getDownloadState(trackId)
     switch (currentState.type) {
       case "UNKNOWN":
-        __DEV__ &&
-          console.warn(
-            `Asked for state to request next and corresponding action for track ${trackId} in unknown state`,
-          )
         return ["NONE", TransitionAction.None]
       case "DOWNLOADED":
         return ["NOT_DOWNLOADED", TransitionAction.Delete]
@@ -141,11 +137,7 @@ export class TrackDownloadsClient {
     const currentState = this.getDownloadState(trackId)
     switch (currentState.type) {
       case "UNKNOWN":
-        __DEV__ &&
-          console.warn(
-            `Asked for state to request next and corresponding action for track ${trackId} in unknown state`,
-          )
-        return requestedState === "NONE"
+        return requestedState !== "NONE"
       case "DOWNLOADED":
         return requestedState === "NOT_DOWNLOADED"
       case "NOT_DOWNLOADED":
@@ -165,7 +157,7 @@ export class TrackDownloadsClient {
       case "UNKNOWN":
         __DEV__ &&
           console.warn(
-            `Requested state ${requestedState} for track ${track.trackId} in unknown state`,
+            `Requested transition to state ${requestedState} for track ${track.trackId} in unknown state`,
           )
         break
       case "DOWNLOADED":

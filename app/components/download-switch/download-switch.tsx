@@ -1,54 +1,48 @@
 import React from "react"
 import { Track } from "../../models"
-import { SwitchProps, View, ViewStyle } from "react-native"
-import { Text } from "../text/text"
+import { SwitchProps } from "react-native"
 import { TransitionAction, DownloadState } from "../../clients/TrackDownloadsClient"
 import { useDownload } from "../../hooks/useDownload"
-import { Switch } from "react-native-paper"
+import { List, Switch } from "react-native-paper"
 import { useTheme } from "react-native-paper"
-
-const ROOT: ViewStyle = {
-  flexDirection: "row",
-  justifyContent: "flex-start",
-  alignItems: "center",
-}
 
 function convertDownloadStateToPhrase(state: DownloadState): string {
   switch (state.type) {
     case "UNKNOWN":
-      return "unbekannter Herunterladzustand"
+      return "Unbekannter Herunterladzustand"
     case "NOT_DOWNLOADED":
-      return "nicht heruntergeladen"
+      return "Nicht heruntergeladen"
     case "DOWNLOADING":
     case "FINALIZING":
-      return `beim Herunterladen: ${Math.round(state.progress * 100)}%`
+      return `Beim Herunterladen: ${Math.round(state.progress * 100)}%`
     case "DOWNLOADED":
-      return "heruntergeladen"
+      return "Heruntergeladen"
     case "CANCELLING":
-      return "beim Abbrechen"
+      return "Beim Abbrechen"
     case "DELETING":
-      return "beim Löschen"
+      return "Beim Löschen"
   }
 }
 
 function convertTransitionActionToPhrase(action: TransitionAction): string {
   switch (action) {
     case TransitionAction.None:
-      return "keine"
+      return "Keine"
     case TransitionAction.Start:
-      return "herunterladen"
+      return "Herunterladen"
     case TransitionAction.Cancel:
-      return "abbrechen"
+      return "Abbrechen"
     case TransitionAction.Delete:
-      return "löschen"
+      return "Löschen"
   }
 }
 
 export interface DownloadSwitchProps {
+  title: string
   track: Track
 }
 
-export function DownloadSwitch({ track }: DownloadSwitchProps) {
+export function DownloadSwitch({ title, track }: DownloadSwitchProps) {
   const {
     state: downloadState,
     requestedState: requestedDownloadState,
@@ -67,34 +61,26 @@ export function DownloadSwitch({ track }: DownloadSwitchProps) {
       : {}
 
   return (
-    <View style={ROOT}>
-      <Switch
-        accessible={true}
-        accessibilityLabel={`Zustand: ${convertDownloadStateToPhrase(downloadState)}`}
-        accessibilityHint={
-          transition.action === TransitionAction.None
-            ? undefined
-            : `Aktion: ${convertTransitionActionToPhrase(transition.action)}`
-        }
-        accessibilityRole="switch"
-        disabled={transition.action === TransitionAction.None}
-        value={
-          requestedDownloadState === "NONE"
-            ? transition.action !== TransitionAction.None &&
-              transition.action !== TransitionAction.Start
-            : requestedDownloadState === "DOWNLOADED"
-        }
-        onValueChange={() => transition.perform()}
-        {...colorProps}
-      />
-      <Text accessibilityElementsHidden={true} importantForAccessibility="no-hide-descendants">
-        {convertDownloadStateToPhrase(downloadState)}
-      </Text>
-      {__DEV__ && (
-        <Text accessibilityElementsHidden={true} importantForAccessibility="no-hide-descendants">
-          {convertTransitionActionToPhrase(transition.action)}
-        </Text>
+    <List.Item
+      title={title}
+      description={`Zustand: ${convertDownloadStateToPhrase(downloadState)}`}
+      right={(props) => (
+        <Switch
+          {...props}
+          accessible={true}
+          accessibilityLabel={`Aktion: ${convertTransitionActionToPhrase(transition.action)}`}
+          accessibilityRole="switch"
+          disabled={transition.action === TransitionAction.None}
+          value={
+            requestedDownloadState === "NONE"
+              ? transition.action !== TransitionAction.None &&
+                transition.action !== TransitionAction.Start
+              : requestedDownloadState === "DOWNLOADED"
+          }
+          onValueChange={() => transition.perform()}
+          {...colorProps}
+        />
       )}
-    </View>
+    />
   )
 }

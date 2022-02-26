@@ -9,10 +9,11 @@ import Slider from "@react-native-community/slider"
 import { spacing } from "../../theme"
 import { TextStyle } from "react-native"
 import { useAudioSource } from "../../hooks/useAudioSource"
-import { IconButton, useTheme } from "react-native-paper"
-import { Track, TrackKind } from "../../models"
+import { Divider, IconButton, useTheme } from "react-native-paper"
+import { Section, SectionKind, Track, TrackKind } from "../../models"
 import { MaterialCommunityIcons } from "@expo/vector-icons"
 import { DownloadsSwitch } from "../downloads-switch"
+import { useTrackStore } from "../../stores"
 
 const ROOT: ViewStyle = {
   flex: 1,
@@ -23,15 +24,9 @@ const TEXT: TextStyle = {
   textAlign: "center",
 }
 const HANDLE: ViewStyle = { marginHorizontal: spacing.tiny }
-const CENTER_ROW: ViewStyle = {
+const ROW: ViewStyle = {
   flexDirection: "row",
   justifyContent: "center",
-  marginVertical: spacing.medium,
-  marginHorizontal: spacing.medium,
-}
-const LEFT_ROW: ViewStyle = {
-  flexDirection: "row",
-  justifyContent: "flex-start",
   marginVertical: spacing.medium,
   marginHorizontal: spacing.medium,
 }
@@ -100,10 +95,9 @@ function Handle({
 }
 
 export interface AudioPlayerProps {
-  tracksKind: TrackKind
+  section: Section
   track: Track
   backgroundMusic?: Track
-  tracksToDownload: Track[]
   onPlaybackDidJustFinish: () => void
   previousTrack?: Track
   onPlayPreviousTrack: () => void
@@ -112,10 +106,9 @@ export interface AudioPlayerProps {
 }
 
 export function AudioPlayer({
-  tracksKind,
+  section,
   track,
   backgroundMusic,
-  tracksToDownload,
   onPlaybackDidJustFinish,
   previousTrack,
   onPlayPreviousTrack,
@@ -124,6 +117,8 @@ export function AudioPlayer({
 }: AudioPlayerProps) {
   const exerciseAudioSource = useAudioSource(track)
   const backgroundAudioSource = useAudioSource(backgroundMusic ?? undefined)
+
+  const getTrack = useTrackStore(useCallback((state) => state.getTrack, []))
 
   const [sound] = useState<Audio.Sound>(() => new Audio.Sound())
   const [playbackStatus, setPlaybackStatus] = useState<AVPlaybackStatus | null>(null)
@@ -376,6 +371,25 @@ export function AudioPlayer({
     }
   }
 
+  const convertSectionKindToSingularWord = (sectionKind: SectionKind) => {
+    switch (sectionKind) {
+      case SectionKind.General:
+        return "Abschnitt"
+      case SectionKind.Playlist:
+        return "Playlist"
+    }
+  }
+
+  const getTracksToDownload = () => {
+    let tracks = section.data.map((trackId) => getTrack(trackId))
+    if (backgroundMusic === undefined || backgroundMusic === null) {
+      return tracks
+    }
+    return [...tracks, backgroundMusic]
+  }
+
+  const tracksToDownload = getTracksToDownload()
+
   return (
     <View
       style={ROOT}
@@ -395,14 +409,14 @@ export function AudioPlayer({
           style={{ width: 150, height: 150, marginBottom: 15, alignSelf: "center" }}
         /> */}
       {!playbackStatus?.isLoaded && playbackStatus?.error && (
-        <View style={CENTER_ROW}>
+        <View style={ROW}>
           <Text style={TEXT}>Error: {playbackStatus.error}</Text>
         </View>
       )}
-      <View style={CENTER_ROW}>
+      <View style={ROW}>
         <Text style={TEXT}>{track.name}</Text>
       </View>
-      <View style={CENTER_ROW}>
+      <View style={ROW}>
         <Handle
           icon="skip-backward"
           disabled={!previousTrack}
@@ -441,7 +455,7 @@ export function AudioPlayer({
           onPress={onPlayNextTrack}
         />
       </View>
-      <View style={CENTER_ROW}>
+      <View style={ROW}>
         <Text
           accessible={true}
           accessibilityLabel={convertToAudioTimePhrase(sliderPosition)}
@@ -489,7 +503,7 @@ export function AudioPlayer({
         </Text>
       </View>
       {backgroundMusic && (
-        <View style={CENTER_ROW}>
+        <View style={ROW}>
           <Handle
             icon="volume-low"
             accessibilityLabel="Hintergrundmusik leiser machen"
@@ -516,27 +530,18 @@ export function AudioPlayer({
           />
         </View>
       )}
-      <View style={LEFT_ROW}>
-        <Text>Diese {convertTrackKindToSingularWord(tracksKind)} herunterladen oder löschen:</Text>
-      </View>
-      <View style={LEFT_ROW}>
-        <DownloadSwitch track={track} />
-      </View>
+      <DownloadSwitch title={convertTrackKindToSingularWord(section.trackKind)} track={track} />
+
       {tracksToDownload.length >= 2 && (
         <>
-          <View style={LEFT_ROW}>
-            <Text>
-              Jede {convertTrackKindToSingularWord(tracksKind)} dieses/dieser Abschnitts/Playlist
-              herunterladen oder löschen:
-            </Text>
-          </View>
-          <View style={LEFT_ROW}>
-            <DownloadsSwitch tracks={tracksToDownload} />
-          </View>
+          <Divider />
+          <DownloadsSwitch
+            title={convertSectionKindToSingularWord(section.kind)}
+            tracks={tracksToDownload}
+          />
+          <Divider />
           {tracksToDownload.map((trackToDownload) => (
-            <View style={LEFT_ROW}>
-              <DownloadSwitch track={trackToDownload} />
-            </View>
+            <DownloadSwitch title={trackToDownload.name} track={trackToDownload} />
           ))}
         </>
       )}
