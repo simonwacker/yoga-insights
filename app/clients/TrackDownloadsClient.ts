@@ -188,6 +188,7 @@ export class TrackDownloadsClient {
       case "DELETING":
         break
     }
+    this.notify(track.trackId)
   }
 
   subscribe(trackId: string, callback: () => void): () => void {

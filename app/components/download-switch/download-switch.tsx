@@ -1,6 +1,6 @@
 import React from "react"
 import { Track } from "../../models"
-import { View, ViewStyle } from "react-native"
+import { SwitchProps, View, ViewStyle } from "react-native"
 import { Text } from "../text/text"
 import { TransitionAction, DownloadState } from "../../clients/TrackDownloadsClient"
 import { useDownload } from "../../hooks/useDownload"
@@ -58,12 +58,13 @@ export function DownloadSwitch({ track }: DownloadSwitchProps) {
 
   const { colors } = useTheme()
 
-  const colorProps = failedToSatisfyDownloadRequest
-    ? {
-        trackColor: { false: colors.error, true: colors.error },
-        ios_backgroundColor: colors.error,
-      }
-    : {}
+  const colorProps: Pick<SwitchProps, "trackColor" | "ios_backgroundColor"> =
+    failedToSatisfyDownloadRequest
+      ? {
+          trackColor: { false: colors.error, true: colors.error },
+          ios_backgroundColor: colors.error,
+        }
+      : {}
 
   return (
     <View style={ROOT}>
@@ -79,7 +80,8 @@ export function DownloadSwitch({ track }: DownloadSwitchProps) {
         disabled={transition.action === TransitionAction.None}
         value={
           requestedDownloadState === "NONE"
-            ? downloadState.type === "DOWNLOADED"
+            ? transition.action !== TransitionAction.None &&
+              transition.action !== TransitionAction.Start
             : requestedDownloadState === "DOWNLOADED"
         }
         onValueChange={() => transition.perform()}
