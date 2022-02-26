@@ -1,5 +1,6 @@
 import React, { useCallback } from "react"
 import { Screen, TrackSectionList } from "../../components"
+import { TrackKind } from "../../models"
 import { ClassesScreenNavigationProp, ClassesScreenRouteProp } from "../../navigators"
 import { useTrackStore } from "../../stores"
 
@@ -17,6 +18,7 @@ export function ClassesScreen({ navigation }: ClassesScreenProps) {
         sections={classSections}
         onSelectTrack={(initialTrackIndex, trackIds) =>
           navigation.navigate("player", {
+            trackKind: TrackKind.Class,
             initialTrackIndex: initialTrackIndex,
             trackIds: trackIds,
             backgroundMusicId: null,

@@ -35,6 +35,7 @@ import {
 } from "../screens"
 import { Appbar } from "react-native-paper"
 import { MaterialCommunityIcons } from "@expo/vector-icons"
+import { TrackKind } from "../models"
 
 /**
  * This type allows TypeScript to know what routes are defined in this navigator
@@ -55,6 +56,7 @@ export type BottomTabParamList = {
 export type MainParamList = {
   tabs: NavigatorScreenParams<BottomTabParamList>
   player: {
+    trackKind: TrackKind
     initialTrackIndex: number
     trackIds: readonly string[]
     backgroundMusicId: string | null

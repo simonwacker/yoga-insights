@@ -13,7 +13,7 @@ const ROOT: ViewStyle = {
   alignItems: "center",
 }
 
-function getSwitchAccessibilityLabelState(state: DownloadState): string {
+function convertDownloadStateToPhrase(state: DownloadState): string {
   switch (state.type) {
     case "UNKNOWN":
       return "unbekannter Herunterladzustand"
@@ -31,7 +31,7 @@ function getSwitchAccessibilityLabelState(state: DownloadState): string {
   }
 }
 
-function getSwitchAccessibilityHintAction(action: TransitionAction): string {
+function convertTransitionActionToPhrase(action: TransitionAction): string {
   switch (action) {
     case TransitionAction.None:
       return "keine"
@@ -70,11 +70,11 @@ export function DownloadSwitch({ track }: DownloadSwitchProps) {
     <View style={ROOT}>
       <Switch
         accessible={true}
-        accessibilityLabel={`Zustand: ${getSwitchAccessibilityLabelState(downloadState)}`}
+        accessibilityLabel={`Zustand: ${convertDownloadStateToPhrase(downloadState)}`}
         accessibilityHint={
           transition.action === TransitionAction.None
             ? undefined
-            : `Aktion: ${getSwitchAccessibilityHintAction(transition.action)}`
+            : `Aktion: ${convertTransitionActionToPhrase(transition.action)}`
         }
         accessibilityRole="switch"
         disabled={transition.action === TransitionAction.None}
@@ -88,11 +88,11 @@ export function DownloadSwitch({ track }: DownloadSwitchProps) {
         {...colorProps}
       />
       <Text accessibilityElementsHidden={true} importantForAccessibility="no-hide-descendants">
-        {getSwitchAccessibilityLabelState(downloadState)}
+        {convertDownloadStateToPhrase(downloadState)}
       </Text>
       {__DEV__ && (
         <Text accessibilityElementsHidden={true} importantForAccessibility="no-hide-descendants">
-          {getSwitchAccessibilityHintAction(transition.action)}
+          {convertTransitionActionToPhrase(transition.action)}
         </Text>
       )}
     </View>

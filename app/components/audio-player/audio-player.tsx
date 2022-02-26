@@ -10,7 +10,7 @@ import { spacing } from "../../theme"
 import { TextStyle } from "react-native"
 import { useAudioSource } from "../../hooks/useAudioSource"
 import { IconButton, useTheme } from "react-native-paper"
-import { Track } from "../../models"
+import { Track, TrackKind } from "../../models"
 import { MaterialCommunityIcons } from "@expo/vector-icons"
 import { DownloadsSwitch } from "../downloads-switch"
 
@@ -100,6 +100,7 @@ function Handle({
 }
 
 export interface AudioPlayerProps {
+  tracksKind: TrackKind
   track: Track
   backgroundMusic?: Track
   tracksToDownload: Track[]
@@ -111,6 +112,7 @@ export interface AudioPlayerProps {
 }
 
 export function AudioPlayer({
+  tracksKind,
   track,
   backgroundMusic,
   tracksToDownload,
@@ -363,6 +365,17 @@ export function AudioPlayer({
     return `${hours} Stunden, ${minutes} Minuten und ${seconds} Sekunden`
   }
 
+  const convertTrackKindToSingularWord = (trackKind: TrackKind) => {
+    switch (trackKind) {
+      case TrackKind.Class:
+        return "Stunde"
+      case TrackKind.Pose:
+        return "Übung"
+      case TrackKind.Music:
+        return "Musik"
+    }
+  }
+
   return (
     <View
       style={ROOT}
@@ -504,7 +517,7 @@ export function AudioPlayer({
         </View>
       )}
       <View style={LEFT_ROW}>
-        <Text>Diese Stunde/Übung/Musik herunterladen oder löschen:</Text>
+        <Text>Diese {convertTrackKindToSingularWord(tracksKind)} herunterladen oder löschen:</Text>
       </View>
       <View style={LEFT_ROW}>
         <DownloadSwitch track={track} />
@@ -513,7 +526,8 @@ export function AudioPlayer({
         <>
           <View style={LEFT_ROW}>
             <Text>
-              Jede Stunde/Übung/Musik dieses/dieser Abschnitts/Playlist herunterladen oder löschen:
+              Jede {convertTrackKindToSingularWord(tracksKind)} dieses/dieser Abschnitts/Playlist
+              herunterladen oder löschen:
             </Text>
           </View>
           <View style={LEFT_ROW}>

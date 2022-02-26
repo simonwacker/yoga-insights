@@ -1,9 +1,10 @@
 import create from "zustand"
-import { Section, Track } from "../models"
+import { Section, Track, TrackKind } from "../models"
 
 const tracks = [
   {
     trackId: "track-volume-1-part-1",
+    kind: TrackKind.Class,
     name: "Grundlegende Einführung",
     fileExtension: "mp3",
     md5FileHashValue: "4154d609e7307a3cc31c9ac1e20ea9d0",
@@ -23,6 +24,7 @@ const tracks = [
   },
   {
     trackId: "track-volume-1-part-2",
+    kind: TrackKind.Class,
     name: "Regeneratives, entlastendes Abendprogramm",
     fileExtension: "mp3",
     md5FileHashValue: "?",
@@ -49,6 +51,7 @@ const tracks = [
   },
   {
     trackId: "track-volume-1-part-3",
+    kind: TrackKind.Music,
     name: "Naturklänge zum freien Üben",
     fileExtension: "mp3",
     md5FileHashValue: "?",
@@ -63,6 +66,7 @@ const tracks = [
   },
   {
     trackId: "track-volume-1-part-4",
+    kind: TrackKind.Class,
     name: "Anregendes Yogaprogramm: Rückenstärkung und Rückenentlastung",
     fileExtension: "mp3",
     md5FileHashValue: "?",
@@ -101,6 +105,7 @@ const tracks = [
   },
   {
     trackId: "track-volume-2-part-1",
+    kind: TrackKind.Class,
     name: "Einführung",
     fileExtension: "mp3",
     md5FileHashValue: "?",
@@ -111,6 +116,7 @@ const tracks = [
   },
   {
     trackId: "track-volume-2-part-2",
+    kind: TrackKind.Class,
     name: "Migräne Soforthilfe 1 & 2 bei Auftretetn erster Symptome",
     fileExtension: "mp3",
     md5FileHashValue: "?",
@@ -128,6 +134,7 @@ const tracks = [
   },
   {
     trackId: "track-volume-2-part-3",
+    kind: TrackKind.Music,
     name: "Musik pur",
     fileExtension: "mp3",
     md5FileHashValue: "?",
@@ -139,6 +146,7 @@ const tracks = [
   },
   {
     trackId: "track-volume-2-part-4",
+    kind: TrackKind.Class,
     name: "Anleitung ohne Musik",
     fileExtension: "mp3",
     md5FileHashValue: "?",
@@ -155,6 +163,7 @@ const tracks = [
   },
   {
     trackId: "track-volume-2-part-5",
+    kind: TrackKind.Class,
     name: "Ausführliches Übungsprogramm zur Entspannung von Kopf und Geist",
     fileExtension: "mp3",
     md5FileHashValue: "?",
@@ -166,6 +175,7 @@ const tracks = [
   },
   {
     trackId: "track-volume-2-part-6",
+    kind: TrackKind.Music,
     name: "Naturklänge",
     fileExtension: "mp3",
     md5FileHashValue: "?",
@@ -226,11 +236,14 @@ const musicSections = [
 
 const fallbackTrack = {
   trackId: "track-volume-1-part-1",
+  kind: TrackKind.Class,
   name: "Grundlegende Einführung",
   fileExtension: "mp3",
   md5FileHashValue: "4154d609e7307a3cc31c9ac1e20ea9d0",
   webUri:
     "https://citysoundstudio.de/n/index.php/s/WggwKH5eGSxzZbk/download?path=%2FYoga%20Insights%20Vol.1&files=Yoga%20Insights%20Volume%201-Teil%201-Grundlegende%20Einf%C3%BChrung.mp3",
+  description: null,
+  hints: [],
 }
 
 type State = {

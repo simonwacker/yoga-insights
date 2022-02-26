@@ -16,7 +16,7 @@ const ROOT: ViewStyle = {
   alignItems: "center",
 }
 
-function getSwitchAccessibilityLabelState(state: AccumulatedDownloadState): string {
+function convertDownloadStateToPhrase(state: AccumulatedDownloadState): string {
   switch (state.type) {
     case "UNKNOWN":
       return "unbekannter Herunterladzustand"
@@ -36,7 +36,7 @@ function getSwitchAccessibilityLabelState(state: AccumulatedDownloadState): stri
   }
 }
 
-function getSwitchAccessibilityHintAction(action: AccumulatedTransitionAction): string {
+function convertTransitionActionToPhrase(action: AccumulatedTransitionAction): string {
   switch (action) {
     case AccumulatedTransitionAction.None:
       return "keine"
@@ -75,11 +75,11 @@ export function DownloadsSwitch({ tracks }: DownloadsSwitchProps) {
     <View style={ROOT}>
       <Switch
         accessible={true}
-        accessibilityLabel={`Zustand: ${getSwitchAccessibilityLabelState(downloadState)}`}
+        accessibilityLabel={`Zustand: ${convertDownloadStateToPhrase(downloadState)}`}
         accessibilityHint={
           transition.action === AccumulatedTransitionAction.None
             ? undefined
-            : `Aktion: ${getSwitchAccessibilityHintAction(transition.action)}`
+            : `Aktion: ${convertTransitionActionToPhrase(transition.action)}`
         }
         accessibilityRole="switch"
         disabled={transition.action === AccumulatedTransitionAction.None}
@@ -93,11 +93,11 @@ export function DownloadsSwitch({ tracks }: DownloadsSwitchProps) {
         {...colorProps}
       />
       <Text accessibilityElementsHidden={true} importantForAccessibility="no-hide-descendants">
-        {getSwitchAccessibilityLabelState(downloadState)}
+        {convertDownloadStateToPhrase(downloadState)}
       </Text>
       {__DEV__ && (
         <Text accessibilityElementsHidden={true} importantForAccessibility="no-hide-descendants">
-          {getSwitchAccessibilityHintAction(transition.action)}
+          {convertTransitionActionToPhrase(transition.action)}
         </Text>
       )}
     </View>

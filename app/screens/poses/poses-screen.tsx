@@ -1,5 +1,6 @@
 import React, { useCallback } from "react"
 import { Screen, TrackSectionList } from "../../components"
+import { TrackKind } from "../../models"
 import { PosesScreenNavigationProp, PosesScreenRouteProp } from "../../navigators"
 import { useTrackStore } from "../../stores"
 
@@ -17,6 +18,7 @@ export function PosesScreen({ navigation }: PosesScreenProps) {
         sections={poseSections}
         onSelectTrack={(initialTrackIndex, trackIds) =>
           navigation.navigate("player", {
+            trackKind: TrackKind.Pose,
             initialTrackIndex: initialTrackIndex,
             trackIds: trackIds,
             backgroundMusicId: null,

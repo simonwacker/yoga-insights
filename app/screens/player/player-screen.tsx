@@ -9,7 +9,7 @@ export type PlayerScreenProps = {
 }
 
 export function PlayerScreen({ route, navigation }: PlayerScreenProps) {
-  const { initialTrackIndex, trackIds, backgroundMusicId } = route.params
+  const { trackKind, initialTrackIndex, trackIds, backgroundMusicId } = route.params
 
   const getTrack = useTrackStore(useCallback((state) => state.getTrack, []))
   const [trackIndex, setTrackIndex] = useState(initialTrackIndex)
@@ -37,6 +37,7 @@ export function PlayerScreen({ route, navigation }: PlayerScreenProps) {
   return (
     <Screen preset="scroll" onAccessibilityEscape={navigation.goBack}>
       <AudioPlayer
+        tracksKind={trackKind}
         track={getTrack(trackIds[trackIndex])}
         backgroundMusic={backgroundMusicId === null ? undefined : getTrack(backgroundMusicId)}
         tracksToDownload={getTracksToDownload()}
