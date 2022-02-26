@@ -63,7 +63,14 @@ export function DownloadSwitch({ title, track }: DownloadSwitchProps) {
   return (
     <List.Item
       title={title}
-      description={`Zustand: ${convertDownloadStateToPhrase(downloadState)}`}
+      description={
+        `Zustand: ${convertDownloadStateToPhrase(downloadState)}` +
+        (__DEV__
+          ? `, Aktion: ${convertTransitionActionToPhrase(
+              transition.action,
+            )}, Wunsch: ${requestedDownloadState}, Versagt: ${failedToSatisfyDownloadRequest}`
+          : "")
+      }
       right={(props) => (
         <Switch
           {...props}

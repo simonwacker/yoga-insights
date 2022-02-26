@@ -38,7 +38,7 @@ export function PlaylistsScreen({ navigation }: PlaylistsScreenProps) {
                   title: item.name,
                   kind: SectionKind.Playlist,
                   trackKind: TrackKind.Pose,
-                  data: [...item.poseIds], // TODO This is necessary because of `readonly`
+                  data: [...item.poseIds],
                 },
                 initialTrackIndex: 0,
                 backgroundMusicId: item.musicId,

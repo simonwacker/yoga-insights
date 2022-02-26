@@ -281,6 +281,7 @@ export class TrackDownloadsClient {
           }
         },
       )
+      __DEV__ && console.log(`Setting state to cencelling and notifying subscribers.`)
       this.cachedDownloadStates.set(track.trackId, {
         type: "CANCELLING",
         progress: currentState.progress,
