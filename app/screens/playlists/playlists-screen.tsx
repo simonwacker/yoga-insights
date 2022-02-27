@@ -32,6 +32,7 @@ export function PlaylistsScreen({ navigation }: PlaylistsScreenProps) {
         renderItem={({ item }) => (
           <ListButtonItem
             label={item.name}
+            description={null}
             onPress={() =>
               navigation.navigate("player", {
                 section: {

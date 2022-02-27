@@ -9,7 +9,7 @@ import Slider from "@react-native-community/slider"
 import { spacing } from "../../theme"
 import { TextStyle } from "react-native"
 import { useAudioSource } from "../../hooks/useAudioSource"
-import { Divider, IconButton, useTheme } from "react-native-paper"
+import { IconButton, List, useTheme } from "react-native-paper"
 import { Section, SectionKind, Track, TrackKind } from "../../models"
 import { MaterialCommunityIcons } from "@expo/vector-icons"
 import { DownloadsSwitch } from "../downloads-switch"
@@ -284,12 +284,11 @@ export function AudioPlayer({
     }
   }
 
-  const jumpPrev30Seconds = () => jumpSeconds(-30)
-  const jumpNext30Seconds = () => jumpSeconds(30)
-  const jumpSeconds = async (seconds: number) => {
+  const jumpPrev30Seconds = () => jumpMilliseconds(-30 * 1000)
+  const jumpNext30Seconds = () => jumpMilliseconds(30 * 1000)
+  const jumpMilliseconds = async (milliseconds: number) => {
     try {
       if (playbackStatus?.isLoaded) {
-        const milliseconds = seconds * 1000
         let nextMilliseconds = playbackStatus.positionMillis + milliseconds
         if (nextMilliseconds < 0) {
           nextMilliseconds = 0
@@ -302,7 +301,7 @@ export function AudioPlayer({
         await sound.setPositionAsync(nextMilliseconds)
       }
     } catch (error) {
-      __DEV__ && console.error(`Failed to jump ${seconds} seconds.`, error)
+      __DEV__ && console.error(`Failed to jump ${milliseconds} milliseconds.`, error)
     }
   }
 
@@ -377,6 +376,15 @@ export function AudioPlayer({
         return "Abschnitt"
       case SectionKind.Playlist:
         return "Playlist"
+    }
+  }
+
+  const convertSectionKindToSingularPhrase = (sectionKind: SectionKind) => {
+    switch (sectionKind) {
+      case SectionKind.General:
+        return "des Abschnitts"
+      case SectionKind.Playlist:
+        return "der Playlist"
     }
   }
 
@@ -530,23 +538,51 @@ export function AudioPlayer({
           />
         </View>
       )}
+      {track.hints.length >= 1 && (
+        <List.Accordion title="Sprungmarken">
+          {
+            track.hints.reduce<[number, React.ReactNode[]]>(
+              ([startTime, items], hint, index) => [
+                startTime + hint.duration,
+                items.concat([
+                  <List.Item
+                    key={index}
+                    title={hint.name}
+                    description={`Beginn: ${convertToAudioTimeString(
+                      startTime,
+                    )}, Dauer: ${convertToAudioTimeString(hint.duration)}`}
+                    onPress={() => sound.setPositionAsync(startTime)}
+                    onMagicTap={() => sound.setPositionAsync(startTime)} // TODO Is `onMagicPress` necessary?
+                  />,
+                ]),
+              ],
+              [0, []],
+            )[1]
+          }
+          {/* {track.hints.map(({ name, duration }, index) => (
+            <List.Item key={index} title={name} description={duration} />
+          ))} */}
+        </List.Accordion>
+      )}
       <DownloadSwitch title={convertTrackKindToSingularWord(section.trackKind)} track={track} />
 
       {tracksToDownload.length >= 2 && (
         <>
-          <Divider />
           <DownloadsSwitch
             title={convertSectionKindToSingularWord(section.kind)}
             tracks={tracksToDownload}
           />
-          <Divider />
-          {tracksToDownload.map((trackToDownload) => (
-            <DownloadSwitch
-              key={trackToDownload.trackId}
-              title={trackToDownload.name}
-              track={trackToDownload}
-            />
-          ))}
+          <List.Accordion
+            title={`Details zum Download ${convertSectionKindToSingularPhrase(section.kind)}`}
+          >
+            {tracksToDownload.map((trackToDownload) => (
+              <DownloadSwitch
+                key={trackToDownload.trackId}
+                title={trackToDownload.name}
+                track={trackToDownload}
+              />
+            ))}
+          </List.Accordion>
         </>
       )}
     </View>

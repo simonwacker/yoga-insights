@@ -16,13 +16,17 @@ export function TrackSectionList({ sections, onSelectTrack }: TrackSectionListPr
   return (
     <SectionList
       sections={sections}
-      renderItem={({ item, index, section }) => (
-        <ListButtonItem
-          key={index}
-          label={getTrack(item).name}
-          onPress={() => onSelectTrack(index, section as Section)}
-        />
-      )}
+      renderItem={({ item, index, section }) => {
+        const track = getTrack(item)
+        return (
+          <ListButtonItem
+            key={index}
+            label={track.name}
+            description={track.description}
+            onPress={() => onSelectTrack(index, section as Section)}
+          />
+        )
+      }}
     />
   )
 }
