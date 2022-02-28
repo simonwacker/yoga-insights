@@ -9,7 +9,7 @@ import Slider from "@react-native-community/slider"
 import { spacing } from "../../theme"
 import { TextStyle } from "react-native"
 import { useAudioSource } from "../../hooks/useAudioSource"
-import { IconButton, List, useTheme } from "react-native-paper"
+import { Divider, IconButton, List, useTheme } from "react-native-paper"
 import { Section, SectionKind, Track, TrackKind } from "../../models"
 import { MaterialCommunityIcons } from "@expo/vector-icons"
 import { DownloadsSwitch } from "../downloads-switch"
@@ -61,6 +61,91 @@ const loadAndPlay = async (
     )
   } catch (error) {
     __DEV__ && console.error("Failed to create, load, and play audio.", error)
+  }
+}
+
+const padZero = (x: number) => (x < 10 ? "0" + x.toString() : x.toString())
+
+const extractHours = (milliseconds: number) => Math.floor(milliseconds / (1000 * 60 * 60))
+
+const extractMinutes = (milliseconds: number) => Math.floor((milliseconds / (1000 * 60)) % 60)
+
+const extractSeconds = (milliseconds: number) => Math.floor((milliseconds / 1000) % 60)
+
+const hourWord = { singular: "Stunde", plural: "Stunden" }
+const minuteWord = { singular: "Minute", plural: "Minuten" }
+const secondWord = { singular: "Sekunde", plural: "Sekunden" }
+
+const getWordInGrammaticalNumber = (time: number, word: { singular: string; plural: string }) => {
+  if (time === 1) return word.singular
+  return word.plural
+}
+
+const extractTimeComponents = (milliseconds: number) => {
+  const hours = extractHours(milliseconds)
+  const minutes = extractMinutes(milliseconds)
+  const seconds = extractSeconds(milliseconds)
+  return [
+    { time: hours, word: getWordInGrammaticalNumber(hours, hourWord) },
+    { time: minutes, word: getWordInGrammaticalNumber(minutes, minuteWord) },
+    { time: seconds, word: getWordInGrammaticalNumber(seconds, secondWord) },
+  ]
+}
+
+const convertToFullAudioTimeString = (milliseconds: number) => {
+  const components = extractTimeComponents(milliseconds)
+  return components.map(({ time }) => padZero(time)).join(":")
+}
+
+const convertToAudioTimePhrase = (milliseconds: number) => {
+  const components = extractTimeComponents(milliseconds).filter(({ time }) => time !== 0)
+  if (components.length === 0)
+    components.push({ time: 0, word: getWordInGrammaticalNumber(0, secondWord) })
+  const phraseParts = components.map(({ time, word }) => `${time} ${word}`)
+  if (phraseParts.length === 1) return phraseParts[0]
+  const allButLastParts = phraseParts.slice(0, -1)
+  const lastPart = phraseParts[phraseParts.length - 1]
+  return `${allButLastParts.join(",")} und ${lastPart}`
+}
+
+const convertToMinimalDurationString = (milliseconds: number) => {
+  // const components = extractTimeComponents(milliseconds).reduce<{time: number, word: string>((accumulator, component) => {
+  //   if (component.time)
+  // }, [])
+  const components = extractTimeComponents(milliseconds)
+  while (components.length >= 1 && components[components.length - 1].time === 0) components.pop()
+  while (components.length >= 1 && components[0].time === 0) components.shift()
+  if (components.length === 0)
+    components.push({ time: 0, word: getWordInGrammaticalNumber(0, secondWord) })
+  return `${components.map(({ time }) => padZero(time)).join(":")} ${components[0].word}`
+}
+
+const convertTrackKindToSingularWord = (trackKind: TrackKind) => {
+  switch (trackKind) {
+    case TrackKind.Class:
+      return "Stunde"
+    case TrackKind.Pose:
+      return "Übung"
+    case TrackKind.Music:
+      return "Musik"
+  }
+}
+
+const convertSectionKindToSingularWord = (sectionKind: SectionKind) => {
+  switch (sectionKind) {
+    case SectionKind.General:
+      return "Abschnitt"
+    case SectionKind.Playlist:
+      return "Playlist"
+  }
+}
+
+const convertSectionKindToSingularPhrase = (sectionKind: SectionKind) => {
+  switch (sectionKind) {
+    case SectionKind.General:
+      return "des Abschnitts"
+    case SectionKind.Playlist:
+      return "der Playlist"
   }
 }
 
@@ -343,51 +428,6 @@ export function AudioPlayer({
     }
   }
 
-  const padZero = (x: number) => (x < 10 ? "0" + x.toString() : x.toString())
-
-  const convertToAudioTimeString = (milliseconds: number) => {
-    const hours = Math.floor(milliseconds / (1000 * 60 * 60))
-    const minutes = Math.floor((milliseconds / (1000 * 60)) % 60)
-    const seconds = Math.floor((milliseconds / 1000) % 60)
-    return `${padZero(hours)}:${padZero(minutes)}:${padZero(seconds)}`
-  }
-
-  const convertToAudioTimePhrase = (milliseconds: number) => {
-    const hours = Math.floor(milliseconds / (1000 * 60 * 60))
-    const minutes = Math.floor((milliseconds / (1000 * 60)) % 60)
-    const seconds = Math.floor((milliseconds / 1000) % 60)
-    return `${hours} Stunden, ${minutes} Minuten und ${seconds} Sekunden`
-  }
-
-  const convertTrackKindToSingularWord = (trackKind: TrackKind) => {
-    switch (trackKind) {
-      case TrackKind.Class:
-        return "Stunde"
-      case TrackKind.Pose:
-        return "Übung"
-      case TrackKind.Music:
-        return "Musik"
-    }
-  }
-
-  const convertSectionKindToSingularWord = (sectionKind: SectionKind) => {
-    switch (sectionKind) {
-      case SectionKind.General:
-        return "Abschnitt"
-      case SectionKind.Playlist:
-        return "Playlist"
-    }
-  }
-
-  const convertSectionKindToSingularPhrase = (sectionKind: SectionKind) => {
-    switch (sectionKind) {
-      case SectionKind.General:
-        return "des Abschnitts"
-      case SectionKind.Playlist:
-        return "der Playlist"
-    }
-  }
-
   const getTracksToDownload = () => {
     let tracks = section.data.map((trackId) => getTrack(trackId))
     if (backgroundMusic === undefined || backgroundMusic === null) {
@@ -422,7 +462,9 @@ export function AudioPlayer({
         </View>
       )}
       <View style={ROW}>
-        <Text style={TEXT}>{track.name}</Text>
+        <Text style={TEXT}>
+          {track.name} ({convertTrackKindToSingularWord(track.kind)})
+        </Text>
       </View>
       <View style={ROW}>
         <Handle
@@ -471,7 +513,7 @@ export function AudioPlayer({
           accessibilityRole="text"
           style={TEXT}
         >
-          {convertToAudioTimeString(sliderPosition)}
+          {convertToFullAudioTimeString(sliderPosition)}
         </Text>
         <Slider
           accessible={true}
@@ -507,7 +549,7 @@ export function AudioPlayer({
           accessibilityRole="text"
           style={TEXT}
         >
-          {convertToAudioTimeString(maximumPlaybackPosition)}
+          {convertToFullAudioTimeString(maximumPlaybackPosition)}
         </Text>
       </View>
       {backgroundMusic && (
@@ -547,9 +589,9 @@ export function AudioPlayer({
                   <List.Item
                     key={index}
                     title={hint.name}
-                    description={`Beginn: ${convertToAudioTimeString(
+                    description={`Beginn: ${convertToFullAudioTimeString(
                       startTime,
-                    )}, Dauer: ${convertToAudioTimeString(hint.duration)}`}
+                    )}, Dauer: ${convertToMinimalDurationString(hint.duration)}`}
                     onPress={() => sound.setPositionAsync(startTime)}
                     onMagicTap={() => sound.setPositionAsync(startTime)} // TODO Is `onMagicPress` necessary?
                   />,
@@ -564,6 +606,7 @@ export function AudioPlayer({
           ))} */}
         </List.Accordion>
       )}
+      <Divider />
       <DownloadSwitch title={convertTrackKindToSingularWord(section.trackKind)} track={track} />
 
       {tracksToDownload.length >= 2 && (
