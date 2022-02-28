@@ -542,9 +542,8 @@ export function AudioPlayer({
         <List.Accordion title="Sprungmarken">
           {
             track.hints.reduce<[number, React.ReactNode[]]>(
-              ([startTime, items], hint, index) => [
-                startTime + hint.duration,
-                items.concat([
+              ([startTime, items], hint, index) => {
+                items.push(
                   <List.Item
                     key={index}
                     title={hint.name}
@@ -554,8 +553,9 @@ export function AudioPlayer({
                     onPress={() => sound.setPositionAsync(startTime)}
                     onMagicTap={() => sound.setPositionAsync(startTime)} // TODO Is `onMagicPress` necessary?
                   />,
-                ]),
-              ],
+                )
+                return [startTime + hint.duration, items]
+              },
               [0, []],
             )[1]
           }
