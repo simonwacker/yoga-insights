@@ -248,7 +248,7 @@ export function AudioPlayer({
         exerciseAudioSource.uri,
         sound,
         {
-          shouldPlay: !playbackStatus?.isLoaded || playbackStatus.shouldPlay,
+          shouldPlay: playbackStatus?.isLoaded && playbackStatus.shouldPlay,
           positionMillis: playbackStatus?.isLoaded ? playbackStatus.positionMillis : 0,
         },
         onPlaybackStatusUpdate,
@@ -261,7 +261,7 @@ export function AudioPlayer({
       loadAndPlay(
         backgroundAudioSource.uri,
         backgroundSound,
-        { shouldPlay: true, isLooping: true, volume: 0.5 },
+        { shouldPlay: false, isLooping: true, volume: 0.5 },
         onBackgroundPlaybackStatusUpdate,
       )
     }
