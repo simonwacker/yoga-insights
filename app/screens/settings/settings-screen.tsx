@@ -5,6 +5,7 @@ import { Button, Screen, Text } from "../../components"
 import { SettingsScreenNavigationProp, SettingsScreenRouteProp } from "../../navigators"
 import { usePlaylistStore } from "../../stores"
 import { tracksDirectoryUri } from "../../utils/file"
+import { Divider, Paragraph } from "react-native-paper"
 
 export type SettingsScreenProps = {
   route: SettingsScreenRouteProp
@@ -49,6 +50,20 @@ export function SettingsScreen({ navigation }: SettingsScreenProps) {
       <Button title="Alle Downloads löschen" onPress={clearDownloads} />
       <Text text={`Du hast ${playlists.length} Playlist${playlists.length === 1 ? "" : "s"}.`} />
       <Button title="Alle Playlists löschen" onPress={clearPlaylists} />
+      <Divider />
+      <Paragraph>
+        Produziert im CitySoundStudio, Aufnahmen &amp; Grafik: Veronica Reiff Editing: Veronica
+        Reiff und Daniel Tipismana Fotos: María García López, Pradito Mariposa Art Musik: Jens Gebel
+      </Paragraph>
+      <Paragraph>
+        Jürgen Ries, seit 2005 Leiter des Yogazentrums Freiburg, bildet seit 2006 im Yoga College
+        Freiburg aus. Er studierte Yoga in der legendären Scuola Yoga bei Selvarajan Yesudian und
+        Elisabeth Haich. Produzent: Jens Gebel @CitySoundStudio Freiburg, 2020 Konzeption, Mix und
+        Master: Jens Gebel; Editing: Daniel Tipismana Musik: Jens Gebel; Aufnahmen &amp; Grafik:
+        Veronica Reiff Fotos: María García López, Pradito Mariposa Art "Wer auch immer alle
+        Yoga-Arten unermüdlich betreibt, erlangt darin schließlich Vollkommenheit (Siddha), sei er
+        jung oder alt, krank oder schwach.“ (Aus der Hatha Yoga Pradipika)
+      </Paragraph>
     </Screen>
   )
 }

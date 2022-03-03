@@ -36,6 +36,7 @@ import {
 import { Appbar } from "react-native-paper"
 import { MaterialCommunityIcons } from "@expo/vector-icons"
 import { Section } from "../models"
+import { WelcomeScreen } from "../screens/welcome/welcome-screen"
 
 /**
  * This type allows TypeScript to know what routes are defined in this navigator
@@ -53,7 +54,8 @@ export type BottomTabParamList = {
   settings: undefined
 }
 
-export type MainParamList = {
+export type AppParamList = {
+  welcome: undefined
   tabs: NavigatorScreenParams<BottomTabParamList>
   player: {
     section: Section
@@ -73,64 +75,57 @@ export type MainParamList = {
   }
 }
 
-export type AppParamList = {
-  main: NavigatorScreenParams<MainParamList>
-}
+export type WelcomeScreenRouteProp = RouteProp<AppParamList, "welcome">
+export type WelcomeScreenNavigationProp = NativeStackNavigationProp<AppParamList, "welcome">
 
 export type ClassesScreenRouteProp = RouteProp<BottomTabParamList, "classes">
 export type ClassesScreenNavigationProp = CompositeNavigationProp<
   MaterialBottomTabNavigationProp<BottomTabParamList, "classes">,
-  NativeStackNavigationProp<MainParamList>
+  NativeStackNavigationProp<AppParamList>
 >
 
 export type PosesScreenRouteProp = RouteProp<BottomTabParamList, "poses">
 export type PosesScreenNavigationProp = CompositeNavigationProp<
   MaterialBottomTabNavigationProp<BottomTabParamList, "poses">,
-  NativeStackNavigationProp<MainParamList>
+  NativeStackNavigationProp<AppParamList>
 >
 
 export type MusicScreenRouteProp = RouteProp<BottomTabParamList, "music">
 export type MusicScreenNavigationProp = CompositeNavigationProp<
   MaterialBottomTabNavigationProp<BottomTabParamList, "music">,
-  NativeStackNavigationProp<MainParamList>
+  NativeStackNavigationProp<AppParamList>
 >
 
 export type PlaylistsScreenRouteProp = RouteProp<BottomTabParamList, "playlists">
 export type PlaylistsScreenNavigationProp = CompositeNavigationProp<
   MaterialBottomTabNavigationProp<BottomTabParamList, "playlists">,
-  NativeStackNavigationProp<MainParamList>
+  NativeStackNavigationProp<AppParamList>
 >
 
 export type SettingsScreenRouteProp = RouteProp<BottomTabParamList, "settings">
 export type SettingsScreenNavigationProp = CompositeNavigationProp<
   MaterialBottomTabNavigationProp<BottomTabParamList, "settings">,
-  NativeStackNavigationProp<MainParamList>
+  NativeStackNavigationProp<AppParamList>
 >
 
-export type TabsScreenRouteProp = RouteProp<MainParamList, "tabs">
-export type TabsScreenNavigationProp = NativeStackNavigationProp<MainParamList, "tabs">
+export type TabsScreenRouteProp = RouteProp<AppParamList, "tabs">
+export type TabsScreenNavigationProp = NativeStackNavigationProp<AppParamList, "tabs">
 
-export type PlayerScreenRouteProp = RouteProp<MainParamList, "player">
-export type PlayerScreenNavigationProp = NativeStackNavigationProp<MainParamList, "player">
+export type PlayerScreenRouteProp = RouteProp<AppParamList, "player">
+export type PlayerScreenNavigationProp = NativeStackNavigationProp<AppParamList, "player">
 
-export type SelectPosesScreenRouteProp = RouteProp<MainParamList, "selectPoses">
-export type SelectPosesScreenNavigationProp = NativeStackNavigationProp<
-  MainParamList,
-  "selectPoses"
->
+export type SelectPosesScreenRouteProp = RouteProp<AppParamList, "selectPoses">
+export type SelectPosesScreenNavigationProp = NativeStackNavigationProp<AppParamList, "selectPoses">
 
-export type OrderPosesScreenRouteProp = RouteProp<MainParamList, "orderPoses">
-export type OrderPosesScreenNavigationProp = NativeStackNavigationProp<MainParamList, "orderPoses">
+export type OrderPosesScreenRouteProp = RouteProp<AppParamList, "orderPoses">
+export type OrderPosesScreenNavigationProp = NativeStackNavigationProp<AppParamList, "orderPoses">
 
-export type SelectMusicScreenRouteProp = RouteProp<MainParamList, "selectMusic">
-export type SelectMusicScreenNavigationProp = NativeStackNavigationProp<
-  MainParamList,
-  "selectMusic"
->
+export type SelectMusicScreenRouteProp = RouteProp<AppParamList, "selectMusic">
+export type SelectMusicScreenNavigationProp = NativeStackNavigationProp<AppParamList, "selectMusic">
 
-export type NamePlaylistScreenRouteProp = RouteProp<MainParamList, "namePlaylist">
+export type NamePlaylistScreenRouteProp = RouteProp<AppParamList, "namePlaylist">
 export type NamePlaylistScreenNavigationProp = NativeStackNavigationProp<
-  MainParamList,
+  AppParamList,
   "namePlaylist"
 >
 
@@ -156,12 +151,10 @@ function getBottomTabTitle(route: TabsScreenRouteProp) {
   return bottomTabTitles[routeName]
 }
 
-const MainStack = createNativeStackNavigator<MainParamList>()
+const AppStack = createNativeStackNavigator<AppParamList>()
 
 // Documentation: https://reactnavigation.org/docs/tab-based-navigation
 const BottomTab = createMaterialBottomTabNavigator<BottomTabParamList>()
-
-const AppStack = createNativeStackNavigator<AppParamList>()
 
 export function BottomTabNavigator() {
   return (
@@ -228,62 +221,53 @@ function Header({ back, options, navigation }: NativeStackHeaderProps) {
   )
 }
 
-export function MainNavigator() {
-  return (
-    <MainStack.Navigator
-      initialRouteName="tabs"
-      screenOptions={{
-        animation: "slide_from_right",
-        header: (props) => <Header {...props} />,
-      }}
-    >
-      <MainStack.Screen
-        name="tabs"
-        component={BottomTabNavigator}
-        options={({ route }) => ({
-          headerShown: false,
-          title: getBottomTabTitle(route),
-          // headerBackAccessibilityLabel: getTitle(route),
-        })}
-      />
-      <MainStack.Screen name="player" component={PlayerScreen} options={{ title: "Player" }} />
-      <MainStack.Screen
-        name="selectPoses"
-        component={SelectPosesScreen}
-        options={{ title: "Übungen auswählen" }}
-      />
-      <MainStack.Screen
-        name="orderPoses"
-        component={OrderPosesScreen}
-        options={{ title: "Übungen sortieren" }}
-      />
-      <MainStack.Screen
-        name="selectMusic"
-        component={SelectMusicScreen}
-        options={{ title: "Hintergrundmusik auswählen" }}
-      />
-      <MainStack.Screen
-        name="namePlaylist"
-        component={NamePlaylistScreen}
-        options={{ title: "Playlist benennen" }}
-      />
-    </MainStack.Navigator>
-  )
-}
-
 interface AppNavigatorProps extends Partial<React.ComponentProps<typeof NavigationContainer>> {}
 
 export const AppNavigator = (props: AppNavigatorProps) => {
   return (
     <NavigationContainer<AppParamList> {...props} ref={navigationRef}>
       <AppStack.Navigator
+        initialRouteName="welcome"
         screenOptions={{
-          headerShown: false,
           animation: "slide_from_right",
+          header: (props) => <Header {...props} />,
         }}
-        initialRouteName="main"
       >
-        <AppStack.Screen name="main" component={MainNavigator} />
+        <AppStack.Screen
+          name="welcome"
+          component={WelcomeScreen}
+          options={{ title: "Willkommen" }}
+        />
+        <AppStack.Screen
+          name="tabs"
+          component={BottomTabNavigator}
+          options={({ route }) => ({
+            headerShown: false,
+            title: getBottomTabTitle(route),
+            // headerBackAccessibilityLabel: getTitle(route),
+          })}
+        />
+        <AppStack.Screen name="player" component={PlayerScreen} options={{ title: "Player" }} />
+        <AppStack.Screen
+          name="selectPoses"
+          component={SelectPosesScreen}
+          options={{ title: "Übungen auswählen" }}
+        />
+        <AppStack.Screen
+          name="orderPoses"
+          component={OrderPosesScreen}
+          options={{ title: "Übungen sortieren" }}
+        />
+        <AppStack.Screen
+          name="selectMusic"
+          component={SelectMusicScreen}
+          options={{ title: "Hintergrundmusik auswählen" }}
+        />
+        <AppStack.Screen
+          name="namePlaylist"
+          component={NamePlaylistScreen}
+          options={{ title: "Playlist benennen" }}
+        />
       </AppStack.Navigator>
     </NavigationContainer>
   )
@@ -300,5 +284,5 @@ AppNavigator.displayName = "AppNavigator"
  *
  * `canExit` is used in ./app/app.tsx in the `useBackButtonHandler` hook.
  */
-const exitRoutes = ["classes"]
+const exitRoutes = ["welcome"]
 export const canExit = (routeName: string) => exitRoutes.includes(routeName)
