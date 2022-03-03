@@ -1,8 +1,8 @@
 import React from "react"
-import { Track } from "../../models"
+import { Track } from "../models"
 import { SwitchProps } from "react-native"
-import { TransitionAction, DownloadState } from "../../clients/TrackDownloadsClient"
-import { useDownload } from "../../hooks/useDownload"
+import { TransitionAction, DownloadState } from "../clients/TrackDownloadsClient"
+import { useDownload } from "../hooks/useDownload"
 import { List, Switch } from "react-native-paper"
 import { useTheme } from "react-native-paper"
 

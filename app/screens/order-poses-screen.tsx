@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from "react"
-import { Button, Screen, FlatList, ListCheckboxItem } from "../../components"
-import { OrderPosesScreenNavigationProp, OrderPosesScreenRouteProp } from "../../navigators"
-import { useTrackStore } from "../../stores"
+import { Button, Screen, FlatList, ListCheckboxItem } from "../components"
+import { OrderPosesScreenNavigationProp, OrderPosesScreenRouteProp } from "../navigators"
+import { useTrackStore } from "../stores"
 
 export type OrderPosesScreenProps = {
   route: OrderPosesScreenRouteProp

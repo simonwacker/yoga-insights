@@ -1,7 +1,7 @@
 import React from "react"
 import { StyleProp, TextInputProps, TextStyle, ViewStyle } from "react-native"
 import { TextInput } from "react-native-paper"
-import { color } from "../../theme"
+import { color } from "../theme"
 
 // currently we have no presets, but that changes quickly when you build your app.
 const PRESETS: { [name: string]: ViewStyle } = {

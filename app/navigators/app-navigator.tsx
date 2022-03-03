@@ -36,7 +36,7 @@ import {
 import { Appbar } from "react-native-paper"
 import { MaterialCommunityIcons } from "@expo/vector-icons"
 import { Section } from "../models"
-import { WelcomeScreen } from "../screens/welcome/welcome-screen"
+import { WelcomeScreen } from "../screens/welcome-screen"
 
 /**
  * This type allows TypeScript to know what routes are defined in this navigator

@@ -2,8 +2,8 @@ import { MaterialCommunityIcons } from "@expo/vector-icons"
 import React from "react"
 import { Linking, ViewStyle } from "react-native"
 import { Button, FAB, Headline, Paragraph, Subheading } from "react-native-paper"
-import { Screen } from "../../components"
-import { WelcomeScreenNavigationProp, WelcomeScreenRouteProp } from "../../navigators"
+import { Screen } from "../components"
+import { WelcomeScreenNavigationProp, WelcomeScreenRouteProp } from "../navigators"
 
 const FAB_STYLE: ViewStyle = {
   position: "absolute",

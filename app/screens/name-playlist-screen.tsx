@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from "react"
-import { Button, Screen, TextField } from "../../components"
-import { NamePlaylistScreenNavigationProp, NamePlaylistScreenRouteProp } from "../../navigators"
-import { usePlaylistStore } from "../../stores"
+import { Button, Screen, TextField } from "../components"
+import { NamePlaylistScreenNavigationProp, NamePlaylistScreenRouteProp } from "../navigators"
+import { usePlaylistStore } from "../stores"
 
 export type NamePlaylistScreenProps = {
   route: NamePlaylistScreenRouteProp

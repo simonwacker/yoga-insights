@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from "react"
-import { Screen, SectionList, ListCheckboxItem, Button } from "../../components"
-import { useTrackStore } from "../../stores"
-import { SelectPosesScreenNavigationProp, SelectPosesScreenRouteProp } from "../../navigators"
+import { Screen, SectionList, ListCheckboxItem, Button } from "../components"
+import { useTrackStore } from "../stores"
+import { SelectPosesScreenNavigationProp, SelectPosesScreenRouteProp } from "../navigators"
 
 export type SelectPosesScreenProps = {
   route: SelectPosesScreenRouteProp

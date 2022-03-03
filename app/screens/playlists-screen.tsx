@@ -2,10 +2,10 @@ import { MaterialCommunityIcons } from "@expo/vector-icons"
 import React, { useCallback } from "react"
 import { ViewStyle } from "react-native"
 import { FAB } from "react-native-paper"
-import { Screen, ListButtonItem, FlatList } from "../../components"
-import { SectionKind, TrackKind } from "../../models"
-import { PlaylistsScreenNavigationProp, PlaylistsScreenRouteProp } from "../../navigators"
-import { usePlaylistStore } from "../../stores"
+import { Screen, ListButtonItem, FlatList } from "../components"
+import { SectionKind, TrackKind } from "../models"
+import { PlaylistsScreenNavigationProp, PlaylistsScreenRouteProp } from "../navigators"
+import { usePlaylistStore } from "../stores"
 
 const FAB_STYLE: ViewStyle = {
   position: "absolute",

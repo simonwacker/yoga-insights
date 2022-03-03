@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from "react"
-import { Screen, SectionList, ListRadioItem, Button } from "../../components"
-import { useTrackStore } from "../../stores"
-import { SelectMusicScreenNavigationProp, SelectMusicScreenRouteProp } from "../../navigators"
+import { Screen, SectionList, ListRadioItem, Button } from "../components"
+import { useTrackStore } from "../stores"
+import { SelectMusicScreenNavigationProp, SelectMusicScreenRouteProp } from "../navigators"
 
 export type SelectMusicScreenProps = {
   route: SelectMusicScreenRouteProp

@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from "react"
-import { Screen, AudioPlayer } from "../../components"
-import { PlayerScreenNavigationProp, PlayerScreenRouteProp } from "../../navigators"
-import { useTrackStore } from "../../stores"
+import { Screen, AudioPlayer } from "../components"
+import { PlayerScreenNavigationProp, PlayerScreenRouteProp } from "../navigators"
+import { useTrackStore } from "../stores"
 
 export type PlayerScreenProps = {
   route: PlayerScreenRouteProp

@@ -1,9 +1,9 @@
 import React, { ErrorInfo } from "react"
 import { TextStyle, View, ViewStyle, ScrollView, ImageStyle } from "react-native"
-import { color } from "../../theme"
-import { Icon } from "../icon/icon"
-import { Text } from "../text/text"
-import { Button } from "../button/button"
+import { color } from "../theme"
+import { Icon } from "./icon/icon"
+import { Text } from "./text"
+import { Button } from "./button"
 
 const CONTAINER: ViewStyle = {
   alignItems: "center",

@@ -1,9 +1,9 @@
 import * as React from "react"
-import { Section } from "../../models"
-import { useTrackStore } from "../../stores"
+import { Section } from "../models"
+import { useTrackStore } from "../stores"
 import { useCallback } from "react"
-import { ListButtonItem } from "../list-button-item/list-button-item"
-import { SectionList } from "../section-list/section-list"
+import { ListButtonItem } from "./list-button-item"
+import { SectionList } from "./section-list"
 
 export interface TrackSectionListProps {
   sections: Section[]

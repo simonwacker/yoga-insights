@@ -2,18 +2,18 @@
 
 import React, { useCallback, useEffect, useState } from "react"
 import { AccessibilityRole, View, ViewStyle } from "react-native"
-import { DownloadSwitch } from "../download-switch/download-switch"
-import { Text } from "../text/text"
+import { DownloadSwitch } from "./download-switch"
+import { Text } from "./text"
 import { Audio, AVPlaybackStatus, AVPlaybackStatusToSet } from "expo-av"
 import Slider from "@react-native-community/slider"
-import { spacing } from "../../theme"
+import { spacing } from "../theme"
 import { TextStyle } from "react-native"
-import { useAudioSource } from "../../hooks/useAudioSource"
+import { useAudioSource } from "../hooks/useAudioSource"
 import { Divider, IconButton, List, useTheme } from "react-native-paper"
-import { Section, SectionKind, Track, TrackKind } from "../../models"
+import { Section, SectionKind, Track, TrackKind } from "../models"
 import { MaterialCommunityIcons } from "@expo/vector-icons"
-import { DownloadsSwitch } from "../downloads-switch"
-import { useTrackStore } from "../../stores"
+import { DownloadsSwitch } from "./downloads-switch"
+import { useTrackStore } from "../stores"
 import {
   INTERRUPTION_MODE_ANDROID_DUCK_OTHERS,
   INTERRUPTION_MODE_IOS_DUCK_OTHERS,

@@ -1,10 +1,10 @@
 import React, { useCallback, useState } from "react"
 import { useEffect } from "react"
 import * as FileSystem from "expo-file-system"
-import { Button, Screen, Text } from "../../components"
-import { SettingsScreenNavigationProp, SettingsScreenRouteProp } from "../../navigators"
-import { usePlaylistStore } from "../../stores"
-import { tracksDirectoryUri } from "../../utils/file"
+import { Button, Screen, Text } from "../components"
+import { SettingsScreenNavigationProp, SettingsScreenRouteProp } from "../navigators"
+import { usePlaylistStore } from "../stores"
+import { tracksDirectoryUri } from "../utils/file"
 import { Divider, Paragraph } from "react-native-paper"
 
 export type SettingsScreenProps = {
