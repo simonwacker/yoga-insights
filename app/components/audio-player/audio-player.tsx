@@ -14,6 +14,10 @@ import { Section, SectionKind, Track, TrackKind } from "../../models"
 import { MaterialCommunityIcons } from "@expo/vector-icons"
 import { DownloadsSwitch } from "../downloads-switch"
 import { useTrackStore } from "../../stores"
+import {
+  INTERRUPTION_MODE_ANDROID_DUCK_OTHERS,
+  INTERRUPTION_MODE_IOS_DUCK_OTHERS,
+} from "expo-av/build/Audio"
 
 const ROOT: ViewStyle = {
   flex: 1,
@@ -49,10 +53,15 @@ const loadAndPlay = async (
   try {
     __DEV__ && console.log(`About to load and play ${uri}.`)
     await sound.unloadAsync()
-    // Make sure audio is played if iOS is in silent mode, defaults to `false`.
-    // NOTE: This sets the property globally which means _all_ future audio
-    // playbacks will be affected.
-    await Audio.setAudioModeAsync({ playsInSilentModeIOS: true })
+    // NOTE: The following sets the property globally which means _all_ future
+    // audio playbacks will be affected.
+    await Audio.setAudioModeAsync({
+      playsInSilentModeIOS: true, // Make sure audio is played if iOS is in silent mode, defaults to `false`.
+      staysActiveInBackground: true, // Make sure audio is played if screen is turned off.
+      interruptionModeAndroid: INTERRUPTION_MODE_ANDROID_DUCK_OTHERS,
+      interruptionModeIOS: INTERRUPTION_MODE_IOS_DUCK_OTHERS,
+      shouldDuckAndroid: true,
+    })
     sound.setOnPlaybackStatusUpdate(onPlaybackStatusUpdate)
     await sound.loadAsync(
       { uri: uri },
