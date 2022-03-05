@@ -9,7 +9,7 @@ type State = Immutable<{
   nextPlaylistId: number
   addPlaylist: (playlist: { name: string; poseIds: string[]; musicId: string | null }) => void
   renamePlaylist: (playlistId: number, name: string) => void
-  removePlaylist: (playlistId: number) => void
+  deletePlaylist: (playlistId: number) => void
   clearPlaylists: () => void
 }>
 
@@ -35,7 +35,7 @@ export const usePlaylistStore = create<State>(
             playlist.name = name
           }),
         ),
-      removePlaylist: (playlistId) =>
+      deletePlaylist: (playlistId) =>
         set(
           produce<State>((state) => {
             state.playlists = state.playlists.filter(

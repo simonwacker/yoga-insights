@@ -217,6 +217,7 @@ function Header({ back, options, navigation }: NativeStackHeaderProps) {
         <Appbar.BackAction accessible accessibilityLabel={back.title} onPress={navigation.goBack} />
       ) : null}
       <Appbar.Content title={options.headerTitle || options.title} />
+      {options.headerRight ? options.headerRight({ canGoBack: false }) : null}
     </Appbar.Header>
   )
 }
