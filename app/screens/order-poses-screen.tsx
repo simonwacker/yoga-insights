@@ -34,7 +34,7 @@ export function OrderPosesScreen({ route, navigation }: OrderPosesScreenProps) {
   }
 
   return (
-    <Screen preset="fixed" onAccessibilityEscape={navigation.goBack} onMagicTap={finish}>
+    <Screen preset="scroll" onAccessibilityEscape={navigation.goBack} onMagicTap={finish}>
       <FlatList
         data={poseIds}
         keyExtractor={(item) => item}

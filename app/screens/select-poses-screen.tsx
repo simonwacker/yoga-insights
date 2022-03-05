@@ -34,7 +34,7 @@ export function SelectPosesScreen({ navigation }: SelectPosesScreenProps) {
   }
 
   return (
-    <Screen preset="fixed" onAccessibilityEscape={navigation.goBack} onMagicTap={finish}>
+    <Screen preset="scroll" onAccessibilityEscape={navigation.goBack} onMagicTap={finish}>
       <SectionList
         sections={poseSections}
         renderItem={({ item }) => (
