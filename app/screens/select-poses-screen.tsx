@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react"
 import { Screen, SectionList, ListCheckboxItem, Button } from "../components"
-import { useTrackStore } from "../stores"
+import { usePlaylistStore, useTrackStore } from "../stores"
 import { SelectPosesScreenNavigationProp, SelectPosesScreenRouteProp } from "../navigators"
 
 export type SelectPosesScreenProps = {
@@ -8,10 +8,16 @@ export type SelectPosesScreenProps = {
   navigation: SelectPosesScreenNavigationProp
 }
 
-export function SelectPosesScreen({ navigation }: SelectPosesScreenProps) {
+export function SelectPosesScreen({ route, navigation }: SelectPosesScreenProps) {
+  const { playlistId } = route.params
+
   const poseSections = useTrackStore(useCallback((state) => state.poseSections, []))
   const getTrack = useTrackStore(useCallback((state) => state.getTrack, []))
-  const [selectedPoseIds, setSelectedPoseIds] = useState(new Set<string>())
+  const getPlaylist = usePlaylistStore(useCallback((state) => state.getPlaylist, []))
+  const playlist = playlistId === undefined ? null : getPlaylist(playlistId)
+  const [selectedPoseIds, setSelectedPoseIds] = useState(
+    () => new Set<string>(playlist?.poseIds ?? []),
+  )
 
   const togglePoseSelection = (poseId: string) => {
     const copy = new Set(selectedPoseIds)
@@ -29,6 +35,7 @@ export function SelectPosesScreen({ navigation }: SelectPosesScreenProps) {
     if (canFinish) {
       navigation.navigate("orderPoses", {
         poseIds: Array.from(selectedPoseIds),
+        playlistId: playlistId,
       })
     }
   }

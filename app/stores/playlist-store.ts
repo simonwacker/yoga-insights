@@ -7,17 +7,28 @@ import { Immutable, produce } from "immer" // https://github.com/pmndrs/zustand#
 type State = Immutable<{
   playlists: Playlist[]
   nextPlaylistId: number
+  getPlaylist: (playlistId: number) => Playlist
   addPlaylist: (playlist: { name: string; poseIds: string[]; musicId: string | null }) => void
-  renamePlaylist: (playlistId: number, name: string) => void
+  updatePlaylist: (
+    playlistId: number,
+    newPlaylist: { name: string; poseIds: string[]; musicId: string | null },
+  ) => void
   deletePlaylist: (playlistId: number) => void
   clearPlaylists: () => void
 }>
 
 export const usePlaylistStore = create<State>(
   persist(
-    (set, _get) => ({
+    (set, get) => ({
       playlists: [],
       nextPlaylistId: 0,
+      getPlaylist: (playlistId) => {
+        const playlist = get().playlists.find((playlist) => playlist.playlistId === playlistId)
+        if (playlist === undefined) {
+          throw new Error(`Unknown playlist ID ${playlistId}.`)
+        }
+        return playlist
+      },
       addPlaylist: (playlist) =>
         set(
           produce<State>((state) => {
@@ -25,14 +36,16 @@ export const usePlaylistStore = create<State>(
             state.nextPlaylistId += 1
           }),
         ),
-      renamePlaylist: (playlistId, name) =>
+      updatePlaylist: (playlistId, newPlaylist) =>
         set(
           produce<State>((state) => {
-            var playlist = state.playlists.find((playlist) => playlist.playlistId === playlistId)
+            const playlist = state.playlists.find((playlist) => playlist.playlistId === playlistId)
             if (playlist === undefined) {
               throw new Error(`Unknown playlist ID ${playlistId}.`)
             }
-            playlist.name = name
+            playlist.name = newPlaylist.name
+            playlist.poseIds = newPlaylist.poseIds
+            playlist.musicId = newPlaylist.musicId
           }),
         ),
       deletePlaylist: (playlistId) =>

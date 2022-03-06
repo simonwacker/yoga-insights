@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react"
 import { Screen, SectionList, ListRadioItem, Button } from "../components"
-import { useTrackStore } from "../stores"
+import { usePlaylistStore, useTrackStore } from "../stores"
 import { SelectMusicScreenNavigationProp, SelectMusicScreenRouteProp } from "../navigators"
 
 export type SelectMusicScreenProps = {
@@ -9,17 +9,25 @@ export type SelectMusicScreenProps = {
 }
 
 export function SelectMusicScreen({ route, navigation }: SelectMusicScreenProps) {
-  const { poseIds } = route.params
+  const { poseIds, playlistId } = route.params
 
   const musicSections = useTrackStore(useCallback((state) => state.musicSections, []))
   const getTrack = useTrackStore(useCallback((state) => state.getTrack, []))
-  const [selectedMusicId, setSelectedMusicId] = useState<string | null>(null)
+  const getPlaylist = usePlaylistStore(useCallback((state) => state.getPlaylist, []))
+  const playlist = playlistId === undefined ? null : getPlaylist(playlistId)
+  const [selectedMusicId, setSelectedMusicId] = useState<string | null>(
+    () => playlist?.musicId ?? null,
+  )
 
   const finish = () =>
-    navigation.navigate("namePlaylist", { poseIds: poseIds, musicId: selectedMusicId })
+    navigation.navigate("namePlaylist", {
+      poseIds: poseIds,
+      musicId: selectedMusicId,
+      playlistId: playlistId,
+    })
 
   return (
-    <Screen preset="fixed" onAccessibilityEscape={navigation.goBack} onMagicTap={finish}>
+    <Screen preset="scroll" onAccessibilityEscape={navigation.goBack} onMagicTap={finish}>
       <SectionList
         accessibilityRole="radiogroup"
         sections={musicSections}

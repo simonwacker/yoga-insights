@@ -1,5 +1,5 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons"
-import React, { useCallback, useState } from "react"
+import React, { useCallback, useEffect, useState } from "react"
 import { ViewStyle } from "react-native"
 import { Appbar, FAB, List } from "react-native-paper"
 import { Screen, FlatList } from "../components"
@@ -36,38 +36,41 @@ export function PlaylistsScreen({ navigation }: PlaylistsScreenProps) {
 
   const [mode, setMode] = useState<Mode>({ type: "NAVIGATE" })
 
-  switch (mode.type) {
-    case "NAVIGATE":
-      navigation.getParent()?.setOptions({ headerShown: false, headerRight: undefined })
-      break
-    case "SELECT":
-      navigation.getParent()?.setOptions({
-        headerShown: true,
-        headerRight: (props: any) => (
-          <Appbar.Action
-            {...props}
-            accessibilityLabel="Ausgewählte Playlists löschen"
-            accessibilityRole="button"
-            accessible={true}
-            icon={(props) => <MaterialCommunityIcons name="delete" {...props} />}
-            onPress={deleteSelectedPlaylists}
-            onMagicTap={deleteSelectedPlaylists}
-          />
-        ),
-      })
-      break
+  const setNavigateMode = useCallback(() => {
+    setMode({ type: "NAVIGATE" })
+    navigation.getParent()?.setOptions({ headerShown: false, headerRight: undefined })
+  }, [navigation])
+  // We do not specify `setMode` in the dependency list because "React
+  // guarantees that setState function identity is stable and won’t change on
+  // re-renders. This is why it’s safe to omit from the useEffect or useCallback
+  // dependency list.", see
+  // https://reactjs.org/docs/hooks-reference.html#usestate
+
+  const setSelectMode = (selectedPlaylistIds: Set<number>) => {
+    setMode({ type: "SELECT", selectedPlaylistIds: selectedPlaylistIds })
+    navigation.getParent()?.setOptions({
+      headerShown: true,
+      headerRight: (props: any) => (
+        <Appbar.Action
+          {...props}
+          accessibilityLabel="Ausgewählte Playlists löschen"
+          accessibilityRole="button"
+          accessible={true}
+          icon={(props) => <MaterialCommunityIcons name="delete" {...props} />}
+          onPress={deleteSelectedPlaylists}
+          onMagicTap={deleteSelectedPlaylists}
+        />
+      ),
+    })
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     // const unsubscribe = navigation.getParent().addListener("tabPress", () => {
     const unsubscribe = navigation.addListener("blur", () => {
-      if (mode.type === "SELECT") {
-        setNavigateMode()
-      }
+      setNavigateMode()
     })
-
     return unsubscribe
-  }, [navigation])
+  }, [navigation, setNavigateMode])
 
   const deleteSelectedPlaylists = () => {
     if (mode.type === "SELECT") {
@@ -80,15 +83,7 @@ export function PlaylistsScreen({ navigation }: PlaylistsScreenProps) {
     }
   }
 
-  const setNavigateMode = () => {
-    setMode({ type: "NAVIGATE" })
-  }
-
-  const setSelectMode = (playlist: Playlist) => {
-    setMode({ type: "SELECT", selectedPlaylistIds: new Set([playlist.playlistId]) })
-  }
-
-  const newPlaylist = () => navigation.navigate("selectPoses")
+  const newPlaylist = () => navigation.navigate("selectPoses", {})
 
   const navigateToPlayer = (item: Playlist) =>
     navigation.navigate("player", {
@@ -100,6 +95,7 @@ export function PlaylistsScreen({ navigation }: PlaylistsScreenProps) {
       },
       initialTrackIndex: 0,
       backgroundMusicId: item.musicId,
+      playlistId: item.playlistId,
     })
 
   const toggleSelection = (item: Playlist) => {
@@ -110,7 +106,7 @@ export function PlaylistsScreen({ navigation }: PlaylistsScreenProps) {
       } else {
         copy.add(item.playlistId)
       }
-      setMode({ type: "SELECT", selectedPlaylistIds: copy })
+      setSelectMode(copy)
     } else {
       console.warn(
         `Attempted to toggle selection of playlist ${item.playlistId} in mode ${mode.type}.`,
@@ -128,7 +124,7 @@ export function PlaylistsScreen({ navigation }: PlaylistsScreenProps) {
           mode.type === "NAVIGATE" ? (
             <List.Item
               title={item.name}
-              onLongPress={() => setSelectMode(item)}
+              onLongPress={() => setSelectMode(new Set([item.playlistId]))}
               onPress={() => navigateToPlayer(item)}
               onMagicTap={() => navigateToPlayer(item)}
               right={(props) => <List.Icon {...props} icon="chevron-right" />}

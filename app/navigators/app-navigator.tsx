@@ -61,17 +61,21 @@ export type AppParamList = {
     section: Section
     initialTrackIndex: number
     backgroundMusicId: string | null
+    playlistId?: number
   }
-  selectPoses: undefined
+  selectPoses: { playlistId?: number }
   orderPoses: {
     poseIds: readonly string[]
+    playlistId?: number
   }
   selectMusic: {
     poseIds: string[]
+    playlistId?: number
   }
   namePlaylist: {
     poseIds: string[]
     musicId: string | null
+    playlistId?: number
   }
 }
 
