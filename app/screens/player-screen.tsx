@@ -18,7 +18,7 @@ export function PlayerScreen({ route, navigation }: PlayerScreenProps) {
       navigation.setOptions({ headerRight: undefined })
     } else {
       navigation.setOptions({
-        headerRight: (props: any) => (
+        headerRight: (props) => (
           <Appbar.Action
             {...props}
             accessibilityLabel="Playlist bearbeiten"

@@ -1,5 +1,5 @@
-import React, { useCallback, useState } from "react"
-import { Button, Screen, FlatList, ListCheckboxItem } from "../components"
+import React, { useCallback, useEffect, useState } from "react"
+import { Button, Screen, FlatList, ListCheckboxItem, CancelAction } from "../components"
 import { OrderPosesScreenNavigationProp, OrderPosesScreenRouteProp } from "../navigators"
 import { usePlaylistStore, useTrackStore } from "../stores"
 
@@ -13,6 +13,18 @@ const keepIdsThatAreInSet = (ids: readonly string[], keep: Set<string>) =>
 
 export function OrderPosesScreen({ route, navigation }: OrderPosesScreenProps) {
   const { poseIds, playlistId } = route.params
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: (props) => (
+        <CancelAction
+          onPress={() => navigation.navigate("tabs", { screen: "playlists" })}
+          props={props}
+        />
+      ),
+    })
+    return () => navigation.setOptions({ headerRight: undefined })
+  }, [navigation])
 
   const getTrack = useTrackStore(useCallback((state) => state.getTrack, []))
   const getPlaylist = usePlaylistStore(useCallback((state) => state.getPlaylist, []))

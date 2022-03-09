@@ -1,5 +1,5 @@
-import React, { useCallback, useState } from "react"
-import { Screen, SectionList, ListRadioItem, Button } from "../components"
+import React, { useCallback, useEffect, useState } from "react"
+import { Screen, SectionList, ListRadioItem, Button, CancelAction } from "../components"
 import { usePlaylistStore, useTrackStore } from "../stores"
 import { SelectMusicScreenNavigationProp, SelectMusicScreenRouteProp } from "../navigators"
 
@@ -10,6 +10,18 @@ export type SelectMusicScreenProps = {
 
 export function SelectMusicScreen({ route, navigation }: SelectMusicScreenProps) {
   const { poseIds, playlistId } = route.params
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: (props) => (
+        <CancelAction
+          onPress={() => navigation.navigate("tabs", { screen: "playlists" })}
+          props={props}
+        />
+      ),
+    })
+    return () => navigation.setOptions({ headerRight: undefined })
+  }, [navigation])
 
   const musicSections = useTrackStore(useCallback((state) => state.musicSections, []))
   const getTrack = useTrackStore(useCallback((state) => state.getTrack, []))

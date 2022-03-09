@@ -1,5 +1,5 @@
-import React, { useCallback, useState } from "react"
-import { Button, Screen, TextField } from "../components"
+import React, { useCallback, useEffect, useState } from "react"
+import { Button, CancelAction, Screen, TextField } from "../components"
 import { NamePlaylistScreenNavigationProp, NamePlaylistScreenRouteProp } from "../navigators"
 import { usePlaylistStore } from "../stores"
 
@@ -10,6 +10,18 @@ export type NamePlaylistScreenProps = {
 
 export function NamePlaylistScreen({ route, navigation }: NamePlaylistScreenProps) {
   const { poseIds, musicId, playlistId } = route.params
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: (props) => (
+        <CancelAction
+          onPress={() => navigation.navigate("tabs", { screen: "playlists" })}
+          props={props}
+        />
+      ),
+    })
+    return () => navigation.setOptions({ headerRight: undefined })
+  }, [navigation])
 
   const addPlaylist = usePlaylistStore(useCallback((state) => state.addPlaylist, []))
   const updatePlaylist = usePlaylistStore(useCallback((state) => state.updatePlaylist, []))

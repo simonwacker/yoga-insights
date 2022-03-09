@@ -1,5 +1,5 @@
-import React, { useCallback, useState } from "react"
-import { Screen, SectionList, ListCheckboxItem, Button } from "../components"
+import React, { useCallback, useEffect, useState } from "react"
+import { Screen, SectionList, ListCheckboxItem, Button, CancelAction } from "../components"
 import { usePlaylistStore, useTrackStore } from "../stores"
 import { SelectPosesScreenNavigationProp, SelectPosesScreenRouteProp } from "../navigators"
 
@@ -10,6 +10,18 @@ export type SelectPosesScreenProps = {
 
 export function SelectPosesScreen({ route, navigation }: SelectPosesScreenProps) {
   const { playlistId } = route.params
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: (props) => (
+        <CancelAction
+          onPress={() => navigation.navigate("tabs", { screen: "playlists" })}
+          props={props}
+        />
+      ),
+    })
+    return () => navigation.setOptions({ headerRight: undefined })
+  }, [navigation])
 
   const poseSections = useTrackStore(useCallback((state) => state.poseSections, []))
   const getTrack = useTrackStore(useCallback((state) => state.getTrack, []))
