@@ -1,7 +1,17 @@
 import React, { useCallback, useEffect, useState } from "react"
-import { Screen, SectionList, ListCheckboxItem, Button, CancelAction } from "../components"
+import { Screen, SectionList, ListCheckboxItem, CancelAction } from "../components"
 import { usePlaylistStore, useTrackStore } from "../stores"
 import { SelectPosesScreenNavigationProp, SelectPosesScreenRouteProp } from "../navigators"
+import { FAB } from "react-native-paper"
+import { MaterialCommunityIcons } from "@expo/vector-icons"
+import { ViewStyle } from "react-native"
+
+const FAB_STYLE: ViewStyle = {
+  position: "absolute",
+  margin: 16,
+  right: 0,
+  bottom: 0,
+}
 
 export type SelectPosesScreenProps = {
   route: SelectPosesScreenRouteProp
@@ -53,7 +63,7 @@ export function SelectPosesScreen({ route, navigation }: SelectPosesScreenProps)
   }
 
   return (
-    <Screen preset="scroll" onAccessibilityEscape={navigation.goBack} onMagicTap={finish}>
+    <Screen preset="fixed" onAccessibilityEscape={navigation.goBack} onMagicTap={finish}>
       <SectionList
         sections={poseSections}
         renderItem={({ item }) => (
@@ -65,7 +75,13 @@ export function SelectPosesScreen({ route, navigation }: SelectPosesScreenProps)
           />
         )}
       />
-      <Button disabled={!canFinish} onPress={finish} title="Übungen sortieren" />
+      <FAB
+        disabled={!canFinish}
+        label="Übungen sortieren"
+        icon={(props) => <MaterialCommunityIcons name="chevron-right" {...props} />}
+        onPress={finish}
+        style={FAB_STYLE}
+      />
     </Screen>
   )
 }

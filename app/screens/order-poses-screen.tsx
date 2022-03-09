@@ -1,7 +1,17 @@
+import { MaterialCommunityIcons } from "@expo/vector-icons"
 import React, { useCallback, useEffect, useState } from "react"
-import { Button, Screen, FlatList, ListCheckboxItem, CancelAction } from "../components"
+import { ViewStyle } from "react-native"
+import { FAB } from "react-native-paper"
+import { Screen, FlatList, ListCheckboxItem, CancelAction } from "../components"
 import { OrderPosesScreenNavigationProp, OrderPosesScreenRouteProp } from "../navigators"
 import { usePlaylistStore, useTrackStore } from "../stores"
+
+const FAB_STYLE: ViewStyle = {
+  position: "absolute",
+  margin: 16,
+  right: 0,
+  bottom: 0,
+}
 
 export type OrderPosesScreenProps = {
   route: OrderPosesScreenRouteProp
@@ -66,9 +76,13 @@ export function OrderPosesScreen({ route, navigation }: OrderPosesScreenProps) {
             onPress={() => pushOrDeletePose(item)}
           />
         )}
-        ListFooterComponent={
-          <Button disabled={!canFinish} onPress={finish} title="Hintergrundmusik auswählen" />
-        }
+      />
+      <FAB
+        disabled={!canFinish}
+        label="Hintergrundmusik auswählen"
+        icon={(props) => <MaterialCommunityIcons name="chevron-right" {...props} />}
+        onPress={finish}
+        style={FAB_STYLE}
       />
     </Screen>
   )

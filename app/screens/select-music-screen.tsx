@@ -1,7 +1,17 @@
 import React, { useCallback, useEffect, useState } from "react"
-import { Screen, SectionList, ListRadioItem, Button, CancelAction } from "../components"
+import { Screen, SectionList, ListRadioItem, CancelAction } from "../components"
 import { usePlaylistStore, useTrackStore } from "../stores"
 import { SelectMusicScreenNavigationProp, SelectMusicScreenRouteProp } from "../navigators"
+import { ViewStyle } from "react-native"
+import { FAB } from "react-native-paper"
+import { MaterialCommunityIcons } from "@expo/vector-icons"
+
+const FAB_STYLE: ViewStyle = {
+  position: "absolute",
+  margin: 16,
+  right: 0,
+  bottom: 0,
+}
 
 export type SelectMusicScreenProps = {
   route: SelectMusicScreenRouteProp
@@ -39,7 +49,7 @@ export function SelectMusicScreen({ route, navigation }: SelectMusicScreenProps)
     })
 
   return (
-    <Screen preset="scroll" onAccessibilityEscape={navigation.goBack} onMagicTap={finish}>
+    <Screen preset="fixed" onAccessibilityEscape={navigation.goBack} onMagicTap={finish}>
       <SectionList
         accessibilityRole="radiogroup"
         sections={musicSections}
@@ -53,7 +63,12 @@ export function SelectMusicScreen({ route, navigation }: SelectMusicScreenProps)
           />
         )}
       />
-      <Button onPress={finish} title="Playlist benennen" />
+      <FAB
+        label="Playlist benennen"
+        icon={(props) => <MaterialCommunityIcons name="chevron-right" {...props} />}
+        onPress={finish}
+        style={FAB_STYLE}
+      />
     </Screen>
   )
 }
