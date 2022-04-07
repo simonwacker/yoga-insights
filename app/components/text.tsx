@@ -27,7 +27,7 @@ export function Text(props: TextProps) {
   const content = text || children
 
   return (
-    <PaperText onPressIn={() => {}} onPressOut={() => {}} {...rest}>
+    <PaperText {...rest}>
       {content}
     </PaperText>
   )

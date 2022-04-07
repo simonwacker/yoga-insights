@@ -22,7 +22,7 @@ export function SectionList<ItemT>({
     //   sections={sections}
     //   renderItem={renderItem}
     //   renderSectionHeader={({ section }) => (
-    //     <List.Subheader onPressIn={() => {}} onPressOut={() => {}}>
+    //     <List.Subheader>
     //       {/* accessing title like this is unsafe */}
     //       {section.title}
     //     </List.Subheader>
@@ -32,7 +32,7 @@ export function SectionList<ItemT>({
       {sections.map((section) => (
         // TODO Use a better `key`
         <List.Section key={section.title}>
-          <List.Subheader onPressIn={() => {}} onPressOut={() => {}}>
+          <List.Subheader>
             {section.title}
           </List.Subheader>
           {section.data.map((item, index) => renderItem({ item, index, section }))}
