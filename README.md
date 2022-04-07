@@ -25,6 +25,33 @@ outdated`, and repeat this process. You can also copy the list of packages
 whose versions are not fixed by expo, remove the commata, and run `yarn upgrade
 --latest --caret ${PACKAGE_LIST}`
 
+# Projektbeschreibung
+
+Yoga Insights App
+www.yoga-insights.de
+
+Die Yoga Insights Programme sind Audio-Yoga-Programme für alle, also auch für nicht oder eingeschränkt sehende Menschen. Die App soll den Kundenkreis erweitern und die Programme mobil und barrierefrei zugänglich machen. 
+Wir erstellen die Audiotracks/Hintergrundbilder/ Hintergrundmusik
+Die App soll: 
+
+1.Fertige Sessions abspielen 
+2. Wahlmöglichkeiten bieten 
+„erstelle eine 20minütige Session zum Thema Rückenstärkung“ (Baukastenprinzip)
+3. In App Käufe ermöglichen
+Problemlos mit Voiceover (Screenreader iOS) bedienbar sein / auch als Android laufen (TalkBack)
+4. Einzelne Übungen abspielen können
+5. evtl die Wahl einer Hintergrundsmusik zulassen 
+6. optisch schön, aber schlicht sein (keine Videos/Animationen o.ä.)
+7. Die Inhalte sollen Downloadbar sein, um Yoga unabhängig vom Internet zu betreiben
+Bisher gibt es ein CD 1 : 30min Programm, ein 75min Programm am Stück und eine 20 Minütige Einführung , dazu 4 Musikstücke und 3  akustische Hintergrundszenen (Wald/Meer/Berg)
+
+CD:
+Weitere Sessions sind in Arbeit.
+Alle Audiofiles können wir als qualitativ hochwertige MP3s anlegen.
+
+
+
+
 # Welcome to your new ignited app!
 
 [![CircleCI](https://circleci.com/gh/infinitered/ignite.svg?style=svg)](https://circleci.com/gh/infinitered/ignite)
