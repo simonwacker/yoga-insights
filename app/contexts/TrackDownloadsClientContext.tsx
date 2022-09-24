@@ -13,7 +13,7 @@ export function useTrackDownloadsClient(): TrackDownloadsClient {
   return clientContext
 }
 
-export const TrackDownloadsClientProvider: React.FC<{ client: TrackDownloadsClient }> = ({
+export const TrackDownloadsClientProvider: React.FC<React.PropsWithChildren<{ client: TrackDownloadsClient }>> = ({
   client,
   children,
 }) => {

@@ -215,12 +215,15 @@ export function BottomTabNavigator() {
 }
 
 function Header({ back, options, navigation }: NativeStackHeaderProps) {
+  // TODO Handle case in which `options.headerTitle` is a function.
   return (
     <Appbar.Header>
       {back ? (
         <Appbar.BackAction accessible accessibilityLabel={back.title} onPress={navigation.goBack} />
       ) : null}
-      <Appbar.Content title={options.headerTitle || options.title} />
+      <Appbar.Content
+        title={options.headerTitle instanceof String ? options.headerTitle : options.title}
+      />
       {options.headerRight ? options.headerRight({ canGoBack: false }) : null}
     </Appbar.Header>
   )

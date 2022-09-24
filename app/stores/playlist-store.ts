@@ -17,7 +17,7 @@ type State = Immutable<{
   clearPlaylists: () => void
 }>
 
-export const usePlaylistStore = create<State>(
+export const usePlaylistStore = create<State>()(
   persist(
     (set, get) => ({
       playlists: [],

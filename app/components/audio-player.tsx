@@ -14,10 +14,7 @@ import { Section, SectionKind, Track, TrackKind } from "../models"
 import { MaterialCommunityIcons } from "@expo/vector-icons"
 import { DownloadsSwitch } from "./downloads-switch"
 import { useTrackStore } from "../stores"
-import {
-  INTERRUPTION_MODE_ANDROID_DUCK_OTHERS,
-  INTERRUPTION_MODE_IOS_DUCK_OTHERS,
-} from "expo-av/build/Audio"
+import { InterruptionModeAndroid, InterruptionModeIOS } from "expo-av"
 
 const ROOT: ViewStyle = {
   flex: 1,
@@ -58,8 +55,8 @@ const loadAndPlay = async (
     await Audio.setAudioModeAsync({
       playsInSilentModeIOS: true, // Make sure audio is played if iOS is in silent mode, defaults to `false`.
       staysActiveInBackground: true, // Make sure audio is played if screen is turned off.
-      interruptionModeAndroid: INTERRUPTION_MODE_ANDROID_DUCK_OTHERS,
-      interruptionModeIOS: INTERRUPTION_MODE_IOS_DUCK_OTHERS,
+      interruptionModeAndroid: InterruptionModeAndroid.DuckOthers,
+      interruptionModeIOS: InterruptionModeIOS.DuckOthers,
       shouldDuckAndroid: true,
     })
     sound.setOnPlaybackStatusUpdate(onPlaybackStatusUpdate)
