@@ -95,7 +95,7 @@ upgrade: ## Upgrade packages to their latest version based on the specified rang
 .PHONY: upgrade
 
 expo: ## Update packages known by expo to compatible versions possibly changing `package.json`
-	expo update
+	npx expo update
 .PHONY: expo
 
 outdated: ## List outdated packages
@@ -109,3 +109,6 @@ android: ## Run app on android
 ios: ## Run app on iOS
 	yarn run ios
 .PHONY: ios
+
+publish: ## Publish app to expo
+	npx eas update

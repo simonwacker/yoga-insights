@@ -5,7 +5,11 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "platforms": ["ios", "android", "web"],
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
     "owner": "citysoundstudio",
     "splash": {
       "image": "./assets/images/splash.png",
@@ -13,15 +17,15 @@
       "backgroundColor": "#ffffff"
     },
     "updates": {
-      "fallbackToCacheTimeout": 0
+      "fallbackToCacheTimeout": 0,
+      "url": "https://u.expo.dev/e5da9235-ac48-48ce-8c46-03d91054fb05"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
-      "bundleIdentifier": "de.citysoundstudio.yogainsights",
-      "buildNumber": "1.0.0",
-      "supportsTablet": true
+      "bundleIdentifier": "de.citysoundstudio.yogainsights"
     },
-    "ios": {},
     "android": {
       "package": "de.citysoundstudio.yogainsights",
       "versionCode": 1,
@@ -29,6 +33,14 @@
     },
     "web": {
       "favicon": "./assets/images/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "e5da9235-ac48-48ce-8c46-03d91054fb05"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "sdkVersion"
     }
   }
 }
