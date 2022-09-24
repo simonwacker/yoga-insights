@@ -16,14 +16,17 @@ If we ever should need to make queries, using
 [React Query](https://react-query.tanstack.com/overview)
 may be a good idea.
 
-To update packages within the range specified in `package.json`, first run
+To update packages first run `make expo`, secondly copy the list of packages
+whose versions are not fixed by expo, remove the commata, set `PACKAGE_LIST` to
+the list and run `yarn upgrade --latest --caret ${PACKAGE_LIST}`.
+
+To update packages *within the range specified in `package.json`*, first run
 `make upgrade` and, if after doing so Expo complains about some package
 version, run `make expo` to have Expo choose a compatible version and tell
 which packages it does not manage. For the latter packages you may update the
 version in `package.json`, for example to the latest version reported by `make
-outdated`, and repeat this process. You can also copy the list of packages
-whose versions are not fixed by expo, remove the commata, and run `yarn upgrade
---latest --caret ${PACKAGE_LIST}`
+outdated`, and repeat this process.
+
 
 # Projektbeschreibung
 
