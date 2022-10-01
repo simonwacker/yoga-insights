@@ -36,7 +36,7 @@ import {
 import { Appbar } from "react-native-paper"
 import { MaterialCommunityIcons } from "@expo/vector-icons"
 import { Section } from "../models"
-// import { WelcomeScreen } from "../screens/welcome-screen"
+import { WelcomeScreen } from "../screens/welcome-screen"
 
 /**
  * This type allows TypeScript to know what routes are defined in this navigator
@@ -55,7 +55,7 @@ export type BottomTabParamList = {
 }
 
 export type AppParamList = {
-  // welcome: undefined
+  welcome: undefined
   tabs: NavigatorScreenParams<BottomTabParamList>
   player: {
     section: Section
@@ -79,8 +79,8 @@ export type AppParamList = {
   }
 }
 
-// export type WelcomeScreenRouteProp = RouteProp<AppParamList, "welcome">
-// export type WelcomeScreenNavigationProp = NativeStackNavigationProp<AppParamList, "welcome">
+export type WelcomeScreenRouteProp = RouteProp<AppParamList, "welcome">
+export type WelcomeScreenNavigationProp = NativeStackNavigationProp<AppParamList, "welcome">
 
 export type ClassesScreenRouteProp = RouteProp<BottomTabParamList, "classes">
 export type ClassesScreenNavigationProp = CompositeNavigationProp<
@@ -242,11 +242,11 @@ export const AppNavigator = (props: AppNavigatorProps) => {
           header: (props) => <Header {...props} />,
         }}
       >
-        {/* <AppStack.Screen
+        <AppStack.Screen
           name="welcome"
           component={WelcomeScreen}
           options={{ title: "Willkommen" }}
-        /> */}
+        />
         <AppStack.Screen
           name="tabs"
           component={BottomTabNavigator}
